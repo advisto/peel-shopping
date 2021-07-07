@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -61,7 +61,7 @@
 						<div class="row">
 						{% if specific_pdf_fact_button %}
 							<div class="col-md-3">
-								<a href="{$proforma_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">
+								<a href="{{ proforma_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">
 									{{ bill_anchor }}
 								</a>
 							</div>
@@ -140,7 +140,7 @@
 			<tr>
 				<td colspan="2">
 					<div class="well">
-						{{ STR_ADMIN_TOTAL_TTC_ALL_INCLUDE }} : {{ montant_displayed_prix }} {{ ttc_ht }}
+						{{ STR_ADMIN_TOTAL_TTC_ALL_INCLUDE }} : {{ montant }} {{ ttc }}
 							<br />
 						{{ STR_ADMIN_INCLUDING_VAT }} : {{ amount_tva }}
 							<br />
@@ -214,7 +214,7 @@
 			<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" /></td>
 		</tr>
 	{% else %}
-		<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+		<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 		<table style="width:100%;">
 	{% endif %}
 {% else %}

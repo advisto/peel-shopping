@@ -1,9 +1,9 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -24,7 +24,7 @@
 		<tr>
 			<td colspan="2">
 			{if isset($edit_href)}
-				<a href="{$edit_href|escape:'html'}">{$STR_MODULE_WEBMAIL_ADMIN_EDIT_USER} #{$id_utilisateur}</a>
+				<a href="{$edit_href|escape:'html'}" class="btn btn-primary">{$STR_MODULE_WEBMAIL_ADMIN_EDIT_USER} #{$id_utilisateur}</a>
 			{/if}
 			</td>
 		</tr>
@@ -117,7 +117,7 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-				<a href="{$email_templates_href|escape:'html'}">{$STR_MODULE_WEBMAIL_ADMIN_FORM_TITLE}</a>
+				<a href="{$email_templates_href|escape:'html'}" class="btn btn-primary">{$STR_MODULE_WEBMAIL_ADMIN_FORM_TITLE}</a>
 			</td>
 		</tr>
 		<tr>

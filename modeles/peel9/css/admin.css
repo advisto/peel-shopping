@@ -699,6 +699,38 @@ img {
 	/* pour fixer pour de bon la taille de la typo dans les champs du formulaire de création de commande, même si le formulaire est utilisé en front office */
 	font-size:14px !important;
 }
+.del_row_link:hover  {
+	text-decoration:none;
+}
+/* icones */
+.add_sub_row, .add_row, .del_row {
+	font-size: 25px;
+}
+.del_row {
+	color: red;
+}
+.add_row {
+	color: black;
+}
+.add_sub_row {
+	color: black;
+}
+.less-content {
+	max-height: 8em; 
+	overflow: hidden;
+	position: relative;
+}
+.alert-info .less-content::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 4em;
+	background-image: linear-gradient(
+		rgba(217, 237, 247, 0) 0%,
+		rgba(217, 237, 247, 1) 100%
+	);
+}
 /* Styles responsive */
 @media (max-width: 767px) {
 	.table-responsive {

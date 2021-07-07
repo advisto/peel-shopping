@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_output2.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_email-templates_output2.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}{$message_html}
 <form class="entryform form-inline" role="form" action="{$action}" method="post" name="form_ajout">
 	{if !empty($params.intro)}
@@ -53,8 +53,13 @@
 				</tr>
 				{/if}
 				{if !empty($params.technical_code)}
+				<tr>
 					<td>{$STR_ADMIN_TECHNICAL_CODE}</td>
 					<td><input name="form_technical_code" style="width:90%" type="text" class="form-control" id="technical_code" value="{$form_technical_code|str_form_value}" /></td>
+				</tr>
+				{else}
+				<tr>
+					<td colspan="2"><input name="form_technical_code" type="hidden" class="form-control" id="technical_code" value="{$form_technical_code|str_form_value}" /></td>
 				</tr>
 				{/if}
 				<tr>
@@ -65,7 +70,7 @@
 					<td>{$STR_ADMIN_SUBJECT}</td>
 					<td><input name="form_subject" style="width:90%" type="text" class="form-control" id="template_subject" value="{$form_subject|str_form_value}" /></td>
 				</tr>
-				<tr id="show_tag_list">
+				<tr>
 					<td colspan="2">{$show_tag_list}</td>
 				</tr>
 				<tr>

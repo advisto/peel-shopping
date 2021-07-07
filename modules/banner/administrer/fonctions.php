@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -59,6 +59,7 @@ function affiche_formulaire_ajout_banniere($categorie_id = 0, &$frm)
 		$frm["on_first_page_category"] = "";
 		$frm["on_other_page_category"] = "";
 		$frm["on_background_site"] = "";
+		$frm["on_product_details"] = "";
 		$frm["on_ad_page_details"] = "";
 		$frm["on_other_page"] = "";
 		$frm["pages_allowed"] = "";
@@ -130,6 +131,7 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('date_fin', get_formatted_date(vb($frm["date_fin"])));
 	$tpl->assign('on_other_page_category', vb($frm["on_other_page_category"]));
 	$tpl->assign('on_background_site', vb($frm["on_background_site"]));
+	$tpl->assign('on_product_details', vb($frm["on_product_details"]));
 	$tpl->assign('on_home_page', vb($frm["on_home_page"]));
 	$tpl->assign('on_other_page', vb($frm["on_other_page"]));
 	$tpl->assign('on_search_engine_page', vb($frm["on_search_engine_page"]));
@@ -229,6 +231,7 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_OTHER_PAGE', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_OTHER_PAGE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_SEARCH_ENGINE_PAGE', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_SEARCH_ENGINE_PAGE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_BACKGROUND_SITE', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_BACKGROUND_SITE']);
+	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_PRODUCT_DETAILS', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_PRODUCT_DETAILS']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_IMAGE_OR_FLASH', $GLOBALS['STR_MODULE_BANNER_ADMIN_IMAGE_OR_FLASH']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
@@ -298,6 +301,7 @@ function insere_banniere(&$frm)
 			, on_first_page_category
 			, on_other_page_category
 			, on_background_site
+			, on_product_details
 			, on_search_engine_page
 			, position
 			, lien
@@ -333,6 +337,7 @@ function insere_banniere(&$frm)
 			, '" . intval(vn($frm['on_first_page_category'])) . "'
 			, '" . intval(vn($frm['on_other_page_category'])) . "'
 			, '" . intval(vn($frm['on_background_site'])) . "'
+			, '" . intval(vn($frm['on_product_details'])) . "'
 			, '" . intval(vn($frm['on_search_engine_page'])) . "'
 			, '" . nohtml_real_escape_string($frm['position']) . "'
 			, '" . nohtml_real_escape_string($frm['lien']) . "'
@@ -387,6 +392,7 @@ function maj_banniere($id, &$frm)
 	}
 	$sql .= '
 		, on_background_site = "' . intval(vn($frm['on_background_site'])) . '"
+		, on_product_details = "' . intval(vn($frm['on_product_details'])) . '"
 		, on_other_page_category = "' . intval(vn($frm['on_other_page_category'])) . '"
 		, on_first_page_category = "' . intval(vn($frm['on_first_page_category'])) . '"
 		, on_search_engine_page = "' . intval(vn($frm['on_search_engine_page'])) . '"

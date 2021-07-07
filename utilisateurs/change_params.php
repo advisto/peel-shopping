@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: change_params.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_CHANGE_PARAMS', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -26,12 +26,12 @@ $form_error_object = new FormError();
 $mandatory_fields = array();
 foreach(vb($GLOBALS['site_parameters']['user_change_mandatory_fields'], $GLOBALS['site_parameters']['user_mandatory_fields']) as $key => $value) {
 	if(check_if_module_active('annonces')) {
-		if($key == 'pseudo') {
+		if($key === 'pseudo') {
 			// Si le module d'annonce est présent, le pseudo n'est éditable donc pas transmit dans le formulaire. Le test sur le champ pseudo est prévu dans user*_change_mandatory_fields uniquement pour l'inscription dans ce cas.
 			continue;
 		}
 	}
-	if($key == 'code' || $key == 'mot_passe_confirm') {
+	if($key === 'code' || $key === 'mot_passe_confirm') {
 		// il n'y a pas de module captcha dans le formulaire de mise à jour d'utilisateur. Le test sur le champ code est prévu dans user_mandatory_fields uniquement pour l'inscription
 		continue;
 	}

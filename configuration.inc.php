@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: configuration.inc.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '9.3.0');
+define('PEEL_VERSION', '9.4.0');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }

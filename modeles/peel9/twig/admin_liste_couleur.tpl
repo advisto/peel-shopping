@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -13,8 +13,11 @@
 // $Id: admin_liste_couleur.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}
 <div class="entete">{{ STR_ADMIN_COULEURS_COLORS_TITLE }}</div>
+<div style="margin-top:5px;">
+	<p><a href="{{ add_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_ADMIN_COULEURS_ADD_COLOR_BUTTON }}</a></p>
+</div>
 <div class="alert alert-info">{{ STR_ADMIN_COULEURS_LIST_EXPLAIN }}</div>
-<p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_COULEURS_ADD_COLOR_BUTTON }}</a></p>
+
 <div class="table-responsive">
 	<table id="admin_liste_couleurs" class="table">
 {% if (results) %}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,9 +12,18 @@
 // +----------------------------------------------------------------------+
 // $Id: avisAdmin_liste.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}
+
 <div class="entete">{{ STR_MODULE_AVIS_ADMIN_LIST }}</div>
-<p><a href="{{ add_prod_href|escape('html') }}"><img src="{{ add_src|escape('html') }}" width="16" height="16" class="middle" alt="{{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT|str_form_value }}" />{{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT }}</a></p>
-{% if is_annonce_module_active %}<p><a href="{{ add_annonce_href|escape('html') }}"><img src="{{ add_src|escape('html') }}" width="16" height="16" class="middle" alt="{{ STR_MODULE_AVIS_ADMIN_ADD_ON_AD|str_form_value }}" />{{ STR_MODULE_AVIS_ADMIN_ADD_ON_AD }}</a></p>{% endif %}
+	<div style="margin-top:5px;">
+		<p><a href="{{ add_prod_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT|str_form_value }}</a></p>
+	</div>
+<p>
+{% if is_annonce_module_active %}
+	<div style="margin-top:5px;">
+		<p><a href="{{ add_annonce_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_MODULE_AVIS_ADMIN_ADD_ON_AD }}</a></p>
+	</div>
+{% endif %}
+
 <div class="table-responsive">
 	<table class="table avisAdmin_liste">
 		{{ links_header_row }}

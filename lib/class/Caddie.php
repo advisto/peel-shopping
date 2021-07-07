@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 64947 2020-11-06 09:06:49Z sdelaporte $
+// $Id: Caddie.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 64947 2020-11-06 09:06:49Z sdelaporte $
+ * @version $Id: Caddie.php 66961 2021-05-24 13:26:45Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -93,6 +93,7 @@ class Caddie {
 	var $reference = array();
 	/* Références annonce qui seront stocké dans le champ référence du produit */
 	var $ad_reference = array();
+	var $on_check = array();
 
 	/* Déclaration des variables */
 	/* Montant total du caddie */
@@ -300,6 +301,8 @@ class Caddie {
 
 		$this->pallet_count = 0;
 		$this->global_percent_pallet_filled = 0;
+		$this->on_check = array();
+		$this->in_pack_id = array();
 
 		$this->delivery_orderid = StringMb::substr(sha1(mt_rand(1, 10000000)), 0, 16);
 		if($load_from_caddie_cookie_if_available) {
@@ -398,6 +401,7 @@ class Caddie {
 			$this->marque[$numero_ligne] = $product_object->get_product_brands(false);
 			$this->base_prix_ht[$numero_ligne] = $product_object->prix_ht;
 			$this->conditionnement[$numero_ligne] = $product_object->conditionnement;
+			$this->on_check[$numero_ligne] = $product_object->on_check;
 			$quantity_wished = $added_quantity_wished;
 		}
 		
@@ -408,7 +412,9 @@ class Caddie {
 					if (!isset($this->$this_field)) {
 						$this->$this_field = array();
 					}
-					$this->$this_field[$numero_ligne] = $this_value;
+					$tmp_array = $this->$this_field;
+					$tmp_array[$numero_ligne] = $this_value;
+					$this->$this_field = $tmp_array;
 				} else {
 					// Concerne la commande
 					$this->$this_field = $this_value;
@@ -436,10 +442,10 @@ class Caddie {
 				if (!empty($this->articles[$numero_ligne])) {
 					if (!empty($line_infos['email_check'][$numero_ligne])) {
 						$line_infos['data_check'][$numero_ligne] = array('email_check' => $line_infos['email_check'][$numero_ligne], 'nom_check' => $line_infos['nom_check'][$numero_ligne], 'prenom_check' => $line_infos['prenom_check'][$numero_ligne]);
-				}
+					}
 					$this->change_line_data($numero_ligne, $product_id, get_float_from_user_input(vn($line_infos['quantite'][$numero_ligne])), vn($line_infos['couleurId'][$numero_ligne]), vn($line_infos['tailleId'][$numero_ligne]), vb($line_infos['data_check'][$numero_ligne]), vn($line_infos['id_attribut'][$numero_ligne]), vb($line_infos['listcadeaux_owner'][$numero_ligne]));
+				}
 			}
-		}
 		}
 		// On recalcule tout, notamment pour les frais de port
 		// Par ailleurs à la fin de l'update, on va éventuellement rediriger vers la page de caddie si une quantité demandée n'a pas été donnée car pas en stock
@@ -641,7 +647,7 @@ class Caddie {
 		$this->option_without_reduction[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht_without_reduction, $apply_vat, false, false, false);
 
 		// Total poids de la ligne
-		$this->poids[$numero_ligne] = ($product_object->poids + $product_object->configuration_overweight) * $this->quantite[$numero_ligne];
+		$this->poids[$numero_ligne] = ($product_object->poids + $product_object->configuration_overweight) * $this->quantite[$numero_ligne] * vn($this->conditionnement[$numero_ligne],1);
 		// Calcul du prix original avant réductions et options
 		$this->prix_cat_ht[$numero_ligne] = $product_object->get_original_price(false, check_if_module_active('reseller') && is_reseller(), false, false, true, false);
 		$this->prix_cat[$numero_ligne] = $product_object->get_original_price($apply_vat, check_if_module_active('reseller') && is_reseller(), false, false, true, false);
@@ -685,7 +691,7 @@ class Caddie {
 			}
 			$this->prix_ht_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, false, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_tested, true, true, false, $this->count_products($product_object->categorie_id)) / $real_stock_tested;
 
-			$this->prix_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, $apply_vat, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_tested, true, true, false,$this->count_products($product_object->categorie_id)) / $real_stock_tested;
+			$this->prix_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, $apply_vat, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_tested, true, true, false, $this->count_products($product_object->categorie_id)) / $real_stock_tested;
 			
 		}
 		$this->percent_remise_produit[$numero_ligne] = $product_object->get_all_promotions_percentage(check_if_module_active('reseller') && is_reseller(), $this->percent_remise_user, false);
@@ -753,6 +759,11 @@ class Caddie {
 		if (!empty($this->ad_reference[$numero_ligne])) {
 			unset($this->ad_reference[$numero_ligne]);
 		}
+		
+		// En cas de suppression d'une ligne dans le cas si le produit est contenu dans une pack on doit gérer la désactivation de la suppression et du changement de quantité.
+		if (!empty($this->in_pack_id[$numero_ligne])) {
+            unset($this->in_pack_id[$numero_ligne]);
+        }
 		// Suppression des attributs d'image existants
 		if (!empty($attributs_list)) {
 			foreach(explode("§", $attributs_list) as $attribut_infos_list) {
@@ -1036,6 +1047,8 @@ class Caddie {
 	function update($percent_remise_user = null)
 	{
 		static $update_in_process;
+		call_module_hook('update_caddie_pre', array('user' => vb($_SESSION['session_utilisateur']), 'caddie_object' => $this));
+
 		$this->products_count = array(); // On demande recalcul de cette valeur en initialisant le tableau
 		$this->global_promotion = null; // On demande recalcul de cette valeur en la mettant à null
 		// Evite les boucles infinies
@@ -1154,8 +1167,13 @@ class Caddie {
 				if (!empty($this->ad_reference[$numero_ligne])) {
 					unset($this->ad_reference[$numero_ligne]);
 				}
+				// En cas de suppression d'une ligne dans le cas si le produit est contenu dans une pack on doit gérer la désactivation de la suppression et du changement de quantité.
+				if (!empty($this->in_pack_id[$numero_ligne])) {
+					unset($this->in_pack_id[$numero_ligne]);
+				}
 			}
 		}
+
 		$this->avoir_user = max(vn($_SESSION['session_utilisateur']['avoir']), 0);
 		$this->global_percent_pallet_filled = 0;
 		// ETAPE 1 : On calcule les totaux avant réduction

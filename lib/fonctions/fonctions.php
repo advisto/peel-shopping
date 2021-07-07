@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64962 2020-11-06 17:04:32Z sdelaporte $
+// $Id: fonctions.php 67425 2021-06-28 12:27:13Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -310,10 +310,14 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 		$currency_rate_item = 1;
 		$symbole_place = 1;
 	}
+	if ($price === "") {
+		$price = 0;
+	}
 	if (!empty($currency_rate)) {
 		// Si on veut forcer le taux de change, alors on l'applique à la place de celui qu'on a récupéré en BDD ou en session
 		$currency_rate_item = $currency_rate;
 	}
+	$price = floatval($price);
 	if (!empty($convertion_needed_into_currency)) {
 		// Par défaut, on effectue une conversion du montant
 		$price_displayed = $price * $currency_rate_item;
@@ -349,17 +353,18 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 		$price_displayed = 0;
 	}
 	if ($format) {
-		// On formatte le prix pour l'affichage
-		// Seuls les float sont admis dans la fonction number_format():
-		if (is_numeric($price_displayed) && is_numeric($price_displayed)) {
+		if (is_numeric($price_displayed)) {
+			// On formatte le prix pour l'affichage, pour avoir un nombre à virgule et pas un point ($prices_decimal_separator) et afficher les décimales ($prices_precision)
 			if(!empty($GLOBALS['site_parameters']['prices_show_rounded_if_possible']) && round($price_displayed) == round($price_displayed, $prices_precision)) {
 				$prices_precision = 0;
 			}
 			$price_displayed = number_format($price_displayed, $prices_precision, $prices_decimal_separator, $prices_thousands_separator);
 		}
-		if($add_rdfa_properties && is_numeric($price_displayed)) {
+		
+		if($add_rdfa_properties) {
 			$price_displayed = '<span property="price" content="'.number_format(str_replace(array("'",',', ' '), array('','.',''), $price_displayed), $prices_precision, '.', '') . '">'.$price_displayed.'</span>';
 		}
+		
 		if ($display_iso_currency_code) {
 			if($add_rdfa_properties) {
 				$currency_code = '<span property="priceCurrency">'.$currency_code.'</span>';
@@ -738,6 +743,8 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					$page_type = 'search_engine_page';
 				} elseif (defined('IN_AD_CREATION')) {
 					$page_type = 'ad_creation_page';
+				} elseif (defined('IN_CATALOGUE_PRODUIT')) {
+					$page_type = 'product_details';
 				} else {
 					$page_type = 'other_page';
 				}
@@ -1398,7 +1405,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 	}
 	$sql_paiement = 'SELECT p.*
 		FROM peel_paiement p
-		WHERE ' .  get_filter_site_cond('paiement', 'p', false, $specific_site_id) . ' AND (totalmin<=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmin=0) AND (totalmax>=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmax=0) ' . $sql_cond . '
+		WHERE ' .  get_filter_site_cond('paiement', 'p', false, $specific_site_id) . (!defined('IN_PEEL_ADMIN')?' AND (totalmin<=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmin=0) AND (totalmax>=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmax=0) ':'') . $sql_cond . '
 		GROUP BY technical_code, nom_' . $_SESSION['session_langue'] . ', site_id
 		ORDER BY p.position';
 	$res_paiement = query($sql_paiement);
@@ -1454,6 +1461,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 			}
 			$tpl->assign('technical_code', $tab_paiement['technical_code']);
 			$tpl->assign('nom', ($show_site_info_if_needed?get_site_info($tab_paiement):'') . $tab_paiement['nom_' . $_SESSION['session_langue']]);
+			
 			$tpl->assign('issel', (in_array($tab_paiement['technical_code'], $selected_payment_technical_code) || count($results_array) == 1));
 			if ($tab_paiement['tarif'] != 0) {
 				$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
@@ -2372,6 +2380,10 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 		}
 		foreach($GLOBALS as $this_global => &$this_value) {
 			if(substr($this_global, 0, 4) == 'STR_') {
+				if (!empty($GLOBALS['site_parameters']['replace_word_by_variable_disable']) && in_array($this_global, $GLOBALS['site_parameters']['replace_word_by_variable_disable'])) {
+					// on impose la valeur par défaut de la variable, pour que le contenu ne soit pas modifié.
+					continue;
+				}
 				if(strpos($this_global, '_URL_') === false) {
 					$this_config = 'replace_words_in_lang_files';
 				} else {
@@ -3358,6 +3370,46 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 			}
 		}
 		$titre = $GLOBALS['STR_ASSOCIATED_PRODUCT'];
+	} elseif ($type == 'associated_product_pack') {
+		$nb_par_page = '*';
+		$infos = array();
+		$commande_id_array = array();
+		// On vérifie si la case remontée de produit a été cochée et qu'un nombre de produits à afficher a bien été saisi
+		$product_fields = get_table_field_names('peel_produits', null, false, array("on_ref_produit", "nb_ref_produits"));
+		if(!empty($product_fields)) {
+			//Aut
+			$sql = query("SELECT " . implode(', ', $product_fields) . "
+				FROM peel_produits
+				WHERE id = " . intval(vn($reference_id))." AND " . get_filter_site_cond('produits') . "");
+			$infos = fetch_assoc($sql);
+			if (!empty($infos) && $infos['on_ref_produit'] == 1 && $infos['nb_ref_produits'] > 0) {
+				// Récupération des id des commandes dont le produit fait partie
+				$sql = 'SELECT commande_id
+					FROM peel_commandes_articles
+					WHERE produit_id = "' . intval($reference_id) . '"  AND  ' . get_filter_site_cond('commandes_articles');
+				$q = query($sql);
+				while ($result = fetch_assoc($q)) {
+					$commande_id_array[] = $result['commande_id'];
+				}
+			}
+		}
+		if (!empty($commande_id_array) && count($commande_id_array) > 0) {
+			// Gestion de l'association automatique des références produits en fonction des anciennes commandes
+			// Si la case a bien été cochée et qu'un nombre a été saisi et que le produit affiché a déjà été commandé
+			$sql_inner .= " INNER JOIN peel_commandes_articles pca ON pca.produit_id = p.id AND " . get_filter_site_cond('commandes_articles', 'pca') . "";
+			$sql_cond_array[] = "pca.commande_id IN ('" . implode("','", nohtml_real_escape_string($commande_id_array)) . "')";
+			$sql_cond_array[] = "p.id!=" . intval($reference_id);
+			$nb_par_page = intval($infos['nb_ref_produits']);
+		} else { 
+			// Dans le cas contraire, on affiche les références produit associées
+			$sql_cond_array[] = "pr.produit_id = '" . intval($reference_id) . "' OR p.id= '" . intval($reference_id) . "'";
+			if(empty($GLOBALS['site_parameters']['product_references_display_limit']) && empty($GLOBALS['site_parameters']['product_references_order_by'])) {
+				$sql_inner .= " LEFT JOIN peel_produits_references pr ON p.id = pr.reference_id";
+			} else {
+				$sql_inner .= " INNER JOIN (SELECT * FROM peel_produits_references WHERE produit_id='" . intval($reference_id) . "' ORDER BY ".real_escape_string(vb($GLOBALS['site_parameters']['product_references_order_by'], 'reference_id ASC'))." LIMIT ".intval(vn($GLOBALS['site_parameters']['product_references_display_limit'], 10)).") pr ON p.id = pr.reference_id";
+			}
+		}
+		$titre = $GLOBALS['STR_ASSOCIATED_PRODUCT'];
 	} elseif ($type == 'save_cart') {
 		$sql_inner .= " INNER JOIN peel_save_cart sc ON sc.produit_id = p.id ";
 		$sql_cond_array[] = "sc.id_utilisateur = '" . intval($condition_value1) . "'";
@@ -3368,7 +3420,9 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	} elseif ($type == 'convert_gift_points') {
         $titre = $GLOBALS['STR_VOIR_LISTE_CADEAU'];
         $user_infos = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
-        $sql_cond_array[] = "p.on_gift=1 AND on_gift_points<='".intval($user_infos['points'])."'";
+		if (!empty($user_infos)) {
+			$sql_cond_array[] = "p.on_gift=1 AND on_gift_points<='".intval($user_infos['points'])."'";
+		}
 	} elseif ($type == 'show_draft') {
 		$titre = $GLOBALS['STR_MODULE_CREATE_PRODUCT_IN_FRONT_OFFICE_SORTIE_SAVE_DRAFT'];
 		$params_list['show_draft'] = true;
@@ -3431,7 +3485,7 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	$sql_main2 = ($join_categories?(!empty($GLOBALS['site_parameters']['allow_products_without_category']) ? 'LEFT' : 'INNER') . ' JOIN peel_categories c ON pc.categorie_id = c.id AND c.etat=1 AND ' . get_filter_site_cond('categories', 'c'):'');
 	$sql_main3 =  '
 		' . $sql_inner . "
-		WHERE " . (!empty($GLOBALS['allow_discontinued'])?"(p.etat='1' OR p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." LIKE 'Discontinued%')":($type != 'show_draft'?"p.etat='1'":'1')) . " AND " . get_filter_site_cond('produits', 'p') . ' AND p.technical_code != "over_cost" AND p.nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']).' != ""';	
+		WHERE " . (!empty($GLOBALS['allow_discontinued'])?"(p.etat='1' OR p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." LIKE 'Discontinued%')":($type != 'show_draft'?($type != 'online_and_suspended_products'?"p.etat='1'":'p.etat IN (0,1)'):'1')) . " AND " . get_filter_site_cond('produits', 'p') . ' AND p.technical_code != "over_cost" AND p.nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']).' != ""';
 	if (!empty($sql_cond_array)) {
 		$sql_main3 .= ' AND (' . implode(') AND (', array_unique($sql_cond_array)) . ')';
 	}
@@ -3483,7 +3537,9 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	if (!empty($additionnal_sql_having)) {
 		$sql .= ' ' . $additionnal_sql_having;
 	}
-	
+
+// var_dump($sql);
+
 	$GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = empty($GLOBALS['site_parameters']['multipage_avoid_redirect_if_page_over_limit_disable']) && !defined('IN_SEARCH') && !defined('IN_CATALOGUE');
 	if ($type == 'special') {
 		$Links = new Multipage($sql, 'home', $nb_par_page, 7, 0, $always_show_multipage_footer);
@@ -3541,11 +3597,11 @@ if (!function_exists('ipGet')) {
 	 *
 	 * @return
 	 */
-	function ipGet()
+	function ipGet($allow_private = false)
 	{
-		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && isPublicIP($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ($allow_private || isPublicIP($_SERVER['HTTP_X_FORWARDED_FOR']))) {
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} elseif (isset($_SERVER['HTTP_CLIENT_IP']) && isPublicIP($_SERVER['HTTP_CLIENT_IP'])) {
+		} elseif (isset($_SERVER['HTTP_CLIENT_IP']) && ($allow_private || isPublicIP($_SERVER['HTTP_CLIENT_IP']))) {
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
 		} elseif (isset($_SERVER['REMOTE_ADDR'])) {
 			$ip = $_SERVER['REMOTE_ADDR'];
@@ -3764,19 +3820,22 @@ function get_upload_errors_text($file_infos, $file_kind = 'image')
 	} elseif (!empty($file_infos['error'])) {
 		// Si fichier a essayé d'être téléchargé
 		$error = $GLOBALS["STR_UPLOAD_ERROR_DURING_TRANSFER"];
-	} elseif ($file_infos['size'] > $GLOBALS['site_parameters']['uploaded_file_max_size']) {
+	} elseif (!empty($file_infos['size']) && $file_infos['size'] > $GLOBALS['site_parameters']['uploaded_file_max_size']) {
 		$error = sprintf($GLOBALS["STR_UPLOAD_ERROR_FILE_IS_TOO_BIG"], round($GLOBALS['site_parameters']['uploaded_file_max_size'] / 1024));
-	} elseif (!is_uploaded_file($file_infos['tmp_name'])) {
+	} elseif (!empty($file_infos['tmp_name']) && !is_uploaded_file($file_infos['tmp_name'])) {
 		$error = $GLOBALS["STR_UPLOAD_ERROR_DURING_TRANSFER"];
 	} elseif ($GLOBALS['site_parameters']['check_allowed_types'] && !empty($file_infos['type']) && !isset($GLOBALS['site_parameters']['allowed_types'][$file_infos['type']])) {
 		// Vérification du type de fichier uploadé
-		$error = sprintf($GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"], $file_infos['type']);
+		$tpl = $GLOBALS['tplEngine']->createTemplate('upload_errors_text.tpl');
+		$tpl->assign('allowed_types', $GLOBALS['site_parameters']['allowed_types']);
+		$tpl->assign('msg', sprintf($GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"], $file_infos['type']));
+		return $tpl->fetch();
 	} elseif (!in_array($extension, $GLOBALS['site_parameters']['extensions_valides_'.$file_kind])) {
 		// Vérification de l'extension de fichier uploadé
 		$error = $GLOBALS["STR_UPLOAD_ERROR_FILE_TYPE_NOT_VALID"];
 	} elseif (!empty($GLOBALS['site_parameters']['extensions_valides_image']) && in_array($extension, $GLOBALS['site_parameters']['extensions_valides_image'])) {
 		// Quand on passe ici, Bonne extension d'un fichier qui est une image
-		if (!empty($GLOBALS['site_parameters']['upload_oversized_images_forbidden'])) {
+		if (!empty($file_infos['tmp_name']) && !empty($GLOBALS['site_parameters']['upload_oversized_images_forbidden'])) {
 			// SECTION DESACTIVEE PAR DEFAUT car les grandes images sont habituellement redimensionnées
 			// A ACTIVER avec la variable upload_oversized_images_forbidden à true SI ON VEUT EMPECHER UPLOAD D'IMAGE NECESSITANT UN REDIMENSIONNEMENT
 			list($width, $height, $type, $attr) = getimagesize($file_infos['tmp_name']);
@@ -3790,11 +3849,8 @@ function get_upload_errors_text($file_infos, $file_kind = 'image')
 		}
 	}
 	if (!empty($error)) {
-		//On a un problème à afficher
-		$tpl = $GLOBALS['tplEngine']->createTemplate('upload_errors_text.tpl');
-		$tpl->assign('allowed_types', $GLOBALS['site_parameters']['allowed_types']);
-		$tpl->assign('msg', $error);
-		return $tpl->fetch();
+		// On a un problème à afficher
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();
 	} else {
 		// Pas d'affichage de problème
 		return false;
@@ -3820,6 +3876,7 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 	}
 	if (is_array($field_name)) {
 		// Compatibilité anciennes versions PEEL < 7.0
+		// Dans ce contexte file_name n'est pas du tout le nom du champ mais c'est un tableau correspondant à $_FILES[$field_name]
 		if (!empty($field_name)) {
 			// $field_name contient $_FILES[$field_name]
 			$file_infos = $field_name;
@@ -3849,9 +3906,9 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 	} else {
 		// On procède à un téléchargement
 		$file_infos = $_FILES[$field_name];
-		// Teste la validité du téléchargement
-		$error = get_upload_errors_text($_FILES[$field_name], $file_kind); 
 	}
+	// Teste la validité du téléchargement
+	$error = get_upload_errors_text($file_infos, $file_kind); 
 	if (empty($error) && !empty($file_infos['name'])) {
 		// Dans les cas ci-dessous, le fichier va être manipulé pour être mis à son emplacement officiel
 		// Extension du fichier téléchargé
@@ -4004,7 +4061,6 @@ function delete_uploaded_file_and_thumbs($filename, $return_message = false, $pa
  * @param boolean $force_encoding
  * @return
  */
-
 function http_download_and_die($filename_with_realpath, $serve_download_with_php = true, $file_content_given = null, $file_name_given = null, $force_download = true, $force_encoding = null)
 {
 	if (!$serve_download_with_php) {
@@ -4127,7 +4183,7 @@ function get_url_from_uploaded_filename($filename)
 		if (!empty($_GET['page_offline'])) {
 			$this_url = 'upload/' . StringMb::rawurlencode($filename);
 		} else {
-		$this_url = $GLOBALS['repertoire_upload'] . '/' . StringMb::rawurlencode($filename);
+			$this_url = $GLOBALS['repertoire_upload'] . '/' . StringMb::rawurlencode($filename);
 		}
 	} else {
 		$this_url = null;
@@ -4170,10 +4226,13 @@ function get_file_type($filename)
  * @param integer $height
  * @return
  */
-function get_document_image_html($filename, $width = 100, $height = 100)
+function get_document_image_html($filename, $width = 100, $height = 100, $filename_for_snapshot = null)
 {
 	if(!empty($filename)) {
-		return '<a href="' . get_url_from_uploaded_filename($filename) . '" onclick="return(window.open(this.href)?false:true);"><img src="' . thumbs($filename, $width, $height, 'fit', null, null, true, true) . '" alt="" style="max-width: ' . $width . 'px; max-height: ' . $height . 'px" /></a>';
+		if(empty($filename_for_snapshot)) {
+			$filename_for_snapshot = $filename;
+		}
+		return '<a href="' . get_url_from_uploaded_filename($filename) . '" onclick="return(window.open(this.href)?false:true);"><img src="' . thumbs($filename_for_snapshot, $width, $height, 'fit', null, null, true, true) . '" alt="" style="max-width: ' . $width . 'px; max-height: ' . $height . 'px" /></a>';
 	}
 }
 
@@ -4562,7 +4621,7 @@ function clean_Cache($days_max = 15, $filename_beginning = null)
  * @param string $filename_beginning
  * @param string $create_files_array_found_instead_of_delete
  */
-function nettoyer_dir($dir, $older_than_seconds = 3, $filename_beginning = null, $create_files_array_found_instead_of_delete = false)
+function nettoyer_dir($dir, $older_than_seconds = 3, $filename_beginning = null, $create_files_array_found_instead_of_delete = false, $keep_last_n_file = null)
 {
 	if (a_priv('demo')) {
 		return false;
@@ -4576,19 +4635,41 @@ function nettoyer_dir($dir, $older_than_seconds = 3, $filename_beginning = null,
 			if(!empty($file)) {
 				if ($file != '.' && $file != '..' && $file[0] != '.' && filemtime($dir . '/' . $file) < time() - $older_than_seconds && is_file($dir . '/' . $file) && (empty($filename_beginning) || strpos($file, $filename_beginning) === 0)) {
 					// On efface les fichiers vieux de plus de $older_than_seconds secondes et qui ne sont pas des .htaccess
-					if($create_files_array_found_instead_of_delete) {
-						$GLOBALS['files_found_in_folder'][] = $file;
+					if($create_files_array_found_instead_of_delete || !empty($keep_last_n_file)) {
+						// si on a spécifié un nombre de fichier à garder dans le dossier, on supprime pas directement les fichiers ici mais plus bas dans la fonction
+						$GLOBALS['files_found_in_folder'][filemtime($dir . '/' . $file).'_'.$file] = $file; // mettre le filemtime.file en clé 
 					} else {
 						unlink($dir . '/' . $file);
 					}
-					$files_deleted++;
+					if(empty($keep_last_n_file)) {
+						
+						$files_deleted++;
+					}
 				} elseif ($file != '.' && $file != '..' && is_dir($dir . '/' . $file)) {
 					// On efface récursivement le contenu des sous-dossiers
-					$files_deleted += nettoyer_dir($dir . '/' . $file, $older_than_seconds, $filename_beginning);
+					$files_deleted += nettoyer_dir($dir . '/' . $file, $older_than_seconds, $filename_beginning, $create_files_array_found_instead_of_delete, $keep_last_n_file);
 				}
 			}
 		}
 	}
+	if (!empty($keep_last_n_file)) {
+		// krsort — Trie un tableau en sens inverse et suivant les clés. Permet de mettre les fichiers les plus récents (avec le filmetime le plus élevé) au début de la liste
+		krsort($GLOBALS['files_found_in_folder']);
+		$i=0;
+		foreach ($GLOBALS['files_found_in_folder'] as $this_key => $this_file) {
+			// le tableau commence par les fichiers les plus récents
+			$i++;
+			if ($i > $keep_last_n_file) {
+				// fichier moins récent : on supprime uniquement si le nombre de fichier dans le dossier est supérieur à la configuration keep_last_n_file
+				unlink($dir . '/' . $this_file);
+				$files_deleted++;
+			} else {
+				// fichier récent sous le seuil imposé par keep_last_n_file
+				continue;
+			}
+		}
+	}
+	
 	return $files_deleted;
 }
 
@@ -4903,11 +4984,16 @@ function get_configuration_variable($technical_code, $site_id, $lang)
  * @param boolean $disable_add_quote
  * @return
  */
-function set_configuration_variable($frm, $update_if_technical_code_exists = false, $allow_create = true, $allow_html = true, $disable_add_quote = false)
+function set_configuration_variable($frm, $update_if_technical_code_exists = false, $allow_create = true, $allow_html = true, $disable_add_quote = false, $table = null)
 {
 	if(!isset($frm['etat'])) {
 		$frm['etat'] = 1;
 	}
+	if (empty($table)) {
+		$table = 'peel_configuration';
+	}
+	// le hook permet de modifier la requête SQL de base
+	$hook_result = call_module_hook('configuration_variable', array('frm' => $frm, 'mode' => 'set', 'table' => $table), 'array');
 	if(!isset($frm['site_id'])) {
 		if(defined('IN_PEEL_ADMIN') && isset($_SESSION['session_admin_multisite'])) {
 			// Par défaut, s'applique au site en cours d'utilisation
@@ -4919,12 +5005,18 @@ function set_configuration_variable($frm, $update_if_technical_code_exists = fal
 	if($update_if_technical_code_exists && !empty($frm['technical_code'])) {
 		// On récupère la ligne si elle existe pour ce site_id et pas un autre
 		$sql = "SELECT id
-			FROM peel_configuration
+			FROM " . $table . "
 			WHERE technical_code = '" . real_escape_string($frm['technical_code']) . "' AND " . get_filter_site_cond('configuration', null, false, vb($frm['site_id']), true);
-		$qid = query($sql); 
+
+		// Ajouter des informations de hook, create_sql_from_array - AND where_fields pour - $sql.
+		if (!empty($hook_result['where_fields'])) {
+			// le hook retourne des champs complémentaire à la requête de base
+			$sql .= ' AND ' . create_sql_from_array($hook_result['where_fields'], ' AND ');
+		}
+		$qid = query($sql);
 		if ($select = fetch_assoc($qid)) {
 			// Elément déjà existant, qu'on met à jour
-			update_configuration_variable($select['id'], $frm, false, $disable_add_quote);
+			update_configuration_variable($select['id'], $frm, false, $disable_add_quote, $table);
 			return true;
 		}
 	}
@@ -4944,15 +5036,23 @@ function set_configuration_variable($frm, $update_if_technical_code_exists = fal
 		$sql_items[] = "technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'";
 		$sql_items[] = "string = '" . ($allow_html?real_escape_string($frm['string']):nohtml_real_escape_string($frm['string'])) . "'";
 		$sql_items[] = "lang = '" . nohtml_real_escape_string(vb($frm['lang'])) . "'";
+
 		$sql = "SELECT id
-			FROM peel_configuration
+			FROM " . $table . "
 			WHERE " . implode(' AND ', $sql_items) . " AND " . get_filter_site_cond('configuration', null, false, vn($frm['site_id'], 0), true);
+		// pas $hook_result['where_fields'] : on a tous les droits 
 		$qid = query($sql); 
 		if (!fetch_assoc($qid)) {
 			$sql_items[] = "`type` = '" . nohtml_real_escape_string($frm['type']) . "'";
 			$sql_items[] = "`last_update` = '" . date('Y-m-d H:i:s', time()) . "'";
 			$sql_items[] = "`origin` = '" . nohtml_real_escape_string(vb($frm['origin'])) . "'";
 			$sql_items[] = "`explain` = '" . nohtml_real_escape_string(vb($frm['explain'])) . "'";
+			if (!empty($hook_result['add_fields'])) {
+				// le hook retourne des champs complémentaire à la requête de base
+				foreach($hook_result['add_fields'] as $this_field => $this_value) {
+					$sql_items[] = $this_field . " = '" . nohtml_real_escape_string($this_value) . "'";
+				}
+			}
 			// MAJ pour la page en cours de génération
 			if($frm['type'] == 'array') {
 				$GLOBALS['site_parameters'][$frm['technical_code']] = get_array_from_string($frm['string']);
@@ -4960,8 +5060,12 @@ function set_configuration_variable($frm, $update_if_technical_code_exists = fal
 				$GLOBALS['site_parameters'][$frm['technical_code']] = $frm['string'];
 			}
 			// MAJ en BDD
-			$sql = "INSERT INTO peel_configuration
-				SET " . implode(', ', $sql_items) . ", `site_id` = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+			$sql = "INSERT INTO " . $table . "
+				SET " . implode(', ', $sql_items);
+			if (empty($hook_result['delete_fields']['site_id'])) {
+				$sql .= "
+				, `site_id` = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+			}
 			return query($sql);
 		}
 	} else {
@@ -4978,16 +5082,20 @@ function set_configuration_variable($frm, $update_if_technical_code_exists = fal
  * @param boolean $disable_add_quote
  * @return
  */
-function update_configuration_variable($id_or_technical_code, $frm, $delete = false, $disable_add_quote = false)
+function update_configuration_variable($id_or_technical_code, $frm, $delete = false, $disable_add_quote = false, $table = null)
 {
 	if(isset($frm['string']) && is_array($frm['string'])) {
 		$frm['string'] = get_string_from_array($frm['string'], $disable_add_quote);
 	}
+	if (empty($table)) {
+		$table = 'peel_configuration';
+	}
+	$hook_result = call_module_hook('configuration_variable', array('frm' => $frm, 'mode' => 'update', 'table' => $table), 'array');
 	if($delete) {
 		// MAJ pour la page en cours de génération
 		unset($GLOBALS['site_parameters'][$frm['technical_code']]);
 		// Modification en BDD
-		$sql = "DELETE FROM peel_configuration
+		$sql = "DELETE FROM " . $table . "
 			WHERE ";
 	} else {
 		// MAJ pour la page en cours de génération
@@ -4999,7 +5107,7 @@ function update_configuration_variable($id_or_technical_code, $frm, $delete = fa
 			}
 		}
 		// Modification en BDD
-		$sql = "UPDATE peel_configuration
+		$sql = "UPDATE " . $table . "
 			SET etat = '" . intval($frm['etat']) . "'
 				, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 				".(isset($frm['type'])?", type = '" . nohtml_real_escape_string($frm['type']) . "'":"")."
@@ -5008,8 +5116,14 @@ function update_configuration_variable($id_or_technical_code, $frm, $delete = fa
 				".(isset($frm['origin'])?", origin = '" . nohtml_real_escape_string($frm['origin']) . "'":"")."
 				".(isset($frm['lang'])?", lang = '" . nohtml_real_escape_string($frm['lang']) . "'":"")."
 				".(isset($frm['explain'])?", `explain` = '" . nohtml_real_escape_string($frm['explain']) . "'":"")."
-				".(isset($frm['site_id'])?", `site_id` = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'":"")."
-			WHERE ";
+				".(isset($frm['site_id']) && empty($hook_result['delete_fields']['site_id'])?", `site_id` = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'":"");
+		if (!empty($hook_result['add_fields'])) {
+			// le hook retourne des champs complémentaire à la requête de base
+			foreach($hook_result['add_fields'] as $this_field => $this_value) {
+				$sql .= ',' . $this_field . " = '" . nohtml_real_escape_string($this_value) . "'";
+			}
+		}
+		$sql .= "WHERE ";
 	}
 	if(is_numeric($id_or_technical_code)) {
 		$sql .= "id = '" . intval($id_or_technical_code) . "'";
@@ -5089,146 +5203,146 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 		$GLOBALS['already_updated_minify_id_increment'] = true;
 	}
 	if(!empty($files_to_minify_array)) {
-	$cache_id = md5(implode(',', $files_to_minify_array) . ','. vb($GLOBALS['site_parameters']['minify_id_increment']));
-	$file_name = $files_type . '_minified_' . substr($cache_id, 0, 16).'.'.$files_type;
-	$minified_doc_root = $GLOBALS['dirroot'] . '/'.$GLOBALS['site_parameters']['cache_folder'].'/';
-	$file_path = $minified_doc_root . $file_name;
-	if (file_exists($file_path) === false || (($filemtime = @filemtime($file_path)) < time() - $lifetime) || (!empty($_GET['update']) && $_GET['update'] == 1)) {
-		if(!empty($_GET['update']) && $_GET['update'] == 1) {
-			$generate = true;
-		} elseif(!empty($filemtime)) {
-			foreach($files_to_minify_array as $this_key => $this_file) {
-				// On regarde les fichiers à fusionner pour voir si ils ont changé depuis la dernière création du fichier de cache
-				if(strpos($this_file, '//') === false || strpos($this_file, $GLOBALS['wwwroot']) !== false) {
-					// On ne peut faire le test si fichier récent ou pas que si il est en local
-					$this_local_path = str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file);
-					$this_mtime = @filemtime($this_local_path);
-					if(empty($this_mtime) && !file_exists($this_local_path)) {
-						// Le fichier est en local et n'existe pas, on ne tient donc pas compte de ce fichier
-						unset($files_to_minify_array[$this_key]);
-					}
-					if($this_mtime > $filemtime) {
-						// Fichier minified pas à jour
-						$generate = true; 
-					}
-				} elseif(strpos($this_file, $this_wwwroot) !== false) {
-					// Fichier sur cdn peut-être modifié => fichier minified peut-être pas à jour, et est donc à regénérer
-					$generate = true;
-				} elseif(strpos($this_file, 'googleapis') !== false) {
-					if($filemtime < time() - min($lifetime*2, 3600*2) || rand(1,6) == 1) {
-						// Fichier sur googleapis peut-être modifié => fichier minified peut-être pas à jour, et est donc à regénérer
-						// Soit la dernière génération a eu lieu il y a plus de 2h (ça fait long, et donc ce test a très peu de chances de dire true si $lifetime est inférieur à 2h, puisqu'on va refaire un touch du fichier minifié toutes les lifetime secondes), soit 1 chance sur 10 (multiplié par nombre de fichiers externes concernés) si le fichier minifié a plus de $lifetime secondes. Si cette régénération est infructueuse, on fera un touch pour rajouter $lifetime d'attente obligatoire avant nouvel essai.
-						// Si $lifetime vaut 1h, et qu'on a 2 fichiers externes en tout à minifier, on appelle donc googleapis en moyenne toutes les heures * 6/2 = 3 heures
-						// Ce délai est assez court : En cas de changement chez Google de fichier de font à utiliser et que les anciens ne sont plus accessible, ça limite le temps où ça ne marcherait plus
-						// Ce délai est néanmoins assez long pour éviter un blacklist de la part de googleapi si trop d'appels (sachant qu'en parallèle sur un site on peut avoir diverses combinaisons de fichiers CSS minifiés)
+		$cache_id = md5(implode(',', $files_to_minify_array) . ','. vb($GLOBALS['site_parameters']['minify_id_increment']));
+		$file_name = $files_type . '_minified_' . substr($cache_id, 0, 16).'.'.$files_type;
+		$minified_doc_root = $GLOBALS['dirroot'] . '/'.$GLOBALS['site_parameters']['cache_folder'].'/';
+		$file_path = $minified_doc_root . $file_name;
+		if (file_exists($file_path) === false || (($filemtime = @filemtime($file_path)) < time() - $lifetime) || (!empty($_GET['update']) && $_GET['update'] == 1)) {
+			if(!empty($_GET['update']) && $_GET['update'] == 1) {
+				$generate = true;
+			} elseif(!empty($filemtime)) {
+				foreach($files_to_minify_array as $this_key => $this_file) {
+					// On regarde les fichiers à fusionner pour voir si ils ont changé depuis la dernière création du fichier de cache
+					if(strpos($this_file, '//') === false || strpos($this_file, $GLOBALS['wwwroot']) !== false) {
+						// On ne peut faire le test si fichier récent ou pas que si il est en local
+						$this_local_path = str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file);
+						$this_mtime = @filemtime($this_local_path);
+						if(empty($this_mtime) && !file_exists($this_local_path)) {
+							// Le fichier est en local et n'existe pas, on ne tient donc pas compte de ce fichier
+							unset($files_to_minify_array[$this_key]);
+						}
+						if($this_mtime > $filemtime) {
+							// Fichier minified pas à jour
+							$generate = true; 
+						}
+					} elseif(strpos($this_file, $this_wwwroot) !== false) {
+						// Fichier sur cdn peut-être modifié => fichier minified peut-être pas à jour, et est donc à regénérer
 						$generate = true;
-					}
-				} else {
-					if($filemtime < time() - min($lifetime*2, 3600*2) || rand(1,6) == 1) {
-						// Fichier externe de CSS peut-être modifié => Même commentaire que ci-dessus pour googleapi
-						$generate = true;
+					} elseif(strpos($this_file, 'googleapis') !== false) {
+						if($filemtime < time() - min($lifetime*2, 3600*2) || rand(1,6) == 1) {
+							// Fichier sur googleapis peut-être modifié => fichier minified peut-être pas à jour, et est donc à regénérer
+							// Soit la dernière génération a eu lieu il y a plus de 2h (ça fait long, et donc ce test a très peu de chances de dire true si $lifetime est inférieur à 2h, puisqu'on va refaire un touch du fichier minifié toutes les lifetime secondes), soit 1 chance sur 10 (multiplié par nombre de fichiers externes concernés) si le fichier minifié a plus de $lifetime secondes. Si cette régénération est infructueuse, on fera un touch pour rajouter $lifetime d'attente obligatoire avant nouvel essai.
+							// Si $lifetime vaut 1h, et qu'on a 2 fichiers externes en tout à minifier, on appelle donc googleapis en moyenne toutes les heures * 6/2 = 3 heures
+							// Ce délai est assez court : En cas de changement chez Google de fichier de font à utiliser et que les anciens ne sont plus accessible, ça limite le temps où ça ne marcherait plus
+							// Ce délai est néanmoins assez long pour éviter un blacklist de la part de googleapi si trop d'appels (sachant qu'en parallèle sur un site on peut avoir diverses combinaisons de fichiers CSS minifiés)
+							$generate = true;
+						}
+					} else {
+						if($filemtime < time() - min($lifetime*2, 3600*2) || rand(1,6) == 1) {
+							// Fichier externe de CSS peut-être modifié => Même commentaire que ci-dessus pour googleapi
+							$generate = true;
+						}
 					}
 				}
+			} else {
+				// Fichier absent
+				$generate = true;
 			}
-		} else {
-			// Fichier absent
-			$generate = true;
-		}
-		if(!empty($generate)) {
-			$output = '';
-			if($files_type == 'css') {
-				require_once($GLOBALS['dirroot'] . '/lib/class/Minify_CSS.php');
-			} elseif($files_type == 'js') {
-				if(!version_compare(PHP_VERSION, '5.3.0', '<')) {
-					// JShrink non compatible si PHP < 5.3 => on désactive la minification
-					require_once($GLOBALS['dirroot'] . '/lib/class/JShrink.php');
-				}
-			}
-			foreach($files_to_minify_array as $this_key => $this_file) {
+			if(!empty($generate)) {
+				$output = '';
 				if($files_type == 'css') {
-					$symlinks = array();
-					$docroot = $GLOBALS['dirroot'];
-					if(StringMb::strlen($GLOBALS['apparent_folder'])>1 && StringMb::strpos($this_wwwroot, StringMb::substr($GLOBALS['apparent_folder'], 0, StringMb::strlen($GLOBALS['apparent_folder']) - 1)) !== false) {
-						$this_http_main_path = StringMb::substr($this_wwwroot, 0, StringMb::strlen($this_wwwroot) - StringMb::strlen($GLOBALS['apparent_folder']) + 1);
-						if(empty($GLOBALS['site_parameters']['avoid_lang_folders_in_minified_css']) && !empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]) && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '//') === false && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '.') === false) {
-							// On n'a pas choisi d'activer l'option pour avoir des liens vers les fichiers sans les dossiers de langue
-							// Donc il faut corriger le chemin qu'on vient de retravailler
-							$this_http_main_path = StringMb::substr($this_http_main_path, 0, StringMb::strlen($this_http_main_path) - StringMb::strlen($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]));
-						}
-					} else {
-						$this_http_main_path = $this_wwwroot;
-					}
-					$options = array('currentDir' => str_replace($this_http_main_path, $GLOBALS['dirroot'], dirname($this_file)), 'docRoot' => $docroot, 'symlinks' => $symlinks);
-					$css_content = StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
-					if(!empty($css_content) && strlen(trim($css_content))>5) {
-						if(StringMb::strpos(str_replace('@import url(http://fonts.googleapis.com', '', $css_content), '@import')!==false) {
-							// On rajoute à la liste des exclusions le fichier concerné si il y a @import dedans pour éviter les dysfonctionnements, sauf si c'est l'import d'une font externe
-							$GLOBALS['site_parameters']['minify_css_exclude_array'][] = $this_file;
-							set_configuration_variable(array('technical_code' => 'minify_css_exclude_array', 'string' => get_string_from_array($GLOBALS['site_parameters']['minify_css_exclude_array']), 'type' => 'array', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
-							continue;
-						}
-						if(strlen($css_content)/max(1,substr_count($css_content, "\n"))>50) {
-							// Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
-							// Néanmoins on appelle quand même la classe minify qui va corriger les chemins des URL appelées dans le fichier
-							$options['do_compress'] = false;
-						}
-						$output .= "\n\n\n".Minify_CSS::minify($css_content, $options);
-					} else {
-						trigger_error('Minify CSS impossible - File load problem : '.str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file), E_USER_NOTICE);
-						if(file_exists($file_path)) {
-							// Le fichier minified attendu existe déjà => même si il est périmé, on le laisse tel qu'il est
-							// On annule donc le travail déjà fait et on sort en gardant le fichier existant
-							$output = null;
-							$write_result = true;@touch($file_path);
-							// On met à jour le timestamp du fichier minifié pour ne pas redemander trop rapidement le résultat à nouveau (éviter le blacklist si beaucoup d'appels à googleapi par exemple)
-							@touch($file_path, min($filemtime + $lifetime, time()));
-							break; 
-						} else {
-							// Le fichier minified n'existe pas, et on a un problème => on ne va pas du tout faire de minify
-							// Si on voulait néanmoins écrire le fichier minified partiel, il faudrait repartir de manière récursive. Et à chaque appel de page, ça aurait lieu => pas une bonne idée pour les ressources serveur
-							// Donc on renvoie la liste des fichiers CSS complète sans altération
-							return $original_files_array;
-						}
-					}
+					require_once($GLOBALS['dirroot'] . '/lib/class/Minify_CSS.php');
 				} elseif($files_type == 'js') {
-					$js_content = StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
-					if(!empty($js_content) && strlen(trim($js_content))>5) {
-						// Le fichier n'est pas vide, on le prend
-						if(strlen($js_content)/max(1,substr_count($js_content, "\n"))>50 || version_compare(PHP_VERSION, '5.3.0', '<')) {
-							// NB : Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
-						}else {
-							$js_minified = Minifier::minify($js_content);
-							if(!empty($js_minified) && strlen(trim($js_minified))>5) {
-								// Protection au cas où Minifier::minify renvoie un contenu vide (peut arriver exceptionnellement)
-								$js_content = $js_minified;
+					if(!version_compare(PHP_VERSION, '5.3.0', '<')) {
+						// JShrink non compatible si PHP < 5.3 => on désactive la minification
+						require_once($GLOBALS['dirroot'] . '/lib/class/JShrink.php');
+					}
+				}
+				foreach($files_to_minify_array as $this_key => $this_file) {
+					if($files_type == 'css') {
+						$symlinks = array();
+						$docroot = $GLOBALS['dirroot'];
+						if(StringMb::strlen($GLOBALS['apparent_folder'])>1 && StringMb::strpos($this_wwwroot, StringMb::substr($GLOBALS['apparent_folder'], 0, StringMb::strlen($GLOBALS['apparent_folder']) - 1)) !== false) {
+							$this_http_main_path = StringMb::substr($this_wwwroot, 0, StringMb::strlen($this_wwwroot) - StringMb::strlen($GLOBALS['apparent_folder']) + 1);
+							if(empty($GLOBALS['site_parameters']['avoid_lang_folders_in_minified_css']) && !empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]) && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '//') === false && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '.') === false) {
+								// On n'a pas choisi d'activer l'option pour avoir des liens vers les fichiers sans les dossiers de langue
+								// Donc il faut corriger le chemin qu'on vient de retravailler
+								$this_http_main_path = StringMb::substr($this_http_main_path, 0, StringMb::strlen($this_http_main_path) - StringMb::strlen($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]));
+							}
+						} else {
+							$this_http_main_path = $this_wwwroot;
+						}
+						$options = array('currentDir' => str_replace($this_http_main_path, $GLOBALS['dirroot'], dirname($this_file)), 'docRoot' => $docroot, 'symlinks' => $symlinks);
+						$css_content = StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
+						if(!empty($css_content) && strlen(trim($css_content))>5) {
+							if(StringMb::strpos(str_replace('@import url(http://fonts.googleapis.com', '', $css_content), '@import')!==false) {
+								// On rajoute à la liste des exclusions le fichier concerné si il y a @import dedans pour éviter les dysfonctionnements, sauf si c'est l'import d'une font externe
+								$GLOBALS['site_parameters']['minify_css_exclude_array'][] = $this_file;
+								set_configuration_variable(array('technical_code' => 'minify_css_exclude_array', 'string' => get_string_from_array($GLOBALS['site_parameters']['minify_css_exclude_array']), 'type' => 'array', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
+								continue;
+							}
+							if(strlen($css_content)/max(1,substr_count($css_content, "\n"))>50) {
+								// Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
+								// Néanmoins on appelle quand même la classe minify qui va corriger les chemins des URL appelées dans le fichier
+								$options['do_compress'] = false;
+							}
+							$output .= "\n\n\n".Minify_CSS::minify($css_content, $options);
+						} else {
+							trigger_error('Minify CSS impossible - File load problem : '.str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file), E_USER_NOTICE);
+							if(file_exists($file_path)) {
+								// Le fichier minified attendu existe déjà => même si il est périmé, on le laisse tel qu'il est
+								// On annule donc le travail déjà fait et on sort en gardant le fichier existant
+								$output = null;
+								$write_result = true;@touch($file_path);
+								// On met à jour le timestamp du fichier minifié pour ne pas redemander trop rapidement le résultat à nouveau (éviter le blacklist si beaucoup d'appels à googleapi par exemple)
+								@touch($file_path, min($filemtime + $lifetime, time()));
+								break; 
+							} else {
+								// Le fichier minified n'existe pas, et on a un problème => on ne va pas du tout faire de minify
+								// Si on voulait néanmoins écrire le fichier minified partiel, il faudrait repartir de manière récursive. Et à chaque appel de page, ça aurait lieu => pas une bonne idée pour les ressources serveur
+								// Donc on renvoie la liste des fichiers CSS complète sans altération
+								return $original_files_array;
 							}
 						}
-						$output .= "\n\n\n" . $js_content;
+					} elseif($files_type == 'js') {
+						$js_content = StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
+						if(!empty($js_content) && strlen(trim($js_content))>5) {
+							// Le fichier n'est pas vide, on le prend
+							if(strlen($js_content)/max(1,substr_count($js_content, "\n"))>50 || version_compare(PHP_VERSION, '5.3.0', '<')) {
+								// NB : Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
+							}else {
+								$js_minified = Minifier::minify($js_content);
+								if(!empty($js_minified) && strlen(trim($js_minified))>5) {
+									// Protection au cas où Minifier::minify renvoie un contenu vide (peut arriver exceptionnellement)
+									$js_content = $js_minified;
+								}
+							}
+							$output .= "\n\n\n" . $js_content;
+						}
+					} else {
+						$output .= "\n\n\n".StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 					}
-				} else {
-					$output .= "\n\n\n".StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 				}
+				if(!empty($output)) {
+					$output = trim($output);
+					$fp = StringMb::fopen_utf8($file_path, 'wb');
+					@flock($fp, LOCK_EX);
+					// On utilise strlen et non pas StringMb::strlen car on veut le nombre d'octets et non pas de caractères
+					$write_result = fwrite($fp, $output, strlen($output));
+					@flock($fp, LOCK_UN);
+					fclose($fp);
+				}
+				if(!$write_result) {
+					return $files_array;
+				}
+			} else {
+				// Pas de regénération car fichiers locaux pas modifiés. Les fichiers distants sont néanmoins peut-être modifiés
+				// On valide le fichier pour une nouvelle période de durée $lifetime
+				touch($file_path);
 			}
-			if(!empty($output)) {
-				$output = trim($output);
-				$fp = StringMb::fopen_utf8($file_path, 'wb');
-				@flock($fp, LOCK_EX);
-				// On utilise strlen et non pas StringMb::strlen car on veut le nombre d'octets et non pas de caractères
-				$write_result = fwrite($fp, $output, strlen($output));
-				@flock($fp, LOCK_UN);
-				fclose($fp);
-			}
-			if(!$write_result) {
-				return $files_array;
-			}
-		} else {
-			// Pas de regénération car fichiers locaux pas modifiés. Les fichiers distants sont néanmoins peut-être modifiés
-			// On valide le fichier pour une nouvelle période de durée $lifetime
-			touch($file_path);
 		}
-	}
-	// On remet le fichier CSS minifié en position dans le tableau de tous les CSS à charger, à la position du premier fichier qui a été minifié (pour respecter au mieux les priorités)
-	$files_array[key($files_to_minify_array)] = str_replace($GLOBALS['dirroot'], $this_wwwroot, $file_path);
+		// On remet le fichier CSS minifié en position dans le tableau de tous les CSS à charger, à la position du premier fichier qui a été minifié (pour respecter au mieux les priorités)
+		$files_array[key($files_to_minify_array)] = str_replace($GLOBALS['dirroot'], $this_wwwroot, $file_path);
 	}
 	return $files_array;
 }
@@ -6102,14 +6216,19 @@ function insere_code_promo($frm)
  */
 function get_default_vat()
 {
-	$query = query("SELECT max(tva) as default_vat
-		FROM peel_tva 
-		WHERE " . get_filter_site_cond('tva'));
-	if ($result = fetch_assoc($query)) {
-		return $result['default_vat'];
+	$hook_result = call_module_hook('default_vat', array(), 'array');
+	if (empty($hook_result['hook_done'])) {
+		$query = query("SELECT max(tva) as default_vat
+			FROM peel_tva 
+			WHERE " . get_filter_site_cond('tva'));
+		if ($result = fetch_assoc($query)) {
+			return $result['default_vat'];
+		} else {
+			// table TVA vide.
+			return null;
+		}
 	} else {
-		// table TVA vide.
-		return null;
+		return $hook_result['default_vat'];
 	}
 }
 
@@ -6433,6 +6552,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 						$this_field_values[$this_key] = get_formatted_date(time()+0*$this_value);
 					}
 				}
+				$value_treated = array();
 				foreach($this_field_values as $this_key => $this_value) {
 					if ($this_field=="funding_eligibility" && vn($frm_this_field_values_array[0]) == 1) {
 						$this_field_infos['field_style'] = "color:#FF0000;font-weight:bold;";
@@ -6452,7 +6572,21 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 							'name' => trim($this_field_names[$this_key]),
 							'br' => (StringMb::substr($this_field_names[$this_key], -6) == '<br />')
 						);
+					$value_treated[] = trim($this_value);
 				}
+				if ($field_type == 'select') {
+					// Si la valeur présente dans le formulaire (et/ou en BDD) et n'est pas présente dans les valeurs par défaut du champ, il faut ajouter cette valeur dans les options du select
+					foreach ($frm_this_field_values_array as $this_frm_value) {
+						if (!in_array($this_frm_value, $value_treated)) {
+							$this_field_infos['options'][trim($this_frm_value)] = array('value' => trim($this_frm_value),
+								'issel' => true,
+								'name' => trim($this_frm_value),
+								'br' => (StringMb::substr($this_frm_value, -6) == '<br />')
+							);
+						}
+					}
+				}
+
 				$this_field_infos['field_values'] = $text_field_values_array;
 				$this_field_infos['field_value'] = implode(', ', $text_field_values_array);
 			}
@@ -7297,8 +7431,8 @@ function set_session_site_country($country_id) {
 	$query_pays = query($sql_pays);
 	if($pays = fetch_assoc($query_pays)){
 		$_SESSION['session_site_country'] = $pays['id'];
-		$_SESSION['session_devise']['decimal_separator'] = $pays['prices_decimal_separator'];
-		$_SESSION['session_devise']['thousands_separator'] = $pays['prices_thousands_separator'];
+		$_SESSION['session_devise']['decimal_separator'] = vb($pays['prices_decimal_separator'], ',');
+		$_SESSION['session_devise']['thousands_separator'] = vb($pays['prices_thousands_separator'], ' ');
 		return true;
 	} else {
 		$_SESSION['session_devise']['decimal_separator'] = null;
@@ -7326,6 +7460,16 @@ function get_quantity_product_reference($reference_id, $produit_id)
 		$output = $product['quantity'];
 	}
 	return $output;
+}
+
+/**
+ * Renvoie si le navigateur ast un navigateur mobile (pas tablette)
+ *
+ * @return
+ */
+function is_mobile_browser() {
+	// Navigateur mobile cf. http://detectmobilebrowsers.com/
+	return !empty($_SERVER['HTTP_USER_AGENT']) && preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i',$_SERVER['HTTP_USER_AGENT'])||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i', substr($_SERVER['HTTP_USER_AGENT'], 0, 4));
 }
 
 if (!function_exists('isSearchBot')) {
@@ -7868,537 +8012,671 @@ function export_products_pdf($params) {
  * @return
  */
 function get_product_infos($where, $filter_site_cond = true, $fields_list_or_array = null, $limit = 1, $one_row_mode = true, $filter_site_cond_use_strict_rights_if_in_admin = false, $order_by = null, $filter_site_forced_site_id = null, $forced_load_field_array = array(), $sql_join_array = array()) {
-	$results = array();
-	if($fields_list_or_array !== null && !is_array($fields_list_or_array)) {
-		$fields_list_or_array = explode(',', $fields_list_or_array);
-		foreach($fields_list_or_array as $this_key => $this_field) {
-			$fields_list_or_array[$this_key] = trim($this_field);
+
+	static $output_array;
+	if($one_row_mode) {
+		$limit = 1;
+	}
+	if (!is_array($where) && intval($where) != 0) {
+		// Si on passe directement un ID de produit. $where peut être un string ou un int, il faut le caster en int sinon ça pose problème lors du calcul du hash. En effet serialize ne retourne pas le même résultat si la variable est un int ou un string. Test avec != pour vérifier que c'est bien un id qu'on cherche
+		$where = intval($where);
+	}
+	$hash_id_base = $filter_site_cond.$limit.$filter_site_cond_use_strict_rights_if_in_admin.$order_by.$filter_site_forced_site_id.serialize($forced_load_field_array);
+	$hash_id_base .= serialize($fields_list_or_array);
+	$hash_id = serialize($where).$hash_id_base;
+	$hash = md5($hash_id);
+
+	if (!empty($fields_list_or_array) && !empty($output_array[$hash])) {
+		// on regarde si une variable static sans contrainte sur les champs a déjé été faite. L'idée est de retourner la variable en cache avec toutes les infos si on a déjà fait une requête avec tous les champs, et ainsi ne pas faire de requête inutile
+		$fields_list_or_array_tested = null;
+		$hash_id_base = $filter_site_cond.$limit.$filter_site_cond_use_strict_rights_if_in_admin.$order_by.$filter_site_forced_site_id.serialize($forced_load_field_array);
+		$hash_id_base .= serialize($fields_list_or_array_tested);
+		$hash_id = serialize($where).$hash_id_base;
+		$hash = md5($hash_id);
+		if(!empty($output_array[$hash])) {
+			// on a déjà fait une requête plus globale sur ce produit, donc on retourne le résultat
+			if($one_row_mode) {
+				return current($output_array[$hash]);
+			} else {
+				return $output_array[$hash];
+			}
 		}
 	}
-	if(empty($GLOBALS['site_parameters']['ajax_products'])) {
-		if($fields_list_or_array === null) {
-			$sql_fields = 'p.*';
-		} else {
-			$sql_fields_filtered = array();
-			// Récupération des champs présents en BDD 
-			$table_field = get_table_field_names('peel_produits');
 
-			foreach($fields_list_or_array as $this_field) {
-				// pour chaque champ demandé
-				// récupération du nom technique du champ dans la base de données
-				$tested_sql_field = explode('AS',$this_field);
-				 // suppression de l'alias si présent
-				$raw_sql_field = explode('.',trim($tested_sql_field[0]));
-				if (!empty($raw_sql_field[1])) {
-					// on récupère le nom du champ brut pour pouvoir le comparer à la liste de champ en BDD
-					$this_final_field = $raw_sql_field[1];
-				} else {
-					$this_final_field = $raw_sql_field[0];
-				}
-				if (in_array($this_final_field, $table_field)) {
-					// le champ demandé est bien dans la table.
-					$sql_fields_filtered[] = $this_field;
-				}
+	if (empty($output_array[$hash])) {
+		$results = array();
+		if($fields_list_or_array !== null && !is_array($fields_list_or_array)) {
+			$fields_list_or_array = explode(',', $fields_list_or_array);
+			foreach($fields_list_or_array as $this_key => $this_field) {
+				$fields_list_or_array[$this_key] = trim($this_field);
 			}
-			if (!empty($sql_fields_filtered)) {
-				$sql_fields = implode(',', $sql_fields_filtered);
+		}
+		if(empty($GLOBALS['site_parameters']['ajax_products'])) {
+				// VERSION STANDARD : utilisation de la base de données pour récupérer des informations sur 1 ou plusieurs produits
+			if($fields_list_or_array === null) {
+				$sql_fields = 'p.*';
 			} else {
-				// pas de champ valide, on ne veut pas exécuter la requête sans avoir de champ donc on retourne false 
-				return false;
-			}
-		}
-		if(is_array($where)) {
-			$sql_cond_array[] = create_sql_from_array($where, ' AND ');
-		} elseif(!is_numeric($where)) {
-			$sql_cond_array[] = $where;
-		} else {
-			$sql_cond_array[] = "p.id = '" . intval($where) . "'";
-		}
-		if($filter_site_cond) {
-			$sql_cond_array[] = get_filter_site_cond('produits', 'p', $filter_site_cond_use_strict_rights_if_in_admin, $filter_site_forced_site_id);
-		}
-		if(empty($sql_cond_array)) {
-			$sql_cond_array[] = 1;
-		}
-		$sql = "SELECT " . $sql_fields . "
-			FROM peel_produits p
-			" . (!empty($sql_join_array) ? implode(" ", $sql_join_array): "") . "
-			WHERE " . implode(" AND ", $sql_cond_array) .
-		(!empty($order_by) ? "
-			ORDER BY " . $order_by: "") .
-		(!empty($limit) ?  "
-			LIMIT " . $limit: "");
+				$sql_fields_filtered = array();
+				// Récupération des champs présents en BDD 
+				$table_field = get_table_field_names('peel_produits');
 
-		$query = query($sql);
-		while($result = fetch_assoc($query)) {
-			if($one_row_mode) {
-				return $result;
-			} else {
-				$results[] = $result;
-			}
-		}
-	} else {
-		// echo debug_print_backtrace();
-		// API
-		if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
-			$start_time = microtime_float();
-		}
-		$curl = curl_init();
-		ini_set('display_errors', 1);
-		curl_setopt($curl, CURLOPT_VERBOSE, true);
-		curl_setopt($curl, CURLOPT_STDERR, fopen(dirname(__FILE__).'/errorlog.txt', 'w'));
-		curl_setopt($curl, CURLOPT_POST, 1);
-		$request_data = array();
-		$mapping_peel_to_ajax_product_fields = $GLOBALS['site_parameters']['mapping_peel_to_ajax_product_fields'];;
-		$peel_not_in_ajax_product_fields = array('description_en', 'etat', 'tva', 'position', 'promo', 'importance', 'url_part', 'categorie', 'categorie_id', 'name');
-		/* Réponse AJAX :
-		 * 
-
-array(4) {
-  ["totalCount"]=>
-  int(1)
-  ["pageSize"]=>
-  int(20)
-  ["filter"]=>
-  array(1) {
-    ["Product ID"]=>
-    string(9) "^1859430$"
-  }
-  ["results"]=>
-  array(1) {
-    [0]=>
-    array(52) {
-*     ["Supplier ID"]=>
-      int(1)
-*     ["Product ID"]=>
-      string(7) "1859430"
-*     ["Catalog Number"]=>
-      string(11) "sc-270598-V"
-*     ["Technical Code"]=>
-      string(0) ""
-      ["Description"]=>
-      string(40) "11β-HSD2 shRNA (r) Lentiviral Particles"
-      ["Class"]=>
-      string(4) "RNAi"
-      ["Category"]=>
-      string(0) ""
-      ["Application"]=>
-      string(0) ""
-      ["Clone"]=>
-      string(0) ""
-      ["Conjugate"]=>
-      string(0) ""
-      ["Host species"]=>
-      string(3) "rat"
-      ["Reactivity species"]=>
-      string(3) "rat"
-      ["Target"]=>
-      string(40) "11β-HSD2 shRNA (r) Lentiviral Particles"
-      ["CellName"]=>
-      string(0) ""
-      ["Diagnosis"]=>
-      string(0) ""
-      ["Diag"]=>
-      string(0) ""
-      ["Gene ID"]=>
-      string(0) ""
-      ["Gene symbol"]=>
-      string(0) ""
-      ["Buying price"]=>
-      string(3) "486"
-      ["Supplier Price list"]=>
-      string(3) "648"
-      ["Factor"]=>
-      string(3) "1.0"
-      ["Selling price in euros"]=>
-      string(3) "661"
-      ["Selling price in dollar"]=>
-      string(0) ""
-      ["Selling price in Swiss franc"]=>
-      string(0) ""
-      ["UK selling price"]=>
-      string(0) ""
-      ["Site"]=>
-      int(1)
-      ["Site id"]=>
-      string(5) "1,2,9"
-      ["Site Country"]=>
-      string(26) "0,1,5,6,25,27,41,54,58,219"
-      ["Additionnal informations"]=>
-      string(0) ""
-      ["Brand"]=>
-      string(24) "Santa Cruz Biotechnology"
-      ["Brand ID"]=>
-      int(1)
-      ["CAS Number"]=>
-      string(0) ""
-      ["Creation/Deletion date"]=>
-      string(8) "20200307"
-      ["Update date"]=>
-      string(8) "20190214"
-      ["Customer minimum order"]=>
-      string(0) ""
-      ["Description in English"]=>
-      string(0) ""
-      ["IATA"]=>
-      string(0) ""
-      ["Image"]=>
-      string(0) ""
-      ["Information"]=>
-      string(11) "siRNA/dsRNA"
-      ["Shipping"]=>
-      string(6) "-20°C"
-      ["Size"]=>
-      string(6) "200µl"
-      ["Storage"]=>
-      string(6) "-80°C"
-      ["Supplier"]=>
-      string(24) "Santa Cruz Biotechnology"
-      ["Supplier URL link"]=>
-      string(101) "https://www.scbt.com/scbt/fr/product/11beta-hsd2-sirna-r-shrna-and-lentiviral-particle-gene-silencers"
-      ["Supplier catalog number"]=>
-      string(11) "sc-270598-V"
-      ["UN"]=>
-      string(0) ""
-      ["UNSPSC"]=>
-      string(8) "41106311"
-      ["Low dilution"]=>
-      string(0) ""
-      ["High dilution"]=>
-      string(0) ""
-      ["Pretreatment"]=>
-      string(0) ""
-      ["e-class v1"]=>
-      string(0) ""
-      ["e-class v2"]=>
-      string(0) ""
-    }
-  }
-}
-		*/
-
-		// A FAIRE : IN / NOT IN. LIKE / NOT LIKE
-		if(is_array($where)) {
-			foreach($where as $this_peel_field => $this_val) {
-				$this_field = str_replace('p.', '', trim($this_peel_field));
-				$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = '^'.strval($this_val) . '$'; 
-			}
-		} elseif(is_numeric($where)) {
-			$request_data[$mapping_peel_to_ajax_product_fields['id']] = '^'.strval(intval($where)) . '$';
-			// Pour tests : $request_data = array("Catalog Number" => "SC-2120"); 
-		} else {
-			$temp = explode(' AND ', $where);
-			foreach($temp as $this_cond) {
-				// Analyse de SQL pour extraire des conditions à transmettre en AJAX.
-				// Attention à l'ordre. Bien mettre <= avant <, >= avant >, NOT LIKE avant LIKE, NOT IN avant IN
-				foreach(array('!=' => '$ne', '<>' => '$ne', '<=' => '$lte', '<' => '$lt', '>=' => '$gte', '>' => '$gt', '=' => '$eq', 'NOT LIKE' => '$ne', 'LIKE' => '$eq', 'NOT IN' => '$nin', 'IN' => '$in') as $this_sql_separator => $this_api_separator) {
-					if(strpos($this_cond, $this_sql_separator) !== false) {
-						$temp2 = explode($this_sql_separator, $this_cond);
-						$this_field = str_replace('p.', '', trim($temp2[0]));
-						$this_value = trim($temp2[1]);
-						if (StringMb::substr($this_value, 0, 1) == "'" || StringMb::substr($this_value, 0, 1) == '"') {
-							// On retire les guillemets simples ou doubles si présent
-							$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value) - 2);
-						}
-						if($this_sql_separator == 'LIKE' || $this_sql_separator == 'NOT LIKE') {
-							// On détermine si % présent
-							$joker_pre = StringMb::substr($this_value, 0, 1) == '%';
-							$joker_post = StringMb::substr($this_value, -1, 1) == '%';
-							
-							// on supprime les % au début et à la fin de la chaine si nécessaire pour rendre compatible la chaine avec la recherche mongoDB
-							if (!empty($joker_pre)) {
-								$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value));
-							}
-							if (!empty($joker_post)) {
-								$this_value = StringMb::substr($this_value, 0, StringMb::strlen($this_value) -1);
-							}
-							if (StringMb::strpos($this_value, '%') !== false) {
-								// il reste un caractère % dans le terme recherché, il faut le remplacer au format expression régulière
-								$this_value = str_replace('%', '(.*)', $this_value);
-							}
-							if (empty($joker_pre) && !empty($joker_post)) {
-								$forced_filter_value = '^' . $this_value . '';
-							} elseif (!empty($joker_pre) && empty($joker_post)) {
-								$forced_filter_value = '' . $this_value . '$';
-							} elseif (!empty($joker_pre) && !empty($joker_post)) {
-								$forced_filter_value = '' . $this_value . '';
-							} elseif (empty($joker_pre) && empty($joker_post)) {
-								$forced_filter_value = '^' . $this_value . '$';
-							}
-						}
-						
-
-						
-
-						if($this_api_separator == '$in' || $this_api_separator == '$nin') {
-							// suppression des parenthèses du IN présent dans la requête SQL
-							$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value) - 2);
-							
-							// Ajout des crochets autour des valeurs à rechercher pour faire correspondre la chaine au format MongoDB { field: { $in: [<value1>, <value2>, ... <valueN> ] } } . A priori on peut laisser les guillemets qui entoure les valeurs à rechercher.
-							$this_value = '['.$this_value.']';
-							
-							$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = array($this_api_separator => $this_value);
-						} elseif($this_api_separator == '$ne') {
-							// A TESTER => ne fonctionne pas.
-							// $request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = '/^((?!' . $this_value . ').)/';
-							
-							// $forced_filter_value : transforme le caractère % en filtre pour l'expression régulière
-							if (!empty($forced_filter_value)) {
-								$this_value = $forced_filter_value;
-							} else {
-								$this_value = '^' . $this_value . '$';
-							}
-							$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = array($this_api_separator => $this_value);
-							// $request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = '^(?!' . $this_value . ')$';
-						} elseif($this_api_separator == '$eq') {
-							// $forced_filter_value : transforme le caractère % en filtre pour l'expression régulière
-							if (!empty($forced_filter_value)) {
-								$this_value = $forced_filter_value;
-							} else {
-								$this_value = '^' . $this_value . '$';
-							}
-							$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = $this_value;
-						} else {
-							$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = array($this_api_separator => $this_value);
-						}
-						unset($this_cond);
-						break;
+				foreach($fields_list_or_array as $this_field) {
+					// pour chaque champ demandé
+					// récupération du nom technique du champ dans la base de données
+					$tested_sql_field = explode('AS',$this_field);
+					 // suppression de l'alias si présent
+					$raw_sql_field = explode('.',trim($tested_sql_field[0]));
+					if (!empty($raw_sql_field[1])) {
+					// on récupère le nom du champ brut pour pouvoir le comparer à la liste de champs en BDD
+						$this_final_field = $raw_sql_field[1];
+					} else {
+						$this_final_field = $raw_sql_field[0];
+					}
+					if (in_array($this_final_field, $table_field)) {
+						// le champ demandé est bien dans la table.
+						$sql_fields_filtered[] = $this_field;
 					}
 				}
-				if(isset($this_cond)) {
-					// $this_cond était une valeur string sans autre information
-					$request_data[$mapping_peel_to_ajax_product_fields['technical_code']] = $this_cond;
+				if (!in_array('id', $sql_fields_filtered)) {
+					// l'id du produit doit être toujours présent dans la requête, pour pouvoir compléter correctement le tableau de résultat
+					$sql_fields_filtered[] = 'p.id';
 				}
-			}
-		}
-
-
-// var_dump($request_data);
-
-
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-		if (count($request_data)) {
-			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($request_data));
-		}		
-		// Optional Authentication:
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($curl, CURLOPT_USERPWD, $GLOBALS['site_parameters']['api_product_user'].":".$GLOBALS['site_parameters']['api_product_password']);
-		curl_setopt($curl, CURLOPT_URL, 'https://cliniprod.ezydata.io/rest/products'); // Echoue avec ?noEngine=1 après timeout
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
-		curl_setopt($curl, CURLOPT_TIMEOUT, 20);
- 
-		$result_set = curl_exec($curl);
-		$error = curl_errno($curl); 
-		//var_dump(curl_getinfo($curl));
-		// https://www.php.net/manual/fr/function.curl-errno.php
-		// var_dump($error);
-		
-		// var_dump($GLOBALS['site_parameters']['api_product_user'], $GLOBALS['site_parameters']['api_product_password']);
-		// resty
-		// 6VtCU9FbbsVHUv2
-		curl_close($curl);
-		if(!empty($result_set)) {
-			$result_set = json_decode($result_set, true);
-			$results = $result_set['results'];
-			$totalCount = $result_set['totalCount'];
-		} else {
-			return null;
-		}
-		if($one_row_mode) {
-			$results = array(current($results));
-		}
-		if (empty($totalCount)) {
-			// pas de resultat
-			return null;
-		}
-		// mapping_peel_to_ajax_product_fields : a pour index les champs PEEL, et pour valeur les champs du flux
-		// mapping_ajax_to_peel_product_fields : inversement à mapping_peel_to_ajax_product_fields, a pour index les champs du flux, et pour valeur les champs PEEL
-		$mapping_ajax_to_peel_product_fields = array_flip($mapping_peel_to_ajax_product_fields);
-		$mapping_ajax_to_peel_product_fields_without_alias = $mapping_ajax_to_peel_product_fields;
-		
-		if(!empty($fields_list_or_array)) {
-			// $fields_list_or_array contient le nom des champs souhaités en retour de la fonction. C'est soit une chaine de caractère au format SQL, donc séparé par des virgules ou un tableau.,Comme c'est fait pour être utilisé par une requête SQL, il est possible de trouver le mot clé 'AS' pour les alias de champ.
-			// $fields_list_or_array est forcement un tableau. Soit le tableau est directement passé en paramètre, soit le paramètre est une chaine de caractère converti en tableau au début de la fonction.
-			$add_totalCount_to_result = false;
-			foreach($fields_list_or_array as $this_key => $this_value) {
-				if($this_value == '*') {
-					$keep_all_fields = true;
-					unset($fields_list_or_array[$this_key]);
-					continue;
-				}
-				$temp = explode(' AS ', $this_value);
-
-				// $temp[0] contient le nom du champ en BDD de PEEL. $temp[1] contient le nom de l'alias du champ, tel qu'on le souhaite en sortie de fonction
-				$peel_fields_array[] = $temp[0];
-				if (StringMb::strtolower($temp[0]) == 'count(*)') {
-					// Dans les champ il y a un count(*), donc on stock la valeur du champ et de son alias ici pour pouvoir l'ajouter auc résultats en bas de la fonction
-					$add_totalCount_to_result = $temp;
-				}
-				foreach ($peel_not_in_ajax_product_fields as $this_peel_field) {
-					if(substr($temp[0], 0, strlen($this_peel_field)) == $this_peel_field) {
-						// on demande un champ qui n'est pas dans le flux, il faut aller chercher l'info en bdd. Donc on va définir des variables à true
-						$load_field_var = 'load_'.$this_peel_field;
-						$$load_field_var = true;
-					}
-				}
-				// $ajax_fields_array contient le nom du champ dans le flux AJAX si il existe, sinon le nom du champ tel que demandé en paramètre
-				$ajax_fields_array[] = vb($mapping_peel_to_ajax_product_fields[$temp[0]], $temp[0]);
-				if(!empty($temp[1])) {
-					// On stock l'alias
-					$peel_field_alias_array[$temp[0]] = $temp[1];
-				}
-			}
-			// ajax_fields_as_keys est un tableau listant les champs souhaités, au format du flux
-			$ajax_fields_as_keys = array_flip($ajax_fields_array);
-		}
-		if(empty($keep_all_fields)) {
-			foreach($forced_load_field_array as $this_key => $this_field) {
-				if(!empty($ajax_fields_as_keys) && !in_array($this_field, $ajax_fields_as_keys)) {
-					// Ne pas charger ce champ car pas demandé
-					unset($forced_load_field_array[$this_key]);
-				}
-			}	
-		}
-			foreach(array_keys($results) as $this_line_key) {
-			// Liste des id de produits résultant de la requête curl
-				$product_ids[] = $results[$this_line_key]['Product ID'];
-		}
-		if (!empty($keep_all_fields) || empty($fields_list_or_array)) {
-			// Si on charge tous les champs, il faut faire un requête unique dans peel_produits et pas une requête à chaque champ
-			$select_sql = array();
-			$peel_product_data = array();
-			foreach($peel_not_in_ajax_product_fields as $this_field) {
-				if ($this_field == 'description_en') {
-					$select_sql[] = "pd.description_en";
-				} elseif ($this_field == 'position') {
-					$select_sql[] = "p.position";
-				} elseif ($this_field == 'etat') {
-					$select_sql[] = "p.etat";
-				} elseif ($this_field == 'categorie') {
-					$select_sql[] = "r.nom_" .  $_SESSION['session_langue'] . " AS categorie";
-				} elseif($this_field == 'name') {
-					$select_sql[] = "p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name";
+				if (!empty($sql_fields_filtered)) {
+					$sql_fields = implode(',', $sql_fields_filtered);
 				} else {
-					$select_sql[] = $this_field;
+					// pas de champ valide, on ne veut pas exécuter la requête sans avoir de champ donc on retourne false 
+					return false;
 				}
 			}
-			$sql = "SELECT p.id, " . implode(",", real_escape_string($select_sql)) . "
+			if(is_array($where)) {
+				$sql_cond_array[] = create_sql_from_array($where, ' AND ');
+			} elseif(!is_numeric($where)) {
+				$sql_cond_array[] = $where;
+			} else {
+				$sql_cond_array[] = "p.id = '" . intval($where) . "'";
+			}
+			if($filter_site_cond) {
+				$sql_cond_array[] = get_filter_site_cond('produits', 'p', $filter_site_cond_use_strict_rights_if_in_admin, $filter_site_forced_site_id);
+			}
+			if(empty($sql_cond_array)) {
+				$sql_cond_array[] = 1;
+			}
+			$sql = "SELECT " . $sql_fields . "
 				FROM peel_produits p
-				LEFT JOIN peel_produits_descriptions pd ON p.id = pd.id
-				INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-				INNER JOIN peel_categories r ON r.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'r') . "
-				WHERE p.id IN ('" . implode("','", real_escape_string($product_ids)) . "') AND " . get_filter_site_cond('produits', 'p');
+				" . (!empty($sql_join_array) ? implode(" ", $sql_join_array): "") . "
+				WHERE " . implode(" AND ", $sql_cond_array) .
+			(!empty($order_by) ? "
+				ORDER BY " . $order_by: "") .
+			(!empty($limit) ?  "
+				LIMIT " . $limit: "");
+
 			$query = query($sql);
 			while($result = fetch_assoc($query)) {
-				$peel_product_data[$result['id']] = $result;
+				$results[] = $result;
 			}
-			foreach(array_keys($results) as $this_line_key) {
-				// Pour chaque ligne, on ne garde que ce qui est souhaité
-				if(!empty($peel_product_data[$results[$this_line_key]['Product ID']])) {
-					foreach($peel_product_data[$results[$this_line_key]['Product ID']] as $this_field=>$this_value) {
-						// Ajout du nouveau champ dans result 
-						$results[$this_line_key][$this_field] = $this_value;
+		} else {
+			// UTILISATION d'API pour récupérer des informations produits
+			// echo debug_print_backtrace();
+			// API
+			if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
+				$start_time = microtime_float();
+			}
+			ini_set('display_errors', 1);
+			$request_data = array();
+				$mapping_peel_to_ajax_product_fields = $GLOBALS['site_parameters']['mapping_peel_to_ajax_product_fields'];
+				$peel_not_in_ajax_product_fields = array(); //'etat' 'description_en', 'tva', 'position', 'promo', 'url_part', 'categorie', 'categorie_id', 'name', 'id_marque',
+			/* Réponse AJAX :
+			 * 
+				array(4) {
+			  ["totalCount"]=>
+			  int(1)
+			  ["pageSize"]=>
+			  int(20)
+			  ["filter"]=>
+			  array(1) {
+				["Product ID"]=>
+				string(9) "^1859430$"
+			  }
+			  ["results"]=>
+			  array(1) {
+				[0]=>
+				array(52) {
+				*     ["Supplier ID"]=>
+				  int(1)
+				*     ["Product ID"]=>
+				  string(7) "1859430"
+				*     ["Catalog Number"]=>
+				  string(11) "sc-270598-V"
+				*     ["Technical Code"]=>
+				  string(0) ""
+				  ["Description"]=>
+				  string(40) "11β-HSD2 shRNA (r) Lentiviral Particles"
+				  ["Class"]=>
+				  string(4) "RNAi"
+				  ["Category"]=>
+				  string(0) ""
+				  ["Application"]=>
+				  string(0) ""
+				  ["Clone"]=>
+				  string(0) ""
+				  ["Conjugate"]=>
+				  string(0) ""
+				  ["Host species"]=>
+				  string(3) "rat"
+				  ["Reactivity species"]=>
+				  string(3) "rat"
+				  ["Target"]=>
+				  string(40) "11β-HSD2 shRNA (r) Lentiviral Particles"
+				  ["CellName"]=>
+				  string(0) ""
+				  ["Diagnosis"]=>
+				  string(0) ""
+				  ["Diag"]=>
+				  string(0) ""
+				  ["Gene ID"]=>
+				  string(0) ""
+				  ["Gene symbol"]=>
+				  string(0) ""
+				  ["Buying price"]=>
+				  string(3) "486"
+				  ["Supplier Price list"]=>
+				  string(3) "648"
+				  ["Factor"]=>
+				  string(3) "1.0"
+				  ["Selling price in euros"]=>
+				  string(3) "661"
+				  ["Selling price in dollar"]=>
+				  string(0) ""
+				  ["Selling price in Swiss franc"]=>
+				  string(0) ""
+				  ["UK selling price"]=>
+				  string(0) ""
+				  ["Site"]=>
+				  int(1)
+				  ["Site id"]=>
+				  string(5) "1,2,9"
+				  ["Site Country"]=>
+				  string(26) "0,1,5,6,25,27,41,54,58,219"
+				  ["Additionnal informations"]=>
+				  string(0) ""
+				  ["Brand"]=>
+				  string(24) "Santa Cruz Biotechnology"
+				  ["Brand ID"]=>
+				  int(1)
+				  ["CAS Number"]=>
+				  string(0) ""
+				  ["Creation/Deletion date"]=>
+				  string(8) "20200307"
+				  ["Update date"]=>
+				  string(8) "20190214"
+				  ["Customer minimum order"]=>
+				  string(0) ""
+				  ["Description in English"]=>
+				  string(0) ""
+				  ["IATA"]=>
+				  string(0) ""
+				  ["Image"]=>
+				  string(0) ""
+				  ["Information"]=>
+				  string(11) "siRNA/dsRNA"
+				  ["Shipping"]=>
+				  string(6) "-20°C"
+				  ["Size"]=>
+				  string(6) "200µl"
+				  ["Storage"]=>
+				  string(6) "-80°C"
+				  ["Supplier"]=>
+				  string(24) "Santa Cruz Biotechnology"
+				  ["Supplier URL link"]=>
+				  string(101) "https://www.scbt.com/scbt/fr/product/11beta-hsd2-sirna-r-shrna-and-lentiviral-particle-gene-silencers"
+				  ["Supplier catalog number"]=>
+				  string(11) "sc-270598-V"
+				  ["UN"]=>
+				  string(0) ""
+				  ["UNSPSC"]=>
+				  string(8) "41106311"
+				  ["Low dilution"]=>
+				  string(0) ""
+				  ["High dilution"]=>
+				  string(0) ""
+				  ["Pretreatment"]=>
+				  string(0) ""
+				  ["e-class v1"]=>
+				  string(0) ""
+				  ["e-class v2"]=>
+				  string(0) ""
+				}
+			  }
+				}
+			*/
+			// A FAIRE : IN / NOT IN. LIKE / NOT LIKE
+			if(is_array($where)) {
+				foreach($where as $this_peel_field => $this_val) {
+					$this_field = str_replace('p.', '', trim($this_peel_field));
+						if (is_array($this_val)) {
+							$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = $this_val; 
+						} else {
+						$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = '^' . strval($this_val) . '$'; 
+						}
+					}
+			} elseif(is_numeric($where)) {
+					$request_data[$mapping_peel_to_ajax_product_fields['id']] = '^' . strval(intval($where)) . '$';
+				// Pour tests : $request_data = array("Catalog Number" => "SC-2120"); 
+			} else {
+				$temp = explode(' AND ', $where);
+				foreach($temp as $this_cond) {
+					// Analyse de SQL pour extraire des conditions à transmettre en AJAX.
+					// Attention à l'ordre. Bien mettre <= avant <, >= avant >, NOT LIKE avant LIKE, NOT IN avant IN
+					foreach(array('!=' => '$ne', '<>' => '$ne', '<=' => '$lte', '<' => '$lt', '>=' => '$gte', '>' => '$gt', '=' => '$eq', 'NOT LIKE' => '$ne', 'LIKE' => '$eq', 'NOT IN' => '$nin', 'IN' => '$in') as $this_sql_separator => $this_api_separator) {
+						if(strpos($this_cond, $this_sql_separator) !== false) {
+							$temp2 = explode($this_sql_separator, $this_cond);
+							$this_field = str_replace('p.', '', trim($temp2[0]));
+							if (in_array($this_field, $peel_not_in_ajax_product_fields)) {
+								// le champ demandé n'est pas présent dans le flux de l'API
+								continue;
+							}
+							$this_value = trim($temp2[1]);
+							if (StringMb::substr($this_value, 0, 1) == "'" || StringMb::substr($this_value, 0, 1) == '"') {
+								// On retire les guillemets simples ou doubles si présent
+								$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value) - 2);
+							}
+							if($this_sql_separator == 'LIKE' || $this_sql_separator == 'NOT LIKE') {
+								// On détermine si % présent
+								$joker_pre = StringMb::substr($this_value, 0, 1) == '%';
+								$joker_post = StringMb::substr($this_value, -1, 1) == '%';
+								
+								// on supprime les % au début et à la fin de la chaine si nécessaire pour rendre compatible la chaine avec la recherche mongoDB
+								if (!empty($joker_pre)) {
+									$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value));
+								}
+								if (!empty($joker_post)) {
+									$this_value = StringMb::substr($this_value, 0, StringMb::strlen($this_value) -1);
+								}
+								if (StringMb::strpos($this_value, '%') !== false) {
+									// il reste un caractère % dans le terme recherché, il faut le remplacer au format expression régulière
+									$this_value = str_replace('%', '(.*)', $this_value);
+								}
+								if (empty($joker_pre) && !empty($joker_post)) {
+									$forced_filter_value = '^' . $this_value . '';
+								} elseif (!empty($joker_pre) && empty($joker_post)) {
+									$forced_filter_value = '' . $this_value . '$';
+								} elseif (!empty($joker_pre) && !empty($joker_post)) {
+									$forced_filter_value = '' . $this_value . '';
+								} elseif (empty($joker_pre) && empty($joker_post)) {
+									$forced_filter_value = '^' . $this_value . '$';
+								}
+							}
+							if($this_api_separator == '$in' || $this_api_separator == '$nin') {
+								// suppression des parenthèses du IN présent dans la requête SQL
+								$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value) - 2);
+								// Ajout des crochets autour des valeurs à rechercher pour faire correspondre la chaine au format MongoDB { field: { $in: [<value1>, <value2>, ... <valueN> ] } } . A priori on peut laisser les guillemets qui entoure les valeurs à rechercher.
+								$this_value = '['.$this_value.']';
+								$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = array($this_api_separator => $this_value);
+							} elseif($this_api_separator == '$ne') {
+								// A TESTER => ne fonctionne pas.
+								$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = "-" . $this_value . "";
+								/*
+								// $forced_filter_value : transforme le caractère % en filtre pour l'expression régulière
+								if (!empty($forced_filter_value)) {
+									$this_value = $forced_filter_value;
+								} else {
+									$this_value = '^' . $this_value . '$';
+								}
+								$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = array($this_api_separator => $this_value);
+								// $request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = '^(?!' . $this_value . ')$';
+								*/
+							} elseif($this_api_separator == '$eq') {
+								// $forced_filter_value : transforme le caractère % en filtre pour l'expression régulière
+								if (!empty($forced_filter_value)) {
+									$this_value = $forced_filter_value;
+								} else {
+									$this_value = '^' . $this_value . '$';
+								}
+								$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = $this_value;
+							} else {
+								$request_data[$mapping_peel_to_ajax_product_fields[$this_field]] = array($this_api_separator => $this_value);
+							}
+							unset($this_cond);
+							break;
+						}
+					}
+					if(isset($this_cond)) {
+						// $this_cond était une valeur string sans autre information
+						$request_data[$mapping_peel_to_ajax_product_fields['technical_code']] = $this_cond;
 					}
 				}
 			}
-		} else {
-			// on traite champ par champ
-		foreach ($peel_not_in_ajax_product_fields as $this_field) {
-			// il faut savoir si on va chercher le contenu de ce champ ou pas. $$load_field_var est défini plus haut, lors du test si un champ inexistant dans le flux est demandé
-			$load_field_var = 'load_'.$this_field;
-			$peel_product_data = array();
-				if (in_array($this_field, $forced_load_field_array) || !empty($$load_field_var)) {
-				// on va chercher dans les tables PEEL les champs manquants dans le flux si :
-					// - on force le champ depuis les paramètres de la fonction
-					// - un des champs est présent dans les champs demandés en retour de la fonction
-					// - on a demandé * dans le champs
-					// - fields_list_or_array est vide, on demande tout
 
-				// ON COMPLETE LES DONNEES AJAX PAR LA BDD DE PEEL
-				// Chargement séparé des descriptions
-				if ($this_field == 'name') {
-						// peel_produits_descriptions est spécifique à certains sites PEEL
-					$sql = "SELECT id, p.".vb($GLOBALS['site_parameters']['field_product_name'], 'nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']))." AS name
+			// var_dump(json_encode($request_data));
+
+			$start_api_time = microtime_float();
+			$restHost = "https://cliniprod.ezydata.io";
+			$curl = curl_init();
+			curl_setopt($curl, CURLOPT_VERBOSE, true);
+			curl_setopt($curl, CURLOPT_STDERR, fopen(dirname(__FILE__).'/errorlog.txt', 'w'));
+			curl_setopt($curl, CURLOPT_POST, 1);
+			curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+			if (count($request_data)) {
+				curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($request_data));
+			}		
+			// Optional Authentication:
+			curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_setopt($curl, CURLOPT_USERPWD, $GLOBALS['site_parameters']['api_product_user'].":".$GLOBALS['site_parameters']['api_product_password']);
+			// + Le nombre de résultats retourné par l'API est défini en GET par pageSize. La valeur de pageSize est de 20 par défaut et ne peux pas dépasser 1000 je crois
+			curl_setopt($curl, CURLOPT_URL, $restHost . '/rest/products?page=1&pageSize=1000'); // Echoue avec ?noEngine=1 après timeout
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
+			curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+
+			$result_set = curl_exec($curl);
+			$error = curl_errno($curl); 
+			//var_dump(curl_getinfo($curl));
+			// https://www.php.net/manual/fr/function.curl-errno.php
+			// var_dump($error);
+			
+			// var_dump($GLOBALS['site_parameters']['api_product_user'], $GLOBALS['site_parameters']['api_product_password']);
+			// resty
+			// 6VtCU9FbbsVHUv2
+			curl_close($curl);
+			$end_api_time = microtime_float();
+
+			if(!empty($result_set)) {
+				$result_set = json_decode($result_set, true);
+				$results = $result_set['results'];
+				$totalCount = $result_set['totalCount'];
+			} else {
+				return null;
+			}
+			if (empty($totalCount)) {
+				// pas de resultat
+				return null;
+			}
+			// mapping_peel_to_ajax_product_fields : a pour index les champs PEEL, et pour valeur les champs du flux
+			// mapping_ajax_to_peel_product_fields : inversement à mapping_peel_to_ajax_product_fields, a pour index les champs du flux, et pour valeur les champs PEEL
+			$mapping_ajax_to_peel_product_fields = array_flip($mapping_peel_to_ajax_product_fields);
+			$mapping_ajax_to_peel_product_fields_without_alias = $mapping_ajax_to_peel_product_fields;
+			if(!empty($fields_list_or_array)) {
+				if (!in_array('id', $fields_list_or_array) && !in_array('p.id', $fields_list_or_array)) {
+					// il faut obligatoirement le champ 'id' dans les champs demandés
+					$fields_list_or_array[] = 'id';
+				}
+				// $fields_list_or_array contient le nom des champs souhaités en retour de la fonction. C'est soit une chaine de caractère au format SQL, donc séparé par des virgules ou un tableau.,Comme c'est fait pour être utilisé par une requête SQL, il est possible de trouver le mot clé 'AS' pour les alias de champ.
+				// $fields_list_or_array est forcement un tableau. Soit le tableau est directement passé en paramètre, soit le paramètre est une chaine de caractère converti en tableau au début de la fonction.
+				$add_totalCount_to_result = false;
+				foreach($fields_list_or_array as $this_key => $this_value) {
+					if($this_value == '*') {
+						$keep_all_fields = true;
+						unset($fields_list_or_array[$this_key]);
+						continue;
+					}
+					$temp = explode(' AS ', $this_value);
+
+					// $temp[0] contient le nom du champ en BDD de PEEL. $temp[1] contient le nom de l'alias du champ, tel qu'on le souhaite en sortie de fonction
+					$peel_fields_array[] = $temp[0];
+					if (StringMb::strtolower($temp[0]) == 'count(*)') {
+						// Dans les champ il y a un count(*), donc on stock la valeur du champ et de son alias ici pour pouvoir l'ajouter auc résultats en bas de la fonction
+						$add_totalCount_to_result = $temp;
+					}
+					foreach ($peel_not_in_ajax_product_fields as $this_peel_field) {
+						if(substr($temp[0], 0, strlen($this_peel_field)) == $this_peel_field) {
+							// on demande un champ qui n'est pas dans le flux, il faut aller chercher l'info en bdd. Donc on va définir des variables à true
+							$load_field_var = 'load_'.$this_peel_field;
+							$$load_field_var = true;
+						}
+					}
+					// $ajax_fields_array contient le nom du champ dans le flux AJAX si il existe, sinon le nom du champ tel que demandé en paramètre
+					$ajax_fields_array[] = vb($mapping_peel_to_ajax_product_fields[$temp[0]], $temp[0]);
+					if(!empty($temp[1])) {
+						// On stock l'alias
+						$peel_field_alias_array[$temp[0]] = $temp[1];
+					}
+				}
+				// ajax_fields_as_keys est un tableau listant les champs souhaités, au format du flux
+				$ajax_fields_as_keys = array_flip($ajax_fields_array);
+			}
+			if(empty($keep_all_fields)) {
+				foreach($forced_load_field_array as $this_key => $this_field) {
+					if(!empty($ajax_fields_as_keys) && !in_array($this_field, $ajax_fields_as_keys)) {
+						// Ne pas charger ce champ car pas demandé
+						unset($forced_load_field_array[$this_key]);
+					}
+				}
+			}
+
+			foreach(array_keys($results) as $this_line_key) {
+				// Liste des id de produits résultant de la requête curl
+				$product_ids[] = $results[$this_line_key]['Product ID'];
+			}
+
+			if (!empty($product_ids)) {
+				// recherche des catégories pour la liste de produits. On utilise le flux search pour récupérer les catégories parce que le flux search permet d'être paramétrer avec une liste d'ID de produit, et donc faire un seul appel à l'API pour une liste de produits, au lieu d'une requête par produit
+				$filters["Product ID"] = $product_ids;
+				$pows = array(
+					"Product ID" => 1
+				);
+				$options = array(
+					"category" => array("id", "name"),
+					"suppliersPerf" => true,
+					"productsPerf" => true,
+					"showScore" => true
+				);
+				$arrayData = array(
+					"query" => '*', 
+					"pows" => $pows,
+					"pageSize" => 1000,
+					"page" => 1,
+					"filters" => $filters,
+					"options" => $options,
+				);
+				$postUrl = $restHost . "/rest/search";
+				$apiPost = CallAPI("POST", $postUrl, $arrayData);
+				$product_list = json_decode($apiPost, true);
+				$cat_array = array();
+				foreach($product_list['rows'] as $this_line_key => $this_row) {
+					// Création d'un tableau cat_array qui liste les catégories pour chaque produit retourné par le flux Produit
+					if (!empty($this_row['category'])) {
+						$cat_array[$this_row['data']['Product ID']]['categorie_id'] = vn($this_row['category']['id']);
+						$sql = "SELECT c.nom_" .  $_SESSION['session_langue'] . " AS categorie_name
+							FROM peel_categories c
+							WHERE c.id = '" .  intval($this_row['category']['id']) ."'  AND " . get_filter_site_cond('categories', 'c') . '
+							LIMIT 1';
+						$query = query($sql);
+						if ($result = fetch_assoc($query)) {
+							if (!empty($result['categorie_name'])) {
+								// on prend le nom de la catégorie dans la langue de l'interface.
+								$cat_array[$this_row['data']['Product ID']]['categorie'] = $result['categorie_name'];
+							} else {
+								// on prend le nom venant du flux, en anglais
+								$cat_array[$this_row['data']['Product ID']]['categorie'] = vb($this_row['category']['name']);
+							}
+						} else {
+							// on prend le nom venant du flux, en anglais
+							$cat_array[$this_row['data']['Product ID']]['categorie'] = vb($this_row['category']['name']);
+						}
+					} elseif (!empty($GLOBALS['site_parameters']['id_categorie_defaut'])) {
+						$sql = "SELECT id, nom_" . $_SESSION['session_langue'] . " as cat_name
+							FROM peel_categories
+							WHERE id = '" . intval($GLOBALS['site_parameters']['id_categorie_defaut']) . "'";
+						$query = query($sql);
+						if ($result = fetch_assoc($query)) {
+							$cat_array[$this_row['data']['Product ID']]['categorie_id'] = $result['id'];
+							$cat_array[$this_row['data']['Product ID']]['categorie'] = $result['cat_name'];
+						}
+					}
+				}
+			}
+
+			foreach(array_keys($results) as $this_line_key) {
+				if (!empty($cat_array)) {
+					// Remplissage des catégories dans le tableau de résulat
+					if (!empty($cat_array[$results[$this_line_key]['Product ID']])) {
+						$results[$this_line_key]['categorie'] = $cat_array[$results[$this_line_key]['Product ID']]['categorie'];
+						$results[$this_line_key]['categorie_id'] = $cat_array[$results[$this_line_key]['Product ID']]['categorie_id'];
+					} else {
+						// Normalement on ne passe pas par là, puisque l'absence de catégorie pour un produit est déjà géré plus haut
+						$results[$this_line_key]['categorie'] = '';
+						$results[$this_line_key]['categorie_id'] = 0;
+					}
+				}
+				// on utilise cette boucle également pour remplir la TVA, qui est la même pour tous les produits
+				$results[$this_line_key]['tva'] = vn($GLOBALS['site_parameters']['product_default_tva'], 20);
+			}
+
+			if (!empty($peel_not_in_ajax_product_fields)) {
+				// On complète les informations venant de l'API par des données venant de BDD
+				if (!empty($keep_all_fields) || empty($fields_list_or_array)) {
+					// Si on charge tous les champs, il faut faire un requête unique dans peel_produits et pas une requête à chaque champ
+					$select_sql = array();
+					$peel_product_data = array();
+					foreach($peel_not_in_ajax_product_fields as $this_field) {
+						if ($this_field == 'description_en') {
+							$select_sql[] = "pd.description_en";
+						} elseif ($this_field == 'position') {
+							$select_sql[] = "p.position";
+						} elseif ($this_field == 'etat') {
+							$select_sql[] = "p.etat";
+						} elseif ($this_field == 'categorie') {
+							$select_sql[] = "r.nom_" .  $_SESSION['session_langue'] . " AS categorie";
+						} elseif($this_field == 'name') {
+							$select_sql[] = "p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name";
+						} else {
+							$select_sql[] = $this_field;
+						}
+					}
+					$sql = "SELECT p.id, " . implode(",", real_escape_string($select_sql)) . "
 						FROM peel_produits p
-						WHERE p.id IN ('" . implode("','", real_escape_string($product_ids)) . "')";
-				} elseif ($this_field == 'description_en') {
-					// peel_produits_descriptions est spécifique à certains sites PEEL
-					$sql = "SELECT id, description_en
-							FROM peel_produits_descriptions p
-							WHERE id IN ('" . implode("','", real_escape_string($product_ids)) . "')";
-				} elseif ($this_field == 'categorie' || $this_field == 'categorie_id') {
-					$sql = "SELECT p.id, pc.categorie_id, r.nom_" .  $_SESSION['session_langue'] . " AS categorie
-						FROM peel_produits p
+						LEFT JOIN peel_produits_descriptions pd ON p.id = pd.id
 						INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
 						INNER JOIN peel_categories r ON r.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'r') . "
 						WHERE p.id IN ('" . implode("','", real_escape_string($product_ids)) . "') AND " . get_filter_site_cond('produits', 'p');
-				} elseif (in_array($this_field, array('tva', 'position', 'promo', 'importance', 'url_part', 'etat'))) {
-					// données à chercher dans peel_produits
-					$sql = "SELECT id, ".word_real_escape_string($this_field)."
-						FROM peel_produits p
-						WHERE id IN ('" . implode("','", real_escape_string($product_ids)) . "')";
-				}
-
 					$query = query($sql);
 					while($result = fetch_assoc($query)) {
-					$peel_product_data[$result['id']] = $result[$this_field];
+						$peel_product_data[$result['id']] = $result;
 					}
-
 					foreach(array_keys($results) as $this_line_key) {
 						// Pour chaque ligne, on ne garde que ce qui est souhaité
-					if(!empty($peel_product_data[$results[$this_line_key]['Product ID']])) {
-							// Ajout du nouveau champ dans result 
-						$results[$this_line_key][$this_field] = $peel_product_data[$results[$this_line_key]['Product ID']];
+						if(!empty($peel_product_data[$results[$this_line_key]['Product ID']])) {
+							foreach($peel_product_data[$results[$this_line_key]['Product ID']] as $this_field=>$this_value) {
+								// Ajout du nouveau champ dans result 
+								$results[$this_line_key][$this_field] = $this_value;
+							}
+						}
+					}
+				} else {
+					// on traite champ par champ
+					foreach ($peel_not_in_ajax_product_fields as $this_field) {
+						// il faut savoir si on va chercher le contenu de ce champ ou pas. $$load_field_var est défini plus haut, lors du test si un champ inexistant dans le flux est demandé
+						$load_field_var = 'load_'.$this_field;
+						$peel_product_data = array();
+						if (in_array($this_field, $forced_load_field_array) || !empty($$load_field_var)) {
+									// on va chercher dans les tables PEEL les champs manquants dans le flux si :
+										// - on force le champ depuis les paramètres de la fonction
+										// - un des champs est présent dans les champs demandés en retour de la fonction
+										// - on a demandé * dans le champs
+										// - fields_list_or_array est vide, on demande tout
+
+									// ON COMPLETE LES DONNEES AJAX PAR LA BDD DE PEEL
+									// Chargement séparé des descriptions
+									if ($this_field == 'name') {
+								// peel_produits_descriptions est spécifique à certains sites PEEL
+										$sql = "SELECT id, p.".vb($GLOBALS['site_parameters']['field_product_name'], 'nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']))." AS name
+											FROM peel_produits p
+											WHERE p.id IN ('" . implode("','", real_escape_string($product_ids)) . "')";
+									} elseif ($this_field == 'description_en') {
+										// peel_produits_descriptions est spécifique à certains sites PEEL
+										$sql = "SELECT id, description_en
+									FROM peel_produits_descriptions p
+									WHERE id IN ('" . implode("','", real_escape_string($product_ids)) . "')";
+									} elseif ($this_field == 'categorie' || $this_field == 'categorie_id') {
+										$sql = "SELECT p.id, pc.categorie_id, r.nom_" .  $_SESSION['session_langue'] . " AS categorie
+											FROM peel_produits p
+											INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
+											INNER JOIN peel_categories r ON r.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'r') . "
+											WHERE p.id IN ('" . implode("','", real_escape_string($product_ids)) . "') AND " . get_filter_site_cond('produits', 'p');
+									} elseif (in_array($this_field, array('tva', 'position', 'promo', 'importance', 'url_part', 'etat'))) {
+										// données à chercher dans peel_produits
+										$sql = "SELECT id, ".word_real_escape_string($this_field)."
+											FROM peel_produits p
+											WHERE id IN ('" . implode("','", real_escape_string($product_ids)) . "')";
+									}
+
+							$query = query($sql);
+							while($result = fetch_assoc($query)) {
+										$peel_product_data[$result['id']] = $result[$this_field];
+							}
+
+							foreach(array_keys($results) as $this_line_key) {
+								// Pour chaque ligne, on ne garde que ce qui est souhaité
+								if(!empty($peel_product_data[$results[$this_line_key]['Product ID']])) {
+									// Ajout du nouveau champ dans result 
+									$results[$this_line_key][$this_field] = $peel_product_data[$results[$this_line_key]['Product ID']];
+								}
+							}
 						}
 					}
 				}
-		}
-		}
-		// On ne garde que certaines colonnes
-		if(!empty($fields_list_or_array)) {
-			foreach(array_keys($results) as $this_line_key) {
-				// Pour chaque ligne $results[$this_line_key], on ne garde que ce qui est souhaité
-				$results[$this_line_key] = array_intersect_key($results[$this_line_key], $ajax_fields_as_keys);
 			}
-			// maintenant $results ne contient que les champs demandés si présent dans le flux, pas plus.
+				// On ne garde que les colonnes demandées
+			if(!empty($fields_list_or_array)) {
+				foreach(array_keys($results) as $this_line_key) {
+					// Pour chaque ligne $results[$this_line_key], on ne garde que ce qui est souhaité
+					$results[$this_line_key] = array_intersect_key($results[$this_line_key], $ajax_fields_as_keys);
+				}
+				// maintenant $results ne contient que les champs demandés si présent dans le flux, pas plus.
 
-			// Quand $fields_list_or_array est défini, il y a potentiellement dans ce tableau des AS qui ont permi ci-dessus de définir $peel_field_alias_array
-			foreach($mapping_ajax_to_peel_product_fields as $this_ajax_field => $this_peel_field) {
-				// On change les correspondances AJAX => PEEL pour tenir compte des AS dans le SELECT
-				if(!empty($peel_field_alias_array[$this_peel_field])) {
-					$mapping_ajax_to_peel_product_fields[$this_ajax_field] = $peel_field_alias_array[$this_peel_field];
-				}
-			}
-			// A ce stade, $mapping_ajax_to_peel_product_fields contient à la fois le mapping ajax > PEEL, et aussi PEEL > alias définis avec AS dans $fields_list_or_array
-		}
-		foreach(array_keys($results) as $this_line_key) {
-			// On renomme les champs si nécessaire, pour avoir le champ PEEL en index de $result, en remplacement du champ du flux
-			foreach($results[$this_line_key] as $this_ajax_field => $this_val) {
-				if(!empty($mapping_ajax_to_peel_product_fields[$this_ajax_field])) {
-					unset($results[$this_line_key][$this_ajax_field]);
-					if(substr($mapping_ajax_to_peel_product_fields_without_alias[$this_ajax_field], 0, 4) == 'prix') {
-						// le prix ici est HT
-						// $this_val = $this_val * 1.20; // On rajoute la TVA
+				// Quand $fields_list_or_array est défini, il y a potentiellement dans ce tableau des AS qui ont permi ci-dessus de définir $peel_field_alias_array
+				foreach($mapping_ajax_to_peel_product_fields as $this_ajax_field => $this_peel_field) {
+					// On change les correspondances AJAX => PEEL pour tenir compte des AS dans le SELECT
+					if(!empty($peel_field_alias_array[$this_peel_field])) {
+						$mapping_ajax_to_peel_product_fields[$this_ajax_field] = $peel_field_alias_array[$this_peel_field];
 					}
-					$results[$this_line_key][$mapping_ajax_to_peel_product_fields[$this_ajax_field]] = $this_val;
+				}
+				// A ce stade, $mapping_ajax_to_peel_product_fields contient à la fois le mapping ajax > PEEL, et aussi PEEL > alias définis avec AS dans $fields_list_or_array
+			}
+			foreach(array_keys($results) as $this_line_key) {
+				// On renomme les champs si nécessaire, pour avoir le champ PEEL en index de $result, en remplacement du champ du flux
+				foreach($results[$this_line_key] as $this_ajax_field => $this_val) {
+					if(!empty($mapping_ajax_to_peel_product_fields[$this_ajax_field])) {
+						unset($results[$this_line_key][$this_ajax_field]);
+						if(substr($mapping_ajax_to_peel_product_fields_without_alias[$this_ajax_field], 0, 4) == 'prix') {
+								// inutile d'ajouter la TVA à cet endroit puisque ce sera gérer par la Class Product
+							// le prix ici est HT
+							// $this_val = $this_val * 1.20; // On rajoute la TVA
+						}
+						if($this_ajax_field == 'Description') {
+							// spécifiquement pour le champ Description, correspond à deux champs coté PEEL. Donc on doit gérer spécifiquement
+							$results[$this_line_key]['name'] = $this_val;
+							$results[$this_line_key]['nom_en'] = $this_val;
+						} else {
+							$results[$this_line_key][$mapping_ajax_to_peel_product_fields[$this_ajax_field]] = $this_val;
+						}
+					}
+				}
+				// var_dump($results);
+				if (!empty($add_totalCount_to_result)) {
+					// il y a un count(*) dans la requête, il faut l'ajouter à la ligne en cours. En effet on peut demander un count(*) et un autre champ de la table.
+					// on a stocké l'alias de ce count dans une add_totalCount_to_result. Si pas d'alias on retourne directement count(*). La valeur à 
+					$results[$this_line_key][vb($add_totalCount_to_result[1], $add_totalCount_to_result[0])] = $totalCount;
 				}
 			}
-			if (!empty($add_totalCount_to_result)) {
-				// il y a un count(*) dans la requête, il faut l'ajouter à la ligne en cours. En effet on peut demander un count(*) et un autre champ de la table.
-				// on a stocké l'alias de ce count dans une add_totalCount_to_result. Si pas d'alias on retourne directement count(*). La valeur à 
-				$results[$this_line_key][vb($add_totalCount_to_result[1], $add_totalCount_to_result[0])] = $totalCount;
+			if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
+				$end_time = microtime_float();
+				$GLOBALS['peel_debug'][] = array('text' => 'get_product_infos : (durée API PRODUCT: ' . sprintf("%04d", ($end_api_time - $start_api_time) * 1000) . ' ms) : request ' . json_encode($request_data) .' - '. json_encode($fields_list_or_array), 'duration' => $end_time - $start_time, 'start' => $start_time - $GLOBALS['script_start_time']);
+			}
 		}
-		}
-		if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
-			$end_time = microtime_float();
-			$GLOBALS['peel_debug'][] = array('text' => 'API : request ' . json_encode($request_data), 'duration' => $end_time - $start_time, 'start' => $start_time - $GLOBALS['script_start_time']);
-		}
-		if($one_row_mode) {
-			return current($results);
+		$output_array[$hash] = $results;
+		// Pour pouvoir faire un prefetch en appelant d'abord les informations pour N produits d'un coup :
+		// Si appel de N ids en même temps, on va stocker dans la variable static les informations séparément aussi pour chaque id
+		foreach(array_keys($results) as $this_line_key) {
+			$hash_id = serialize(intval($results[$this_line_key]['id'])).$hash_id_base;
+			$output_array[md5($hash_id)] = array($results[$this_line_key]);
 		}
 	}
-	return $results;
+	if($one_row_mode) {
+		return current($output_array[$hash]);
+	} else {
+		return $output_array[$hash];
+	}
 }
 
 

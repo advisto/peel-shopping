@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_haut.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -51,6 +51,9 @@ $tpl->assign('STR_ADMINISTRATION', $GLOBALS['STR_ADMINISTRATION']);
 if (!empty($GLOBALS['site_parameters']['favicon'])) {
 	$tpl->assign('favicon_href', get_url_from_uploaded_filename($GLOBALS['site_parameters']['favicon']));
 }
+// Bootstrap obligatoire dans l'administration
+$GLOBALS['css_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/css/bootstrap.css';
+$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/bootstrap.js';
 $GLOBALS['js_files'][-10] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery.js';
 $GLOBALS['js_files'][-5] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery-ui.js';
 $GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/advisto.js';
@@ -75,9 +78,6 @@ if (vb($GLOBALS['site_parameters']['used_uploader']) == 'fineuploader') {
 	// Par défaut on peut utiliser fineuploader sur toutes les pages de l'administration
 	init_fineuploader_interface();
 }
-// Bootstrap obligatoire dans l'administration
-$GLOBALS['css_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/css/bootstrap.css';
-$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/bootstrap.js';
 // On met en dernier fichiers CSS du site pour qu'ils aient priorité
 $GLOBALS['css_files'][] = $GLOBALS['repertoire_css'] . '/admin.css';
 // Pour PHP 32 bits, les dates ne doivent pas aller avant 1902 et après 2038, car l'intervalle de validité d'un timestamp va du Vendredi 13 Décembre 1901 20:45:54 UTC au Mardi 19 Janvier 2038 03:14:07 UTC.

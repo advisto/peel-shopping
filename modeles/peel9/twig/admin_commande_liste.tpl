@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -71,7 +71,7 @@
 			{% for res in results %}
 			{{ res.tr_rollover }}
 			{% if return == 'full_html' %}
-				<td class="center">
+				<td class="center"><input type="checkbox" name="change_statut{{ res.order_id }}" id="checkbox_tbl_{{ res.order_id }}" value="1" />
 					<a href="commander.php?mode=modif&amp;commandeid={{ res.order_id }}">{{ STR_MODIFY }}</a><br />
 				{% if is_duplicate_module_active %}
 					<a href="{{ res.dup_href|escape('html') }}" data-confirm="{{ STR_ADMIN_ORDER_DUPLICATE_WARNING|str_form_value }}" title="{{ STR_ADMIN_ORDER_DUPLICATE|str_form_value }}"><img src="{{ res.dup_src|escape('html') }}" alt="" /></a>
@@ -81,12 +81,10 @@
 				<td class="center">{{ res.order_id }}</td>
 				<td class="center"><a href="commander.php?mode=modif&amp;commandeid={{ res.order_id }}">{{ res.numero|default('&nbsp;') }}</a></td>
 				<td class="center">{{ res.date }}</td>
-				<td class="center" style="{% if res.suspect %}background-color:green;{% else %}background-color:red;{% endif %}"></td>
 				<td class="center">{{ res.montant_prix }}</td>
 				<td class="center">{{ res.avoir_prix }}</td>
 				<td class="center">{{ res.modifUser }}</td>
 			{% if return == 'full_html' %}
-				<td class="center"><input type="checkbox" name="change_statut{{ res.order_id }}" id="checkbox_tbl_{{ res.order_id }}" value="1" /></td>
 				<td class="center">{{ res.payment_name }}</td>
 			{% endif %}
 				<td class="center"><input type="hidden" name="id[]" value="{{ res.order_id|str_form_value }}" />
@@ -101,18 +99,24 @@
 				{% else %}
 					<td class="center">{{ res.delivery_status_name }}</td>
 				{% endif %}
-				{% if (res.type) %}
-					<td class="center"><center><table><tr><td>{{ res.type }}</td></tr></table></center></td>
-				{% endif %}
 			{% if is_fianet_sac_module_active %}
 				<td class="center"><center><table><tr><td>{{ this_sac_status }}</td></tr></table></center></td>
 			{% endif %}
 				<td class="center">{{ res.site_name }}</td>
+				{% if (res.type) %}
+					<td class="center"><center><table><tr><td>{{ res.type }}</td></tr></table></center></td>
+				{% endif %}
+				<td class="center">{% if res.suspect %}<span class="fa fa-exclamation-circle fa-3x" style="color:red;"></span>{% endif %}</td>
 			</tr>
 			{% endfor %}
 		</table>
 	{% if return == 'full_html' %}
 	</div>
+	<div class="center">{{ links_multipage }}</div>
+	
+	<div class="entete">{{ STR_ADMIN_MODIFICATION_MULTIPLE }}</div>
+	<div class="well">
+	
 	<div style="margin-bottom: 10px; margin-top: 10px;">
 		<div class="row center">
 			<input type="button" value="{{ STR_ADMIN_CHECK_ALL|str_form_value }}" onclick="if (markAllRows('tablesForm')) return false;" class="btn btn-info" />&nbsp;&nbsp;&nbsp;
@@ -131,14 +135,17 @@
 		</div>
 	</div>
 	
-		{% if is_module_genere_pdf_active %}
-	<div style="margin-bottom: 10px; margin-top: 10px;">
-		<div class="row center">
-			<input type="submit" name="export_pdf" value="{{ STR_MODULE_FACTURES_ADMIN_TITLE|str_form_value }}" class="btn btn-primary" />
-		</div>
+	{% if is_module_genere_pdf_active %}
+	<div class="row center" style="margin-top: 15px">
+		<input type="submit" name="export_pdf" value="{{ STR_MODULE_FACTURES_ADMIN_TITLE|str_form_value }}" class="btn btn-primary" />
 	</div>
-		{% endif %}	
-	<div class="center">{{ links_multipage }}</div>
+	{% endif %}
+	</div>
+		<div style="margin-bottom: 10px; margin-top: 10px;">
+		{% if get_csv_export_from_html_table %}
+			<a href="{{ get_current_url }}?mode=export" class="btn btn-primary">{{ STR_ADMIN_LIVRAISONS_EXCEL_EXPORT }}</a>
+		{% endif %}
+	</div>
 	{% endif %}
 {% else %}
 	<p>{{ STR_ADMIN_COMMANDER_NO_ORDER_FOUND }}</p>

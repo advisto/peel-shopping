@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 67535 2021-07-07 13:05:57Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -100,13 +100,23 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	// Si $id_account existe, alors on envoie un email à un utilisateur connu.
 	if (!empty($frm['id_utilisateur'])) {
 		$row_account =  get_user_information(vn($frm['id_utilisateur']));
-		$user_id = $row_account['id_utilisateur'];
-		$user_email = $row_account['email'];
-		$user_gender = $row_account['civilite'];
-		$user_name = $row_account['nom_famille'];
-		$user_first_name = $row_account['prenom'];
-		$user_login = $row_account['pseudo'];
-		$user_password = $row_account['mot_passe'];
+		if (!empty($row_account)) {
+			$user_id = $row_account['id_utilisateur'];
+			$user_email = $row_account['email'];
+			$user_gender = $row_account['civilite'];
+			$user_name = $row_account['nom_famille'];
+			$user_first_name = $row_account['prenom'];
+			$user_login = $row_account['pseudo'];
+			$user_password = $row_account['mot_passe'];
+		} else {
+			$user_id = 0;
+			$user_email = "";
+			$user_gender = "";
+			$user_name = "";
+			$user_first_name = "";
+			$user_login = "";
+			$user_password = "";
+		}
 	} elseif (!empty($frm['id_webmail'])) {
 		// On répond à un email envoyé par un utilisateur
 		$q = query("SELECT *
@@ -128,9 +138,15 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 		if (!empty($user_id)) {
 			// on récupère les infos persos dans la BDD si l'utilisateur était loggué
 			$row_account = get_user_information($user_id);
-			$user_gender = $row_account['civilite'];
-			$user_login = $row_account['pseudo'];
-			$user_password = $row_account['mot_passe'];
+			if (!empty($row_account)) {
+				$user_gender = $row_account['civilite'];
+				$user_login = $row_account['pseudo'];
+				$user_password = $row_account['mot_passe'];
+			} else {
+				$user_gender = "";
+				$user_login = "";
+				$user_password = "";
+			}
 		}
 	} elseif (!empty($frm['user_ids'])) {
 		$q = 'SELECT email
@@ -361,7 +377,7 @@ function send_mail_admin($frm)
 			unset($_SESSION['request_from_send_email_all'][$_GET['email_all_hash']]);
 			// on va envoyer plus tard par cron
 			$send_now = false;
-			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, '', $_SESSION['count_from_send_email_all'][$_GET['email_all_hash']] . ' destinataires');
+			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, $_SESSION['count_from_send_email_all'][$_GET['email_all_hash']] . ' destinataires');
 		} else {
 			$destination_mail_array = explode(';', $frm['destination_mail']);
 			foreach($destination_mail_array as $this_destination_mail) {
@@ -392,7 +408,7 @@ function send_mail_admin($frm)
 					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_WEBMAIL_ADMIN_ERR_SENT'], $this_destination_mail)))->fetch();
 				}
 			}
-			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, $frm['destination_mail'], $frm['destination_mail']);
+			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, $frm['destination_mail']);
 		}
 	}
 	return $output;
@@ -737,7 +753,7 @@ $output_array = '
 					<input name="form_delete[]" type="checkbox" value="' . intval(vn($message['id'])) . '" id="cbx_' . intval(vn($message['id'])) . '" />
 				</td>
 				<td class="center" style="width:15%">
-					<b>' . StringMb::strtoupper(vb($message['titre'])) . '</b><br /><span style="color:' . ($message['read'] == 'NO'?'Red':($message['read'] == 'SEND'?'Green':'Black')) . '">[' . $read_title_array[$message['read']] . ']</span><br /><br /><a style="' . ($message['read'] == 'NO'?'font-size:13px; color:Red':($message['read'] == 'SEND'?'color:Green':'color:Black')) . '" href="' . $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_webmail=' . intval(vn($message['id'])) . '">' . sprintf(($message['read'] == 'SEND'?$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_AGAIN"]:$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_TO"]), $message['email']) . '</a>
+					<b>' . StringMb::strtoupper(vb($message['titre'])) . '</b><br />' . (!empty($message['commande_id'])?$GLOBALS["STR_ORDER_NAME"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $message['commande_id'] . '<br />':'') . '<span style="color:' . ($message['read'] == 'NO'?'Red':($message['read'] == 'SEND'?'Green':'Black')) . '">[' . $read_title_array[$message['read']] . ']</span><br /><br /><a style="' . ($message['read'] == 'NO'?'font-size:13px; color:Red':($message['read'] == 'SEND'?'color:Green':'color:Black')) . '" href="' . $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_webmail=' . intval(vn($message['id'])) . '">' . sprintf(($message['read'] == 'SEND'?$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_AGAIN"]:$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_TO"]), $message['email']) . '</a>
 				</td>
 				<td class="center" style="width:15%">
 					'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_TELEPHONE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['telephone']) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_ADMIN_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '

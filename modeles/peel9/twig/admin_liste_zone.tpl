@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,7 +12,9 @@
 // +----------------------------------------------------------------------+
 // $Id: admin_liste_zone.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_ZONES_TITLE }}</div>
-<div><p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_ZONES_CREATE }}</a></p></div>
+<div style="margin-top:5px;">
+	<p><a href="{{ add_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_ADMIN_ZONES_CREATE }}</a></p>
+</div>
 {% if (results) %}
 <div class="table-responsive">
 	<table class="table">

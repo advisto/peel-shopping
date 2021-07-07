@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 64863 2020-10-30 11:05:39Z sdelaporte $
+// $Id: admin_fr.php 67425 2021-06-28 12:27:13Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -362,6 +362,7 @@ $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "Ajouter ou modifier une écotaxe";
 $GLOBALS["STR_ADMIN_EXPORT_CSV"] = "Export CSV";
 $GLOBALS["STR_ADMIN_EXPORT_PDF"] = "Export PDF";
 $GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "Ne pas exporter les tarifs (pour l'export CSV)";
+$GLOBALS["STR_ADMIN_EXPORT_PAGE_BREAK_EACH_GROUP"] = "Saut de page à chaque groupe pour l'impression";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Choisissez vos critères d'export";
 $GLOBALS["STR_ADMIN_EXPORT_SHOW_DETAILS"] = "Afficher les lignes de détails";
 $GLOBALS["STR_ADMIN_EXPORT_SKIP_EMPTY_TOTALS"] = "Retirer les lignes au total nul";
@@ -458,6 +459,7 @@ $GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE_EXPLANATION"] = "Une fois le type de d
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_FOUND"] = "Colonne choisie non trouvée dans le fichier : %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "Colonne n°%s non gérée à l'import (purement descriptive lors de l'export) : %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "Colonne n°%s non reconnue et donc non importée : %s";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_FILE_STRUCTURE"] = "La structure du fichier CSV semble poser problème au niveau du nombre de colonne ligne %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "Vous devez faire au moins une correspondance de champs.<br />Importation stoppée.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND"] = "Fichier introuvable !<br />Importation stoppée.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS"] = "Problème lors de l'importation : il existe plusieurs colonnes \"%s\" dans le fichier source - pas d'importation effectuée.";
@@ -901,6 +903,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_BRAND"] = "CHOISIR LA MARQUE ASSOCIÉE";
 $GLOBALS["STR_ADMIN_DISTRIBUTOR_PRODUITS_CHOOSE_BRAND"] = "Choisir la marque associée au distributeur";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_EXPLAIN"] = "Si vous sélectionnez l'option de calcul automatique, les produits associés affichés sur la fiche produit seront les produits commandés par des utilisateurs en même temps que celui-ci. Dans ce cas, la liste de produits ci-dessus ne sera pas prise en compte.";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE"] = "CHOISIR LES RÉFÉRENCES PRODUITS ASSOCIÉES (ventes croisées)";
+$GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_PACKS"] = "CHOISIR LES RÉFÉRENCES PRODUITS PACKS";
 $GLOBALS["STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST"] = "Vous devez d'abord créer une catégorie de produits";
 $GLOBALS["STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT"] = "afficher cette couleur par défaut en front-office";
 $GLOBALS["STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER_CONSTRAINT"] = "Nombre entre 1 et 10";
@@ -1549,6 +1552,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_NO_ACCOUNT_MANAGER"] = "Client non géré";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_ADMIN_RIGHT_TO_LIST"] = "Vous n'avez pas les droits pour voir les administrateurs ni la liste des emails des utilisateurs";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED"] = "Aucun groupe défini";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND"] = "Aucune commande enregistrée pour ce client.";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NO_FACT_FOUND"] = "Aucune facture enregistrée pour ce client.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_SUPPLIER_FOUND"] = "Aucun fournisseur enregistré dans la base.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NOT_FOUND"] = "L'utilisateur n'a pas été trouvé.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ON_HOLIDAY_SUPPLIER"] = "Fournisseur en vacances";
@@ -1775,6 +1779,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_VIEWED"] = "Vue";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_WIDTH"] = "Largeur (dimension en px)";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"] = "La bannière publicitaire <b>%s</b> a été créée.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ON_BACKGROUND_SITE"] = "En fond de site.";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_ON_PRODUCT_DETAILS"] = "Détails produit";
 $GLOBALS["STR_MODULE_BOUNCES_BAD_EMAILS_TITLE"] = "Liste des emails à problèmes";
 $GLOBALS["STR_MODULE_BOUNCES_ACTIONS_SELECTION"] = "Sélection des actions";
 $GLOBALS["STR_MODULE_BOUNCES_SEARCH_EMAIL_PROBLEM"] = "Rechercher un problème d'email";
@@ -2141,6 +2146,7 @@ $GLOBALS["STR_ADMIN_COLUMN_CONTAINS_CHOICE"] = "La colonne \"%s\" doit contenir 
 $GLOBALS["STR_ADMIN_FIELD_UNIQUE"] = "La valeur du champ \"%s\" doit être unique.";
 $GLOBALS["STR_ADMIN_IMPORT_USER_END"] = "Fin de l'import des utilisateurs : %s insérés, %s MAJ<br />E-mails avec mot de passe générés envoyés.";
 $GLOBALS["STR_ADMIN_IMPORT_FILE_END"] = "Fin de l'import du fichier : %s lignes insérées, %s MAJ";
+$GLOBALS["STR_ADMIN_INSERT_VALUE_FORBIDDEN"] = "Insertion dans la table %s interdite.";
 $GLOBALS["STR_ADMIN_NO_PROBLEM_OCCURED"] = "Pas d'anomalie trouvée, vous pouvez valider ci-dessous pour réaliser l'import";
 $GLOBALS["STR_ADMIN_LINE"] = "Ligne";
 $GLOBALS["STR_ADMIN_SIMULATION"] = "Simulation";
@@ -2156,7 +2162,7 @@ $GLOBALS["STR_ADMIN_COLUMN_TTTLE_FIRST_LINE"] = "Mettre les titres de colonnes e
 $GLOBALS["STR_ADMIN_ADD_FOOTER_FILE_EXPORT"] = "Mettre un footer contenant les totaux à la fin du fichier d'export (la colonne montant_ht doit être présente dans le fichier)";
 $GLOBALS["STR_ADMIN_COLUMN_AVAILABLE"] = "Colonnes disponibles";
 $GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE"] = "Glissez / déposez ci-dessous les noms de colonnes EXCLUES";
-$GLOBALS["STR_ADMIN_GENERATE_FILE"] = "Colonnes inclues";
+$GLOBALS["STR_ADMIN_GENERATE_FILE"] = "Colonnes incluses";
 $GLOBALS["STR_ADMIN_FILE_COLUMN_EXPORTED"] = "Glissez / déposez ci-dessous les noms de colonnes souhaitées";
 $GLOBALS["STR_ADMIN_SELECTED_COLUMN_FOR_EXPORT"] = "Après le choix du type de données ci-dessus, dans cette section vous pourrez sélectionner et ordonner les colonnes que vous souhaitez exporter.";
 $GLOBALS["STR_ADMIN_SOURCE_FILE"] = "Fichier Source";
@@ -2171,6 +2177,7 @@ $GLOBALS["STR_ADMIN_SEND_EMAIL_TO_USERS"] = "Envoyer des emails aux utilisateurs
 $GLOBALS["STR_ADMIN_HTML_PRODUCT_PAGE_FOOTER"] = "Bas de page produit";
 $GLOBALS["STR_ADMIN_HTML_HOME_HEADER"] = "Sous le menu de la page d'accueil";
 $GLOBALS["STR_ADMIN_SHOW_TAG_LIST_EXPLANATION"] = "Un tag est un élément qui sera remplacé automatiquement par la bonne valeur (associée au destinataire) lors de l'envoi de l'email. Pour ajouter un tag au texte de l'email vous pouvez cliquer desssus.";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE'] = "Action groupée sur la sélection";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION'] = "Afficher en page d'accueil et dans la rubrique Notre sélection";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION'] = "Ne pas Afficher en page d'accueil et dans la rubrique Notre sélection";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW'] = "Afficher dans la rubrique Nouveautés";
@@ -2185,3 +2192,17 @@ $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_ETAT'] = "Mettre en ligne";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_ETAT'] = "Mettre hors ligne";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_SUPPR_PRODUCT'] = "Supprimer les produits sélectionnés";
 $GLOBALS['STR_ADMIN_NO_UPDATE_VERSION'] = "On n'utilise pas cette page pour mettre à jour la base de données pour ce site. Veuillez contacter le support";
+$GLOBALS['STR_CONTINUE_WITH_ERROR'] = "Forcer l'import des lignes valides uniquement";
+$GLOBALS['STR_CONTINUE_WITH_ERROR_CONFIRM'] = "Le fichier que vous souhaitez importer a des anomalies sur certaines lignes. Souhaitez-vous vraiment ignorer ces lignes et importer les autres lignes qui sont valides ?";
+$GLOBALS['STR_ADMIN_LINE_WITH_ERROR_NOT_IMPORT'] = "Ligne(s) avec anomalie et donc non importée(s)";
+$GLOBALS["STR_ADMIN_MORE_INFOS"] = "Afficher plus d'informations";
+$GLOBALS["STR_ADMIN_LESS_INFOS"] = "Afficher moins d'informations";
+$GLOBALS["STR_ADMIN_GENERAL"] = "Général";
+$GLOBALS["STR_ADMIN_CONTACT_DATE"] = "Date de contact";
+$GLOBALS["STR_ADMIN_CALL_AND_EVENT"] = "Appel / Évènement";
+$GLOBALS["STR_ADDRESSES"] = "Adresses";
+$GLOBALS["STR_ADMIN_CLIENT_HISTORY"] = "Historique client";
+$GLOBALS["STR_ADMIN_CONTACT_PLANIFICATION"] = "Plannification des contacts";
+$GLOBALS["STR_ADMIN_CLIENT_PAGE"] = "Fiche client";
+$GLOBALS["STR_ADMIN_CONTACT_AND_ACTION"] = "Contacts et actions";
+$GLOBALS["STR_ADMIN_CONNECTION_HISTORY"] = "Historique de connexion";

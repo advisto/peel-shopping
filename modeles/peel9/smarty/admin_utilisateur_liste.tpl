@@ -1,39 +1,18 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}
-{if isset($groupes_options_utilisateurs)}
-<div class="entete">{$STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP}</div>
-	<form method="post" action="{$action|escape:'html'}">
-		<input type="hidden" name="mode" value="groupe_utilisateurs" />
-		<span class="normal">
-			<input type="radio" value="1" name="affected" checked="checked">{$STR_ADMIN_ASSIGN}
-			<input type="radio" value="0" name="affected">{$STR_ADMIN_UNASSIGN}
-		</span>
-	{if isset($groupes_options_utilisateurs)}
-		<select class="form-control" name="id_groupe">
-			<option value="">-------------------------------------------</option>
-			{foreach $groupes_options_utilisateurs as $o}
-			<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed} / - {$o.remise} %</option>
-			{/foreach}
-		</select>
-	{else}
-		{$STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED}
-	{/if}
-	<br />
-	<input type="submit" value="Valider" class="btn btn-success" />
-	</form>
-{/if}
+
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<div class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</div>
 	<div class="row">
@@ -386,9 +365,10 @@
 <div class="clearfix"></div>
 <form class="entryform form-inline" role="form" action="{$action|escape:'html'}" method="post" style="margin-top:10px">
 	<div class="entete">{$STR_ADMIN_UTILISATEURS_USERS_COUNT}{$STR_BEFORE_TWO_POINTS}: {$nbRecord}</div>
-	<div><span class="glyphicon glyphicon-plus"></span> <a href="{$administrer_url}/utilisateurs.php?mode=ajout">{$STR_ADMIN_UTILISATEURS_CREATE}</a></div>
+	<div style="margin-top:5px;margin-bottom:5px;"><a href="{$administrer_url}/utilisateurs.php?mode=ajout" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {$STR_ADMIN_UTILISATEURS_CREATE}</a></div>
+
+	<div class="alert alert-info">{$STR_ADMIN_UTILISATEURS_LIST_EXPLAIN}<br />{$STR_ADMIN_UTILISATEURS_FILER_EXPLAIN}</div>
 {if isset($results)}
-	<div><a href="{$wwwroot_in_admin}/modules/export/administrer/export_clients.php?priv={$priv}&amp;cle={$cle}">{$STR_ADMIN_UTILISATEURS_EXCEL_EXPORT}</a></div>
 	<div class="center">{$link_multipage}</div>
 	<div class="table-responsive">
 	<table id="tablesForm" class="table">
@@ -456,21 +436,56 @@
 		</tr>
 	{/foreach}
 	</table>
+	<div class="center">{$link_multipage}</div>
 	</div>
-	<div class="center">
+	
+	<div class="entete">{$STR_ADMIN_MODIFICATION_MULTIPLE}</div>
+	<div class="well center">
 		<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="{$STR_ADMIN_CHECK_ALL|str_form_value}" />
 		<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="{$STR_ADMIN_UNCHECK_ALL|str_form_value}" />
-			&nbsp; &nbsp; &nbsp; &nbsp; <input class="btn btn-primary" name="send_email_to_selected" type="submit" value="{$STR_ADMIN_UTILISATEURS_SEND_EMAIL_TO_SELECTED_USERS|str_form_value}" />
-		<a class="btn btn-primary" href="{$export_client_href}">{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a>
+		<br />
+		<br />
+		<input class="btn btn-primary" name="send_email_to_selected" type="submit" value="{$STR_ADMIN_UTILISATEURS_SEND_EMAIL_TO_SELECTED_USERS|str_form_value}" />
 		<input class="btn alert-danger" type="submit" name="mode" value="{$STR_DELETE_SELECTION}">
 	</div>
-	<div class="center">{$link_multipage}</div>
-	<div class="alert alert-info">{$STR_ADMIN_UTILISATEURS_LIST_EXPLAIN}</div>
+	
+	
+	{if isset($groupes_options_utilisateurs)}
+	<div class="entete">{$STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP}</div>
+	<div class="well">
+			<form method="post" action="{$action|escape:'html'}">
+				<input type="hidden" name="mode" value="groupe_utilisateurs" />
+				<span class="normal">
+					<input type="radio" value="1" name="affected" checked="checked">{$STR_ADMIN_ASSIGN}
+					<input type="radio" value="0" name="affected">{$STR_ADMIN_UNASSIGN}
+				</span>
+			{if isset($groupes_options_utilisateurs)}
+				<select class="form-control" name="id_groupe">
+					<option value="">-------------------------------------------</option>
+					{foreach $groupes_options_utilisateurs as $o}
+					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed} / - {$o.remise} %</option>
+					{/foreach}
+				</select>
+			{else}
+				{$STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED}
+			{/if}
+			<br />
+			<input type="submit" value="Valider" class="btn btn-primary" />
+			</form>
+	</div>
+	{/if}
+	
+	<div class="center">
+		<div style="margin-top:5px;">
+			<a class="btn btn-primary" href="{$export_client_href}">{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a>
+			<a href="{$wwwroot_in_admin}/modules/export/administrer/export_clients.php?priv={$priv}&amp;cle={$cle}" class="btn btn-primary">{$STR_ADMIN_UTILISATEURS_EXCEL_EXPORT}</a>
+		</div>
+	</div>
 {else}
 	<div><br /><b>{$STR_ADMIN_UTILISATEURS_NO_SUPPLIER_FOUND}</b></div>
 {/if}
 </form>
+
 {if isset($send_email_all_form)}
 <center>{$send_email_all_form}</center>
-<div class="alert alert-info">{$STR_ADMIN_UTILISATEURS_FILER_EXPLAIN}</div>
 {/if}

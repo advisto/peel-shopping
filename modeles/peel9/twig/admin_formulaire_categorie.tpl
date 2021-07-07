@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -104,6 +104,12 @@
 		</tr>
 		<tr>
 			<td colspan="2"><input style="width:100%" type="text" class="form-control" name="nom_{{ l.lng }}" value="{{ l.nom|str_form_value }}" /></td>
+		</tr>
+		<tr>
+			<td class="title_label" colspan="2">{{ STR_ADMIN_NAME_SHORT }} {{ l.lng|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+		</tr>
+		<tr>
+			<td colspan="2"><input style="width:100%" type="text" class="form-control" name="nom_court_{{ l.lng }}" value="{{ l.nom_court|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_ADMIN_DESCRIPTION }} {{ l.lng|upper }}:</td>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 64757 2020-10-22 09:00:10Z sdelaporte $
+// $Id: produits.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -25,7 +25,7 @@ $form_error_object = new FormError();
 $frm = $_POST;
 $output = '';
 
-if (!empty(vb($_REQUEST['modification_multiple'])) && !empty($frm['product_ids'])) {
+if (!empty($_REQUEST['modification_multiple']) && !empty($frm['product_ids'])) {
 	$modification_multiple = $_REQUEST['modification_multiple'];
 	if($modification_multiple == 'on_our_selection'){
 		query("UPDATE peel_produits SET on_special=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
@@ -456,6 +456,18 @@ function affiche_formulaire_modif_produit($id, &$frm)
 		$frm['nb_produits']++;
 		$frm['references'][] = $ref['reference_id'];
 	}
+	if(check_if_module_active('product_pack')){
+		/* Charge les packs du produit */
+		$references_packs = query("SELECT reference_id
+			FROM peel_produits_packs
+			WHERE produit_id = '" . intval($id) . "'");
+		$frm['references_packs'] = array();
+		$frm['nb_produits_packs'] = 0;
+		while ($ref_pack = fetch_assoc($references_packs)) {
+			$frm['nb_produits_packs']++;
+			$frm['references_packs'][] = $ref_pack['reference_id'];
+		}
+	}
 	/* Charge les couleurs du produit */
 	$couleurs = query("SELECT couleur_id
 		FROM peel_produits_couleurs
@@ -878,10 +890,29 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				);
 				$i++;
 			}
-			unset($product_object);
+		}
+		unset($product_object);
+		$tpl_produits_options_packs = array();
+		if(check_if_module_active('product_pack')) {
+			$select = query("SELECT pp.reference_id, p.reference, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name, pp.quantity
+				FROM peel_produits p
+				LEFT JOIN peel_produits_packs pp ON pp.reference_id = p.id
+				WHERE produit_id = ".intval($frm['id'])." AND " . get_filter_site_cond('produits', 'p', true) . "
+				ORDER BY reference ASC");
+			$i=1;
+			while ($nom = fetch_assoc($select)) {
+				$tpl_produits_options_packs[] = array('value' => intval($nom['reference_id']),
+					'reference_pack' => $nom['reference'],
+					'name' => $nom['name'],
+					'i' => $i,
+					'qt' => intval($nom['quantity']),
+				);
+				$i++;
+			}
 		}
 		$tpl->assign('nb_produits', $frm['nb_produits']);
 		$tpl->assign('produits_options', $tpl_produits_options);
+		$tpl->assign('produits_options_packs', $tpl_produits_options_packs);
 		$tpl->assign('is_on_ref_produit', vn($frm['on_ref_produit']) == 1);
 		$tpl->assign('nb_ref_produits', intval(vn($frm['nb_ref_produits'])));
 		$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
@@ -1058,6 +1089,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_LINK_PRODUCT_TO_SUPPLIER', $GLOBALS['STR_ADMIN_PRODUITS_LINK_PRODUCT_TO_SUPPLIER']);
 		$tpl->assign('STR_ADMIN_PRODUITS_CHOOSE_BRAND', $GLOBALS['STR_ADMIN_PRODUITS_CHOOSE_BRAND']);
 		$tpl->assign('STR_ADMIN_PRODUITS_CHOOSE_REFERENCE', $GLOBALS['STR_ADMIN_PRODUITS_CHOOSE_REFERENCE']);
+		$tpl->assign('STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_PACKS', $GLOBALS['STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_PACKS']);
 		$tpl->assign('STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_PRODUITS_AUTO_REF_PRODUCT', $GLOBALS['STR_ADMIN_PRODUITS_AUTO_REF_PRODUCT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_AUTO_REF_NUMBER_PRODUCTS', $GLOBALS['STR_ADMIN_PRODUITS_AUTO_REF_NUMBER_PRODUCTS']);
@@ -1134,6 +1166,9 @@ function supprime_produit($id)
 	/* Efface ce produit dans les tables de jointure telles que la table peel_produits_categories */
 	query("DELETE FROM peel_produits_categories WHERE produit_id = '" . intval($id) . "'");
 	query("DELETE FROM peel_produits_references WHERE produit_id = '" . intval($id) . "'");
+	if(check_if_module_active('product_pack')){
+		query("DELETE FROM peel_produits_packs WHERE produit_id = '" . intval($id) . "'");
+	}
 	query("DELETE FROM peel_produits_couleurs WHERE produit_id = '" . intval($id) . "'");
 	query("DELETE FROM peel_produits_tailles WHERE produit_id = '" . intval($id) . "'");
 	if (check_if_module_active('stock_advanced') && $product_infos['on_stock'] == 1) {
@@ -1380,7 +1415,21 @@ function insere_produit($frm)
 			}
 		}
 	}
-
+	if(check_if_module_active('product_pack')){
+		/* ajoute les packs associées */
+		for ($i = 0; $i < count(vn($frm['references_packs'])); $i++) {
+			if (!empty($frm['references_packs'][$i])) {
+				$query = query("SELECT reference_id
+					FROM peel_produits_packs 
+					WHERE produit_id = " . intval($product_id) ." AND " . nohtml_real_escape_string($frm['references_packs'][$i]));
+				if (!$result = fetch_assoc($query)) {
+					// Association de produit non présente.
+					$qid = query("INSERT INTO peel_produits_packs (reference_id, produit_id)
+						VALUES ('" . nohtml_real_escape_string($frm['references_packs'][$i]) . "', '" . intval($product_id) . "')");
+				}
+			}
+		}
+	}
 	/* ajoute les couleurs associées */
 	for ($i = 0; $i < count(vn($frm['couleurs'], array())); $i++) {
 		if (!empty($frm['couleurs'][$i])) {
@@ -1575,6 +1624,9 @@ function maj_produit($id, $frm)
 	/* Efface toutes les catégories auxquelles le produit est associé */
 	query("DELETE FROM peel_produits_categories WHERE produit_id = '" . intval($id) . "'");
 	query("DELETE FROM peel_produits_references WHERE produit_id = '" . intval($id) . "'");
+	if(check_if_module_active('product_pack')){
+		query("DELETE FROM peel_produits_packs WHERE produit_id = '" . intval($id) . "'");
+	}
 	query("DELETE FROM peel_produits_couleurs WHERE produit_id = '" . intval($id) . "'");
 	query("DELETE FROM peel_produits_tailles WHERE produit_id = '" . intval($id) . "'");
 
@@ -1583,6 +1635,9 @@ function maj_produit($id, $frm)
 	}
 	if (empty($frm['references'])) {
 		$frm['references'][] = 0;
+	}
+	if (empty($frm['references_packs'])) {
+		$frm['references_packs'][] = 0;
 	}
 	if (empty($frm['couleurs'])) {
 		$frm['couleurs'][] = 0;
@@ -1609,11 +1664,25 @@ function maj_produit($id, $frm)
 				} else {
 					query("INSERT INTO peel_produits_references (reference_id, produit_id)
 						VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "')");
+				}
 			}
 		}
 	}
+	if(check_if_module_active('product_pack')){
+		for ($i = 0; $i < count(vn($frm['references_packs'])); $i++) {
+			if (!empty($frm['references_packs'][$i])) {
+				$query = query("SELECT reference_id
+					FROM peel_produits_packs
+					WHERE produit_id = " . intval($id) ." AND reference_id = " . nohtml_real_escape_string($frm['references_packs'][$i]));
+				$result = fetch_assoc($query);
+				if (empty($result)) {
+					// Association de produit non présente.
+					query("INSERT INTO peel_produits_packs (reference_id, produit_id)
+						VALUES ('" . nohtml_real_escape_string($frm['references_packs'][$i]) . "', '" . intval($id) . "')");
+				}
+			}
+		}
 	}
-	
 	foreach($frm['couleurs'] as $this_color_id) {
 		// On recupere chaque champ default_image par couleur
 		query("INSERT INTO peel_produits_couleurs (couleur_id, produit_id, default_image)

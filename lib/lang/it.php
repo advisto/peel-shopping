@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: it.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: it.php 67177 2021-06-09 13:38:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -824,7 +824,7 @@ $GLOBALS["STR_SUBMIT"] = "Convalidare";
 $GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "";
 $GLOBALS["STR_SUGGEST"] = "Il tuo credito ti consente di ottenere prodotti complementari. <a href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\"> Ti invitiamo a consultare il nostro elenco di suggerimenti per completare l'acquisto </a>.";
 $GLOBALS["STR_SUPPORT"] = "Per tutte le domande, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\"> è possibile contattarci tramite questo modulo </a>.";
-$GLOBALS["STR_SWIFT"] = "SWIFT/BIC";
+$GLOBALS["STR_SWIFT"] = "BIC";
 $GLOBALS["STR_SYNC_OK"] = "Sincronizzazione dei file è stata completata con successo";
 $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "In questa tabella sono elencati i prodotti del carrello";
 $GLOBALS["STR_TABLE_SUMMARY_ORDERS"] = "Questa tabella mostra lo storico degli ordini";
@@ -961,6 +961,16 @@ $GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "Tempo di disponibilità (montagg
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "giorni";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "settimana";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "mese";
+$GLOBALS["STR_ORDER_SUSPECT"] = "Ordine sospetto";
 $GLOBALS["STR_CODE_CHORUS"] = "";
 $GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "";
 $GLOBALS["STR_NAME_ADDRESS"] = "Nome INDIRIZZO";
+
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_1'] = "Pagamento in un'unica";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_2'] = "Pagamento in 2 rate";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_3'] = "Pagamento in 3 rate";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_FREE_OF_CHARGE'] = "gratuito";
+$GLOBALS["STR_EMAIL_INCORRECT"] = "";
+$GLOBALS["STR_AMOUNT_TVA"] = "";
+$GLOBALS["STR_VAT_PERCENTAGE"] = "";
+$GLOBALS["STR_VAT_DETAIL"] = "";

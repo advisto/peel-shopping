@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: produit_details_html.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}
 <div typeof="Product">
 	{if isset($global_error)}
@@ -38,10 +38,21 @@
 		<div class="fp_image_grande">
 			<div class="image_grande" id="slidingProduct{$product_id}">
 				{if isset($main_image)}
+						{if !empty($thumbnail_promotion)}
+						<div class="produit_thumbnail_promotion"><span>-{$promotion}</span></div>
+						{/if}
+						{if !empty($img_promotion)}<div style="position:absolute;z-index:1;right:-17px;top:-10px;"><img style="border:none;" src="{$img_promotion}" alt="promotion"></div>{/if}
+						{if !empty($img_new)}<div style="position:absolute;z-index:1;left:-17px;top:-10px;"><img style="border:none;" src="{$img_new}" alt="new"></div>{/if}
+						{if !empty($exclusif_web)}<div style="position:absolute;z-index:1;left:-17px;top:-10px;"><img style="border:none;" src="{$exclusif_web}" alt="exclusif_web"></div>{/if}
+						{if !empty($img_promo_specific_image9)}<div style="position:absolute;z-index:1;left:-17px;top:-10px;"><img style="border:none;" src="{$img_promo_specific_image9}" alt="img_promo_specific_image9"></div>{/if}
+						{if !empty($img_promo_specific_image10)}<div style="position:absolute;z-index:1;left:-17px;top:-10px;"><img style="border:none;" src="{$img_promo_specific_image10}" alt="img_promo_specific_image10"></div>{/if}
 					{if $main_image.file_type != 'image'}
 						<a href="{$main_image.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$main_image.src}" alt="{$product_name|str_form_value}" width="{$medium_width}" height="{$medium_height}" /></a>
 					{else}
-						<a id="zoom1" typeof="ImageObject" {$a_zoom_attributes} href="{$main_image.href|escape:'html'}" title="{$product_name}" onclick="return false;"><img property="image" id="mainProductImage" class="zoom" src="{$main_image.src|escape:'html'}" alt="{$product_name|str_form_value}" /></a>
+						<div rel="schema:image" resource="{$main_image.src|escape:'html'}"></div>
+						<a id="zoom1" typeof="ImageObject" {$a_zoom_attributes} href="{$main_image.href|escape:'html'}" title="{$product_name}" onclick="return false;">
+							<img property="image" id="mainProductImage" class="zoom" src="{$main_image.src|escape:'html'}" alt="{$product_name|str_form_value}" />
+						</a>
 					{/if}
 				{elseif !empty($no_photo_src)}
 					<a href="{$product_href|escape:'html'}"><img src="{$no_photo_src}" alt="{$photo_not_available_alt}" /></a>

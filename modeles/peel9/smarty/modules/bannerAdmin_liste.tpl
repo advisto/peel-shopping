@@ -1,9 +1,9 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -13,7 +13,9 @@
 // $Id: bannerAdmin_liste.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
 *}
 <div class="entete">{$STR_MODULE_BANNER_ADMIN_LIST_TITLE}</div>
-<div><img src="{$add_src|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_href|escape:'html'}">{$STR_MODULE_BANNER_ADMIN_CREATE}</a></div>
+<div style="margin-top:5px;">
+	<p><a href="{$add_href|escape:'html'}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {$STR_MODULE_BANNER_ADMIN_CREATE}</a></p>
+</div>
 {if isset($results)}
 <div class="table-responsive">
 	<table class="table">

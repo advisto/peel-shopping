@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fine_uploader.php 66961 2021-05-24 13:26:45Z sdelaporte $
 
 define('IN_FINE_UPLOADER', true);
 include("configuration.inc.php");
@@ -27,6 +27,7 @@ $uploader = new FineUploader();
 $file_kind = 'any';
 $input_name = array_keys($_FILES);
 if (!empty($GLOBALS['site_parameters']['extensions_valides_'.vb($input_name[0])])) {
+	// Dans le cas où l'on veut définir des restrictions différentes de la configuration générale pour un champ donné, on peut créer une configuration spéciale pour ce champ spécifiquement
 	$uploader->allowedExtensions = $GLOBALS['site_parameters']['extensions_valides_'.$input_name[0]];
 } elseif (!empty($GLOBALS['site_parameters']['extensions_valides_'.$file_kind])) {
 	// Specify the list of valid extensions, ex. array("jpeg", "xml", "bmp")

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 64947 2020-11-06 09:06:49Z sdelaporte $
+// $Id: display_product.php 67436 2021-06-28 16:21:18Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -61,6 +61,11 @@ if (!function_exists('get_produit_details_html')) {
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('produit_details_html.tpl');
 			$tpl->assign('product_detail_html_zone', affiche_contenu_html('product_detail_html_zone', true));
+			if (check_if_module_active('product_pack')) {
+				$tpl->assign('add_pack_to_cart_button', get_add_pack_to_cart_form($product_object->id));
+			} else {
+				$tpl->assign('add_pack_to_cart_button', '');
+			}
 			$tpl->assign('product_disable_ad_cart_if_user_not_logged', !est_identifie() && !empty($GLOBALS['site_parameters']['product_disable_ad_cart_if_user_not_logged']));
 			$tpl->assign('medium_width', $GLOBALS['site_parameters']['medium_width']);
 			$tpl->assign('medium_height', $GLOBALS['site_parameters']['medium_height']);
@@ -68,6 +73,7 @@ if (!function_exists('get_produit_details_html')) {
 			$tpl->assign('STR_CONDITIONING', $GLOBALS['STR_CONDITIONING']);
 			$tpl->assign('STR_MSG_NEW_CUSTOMER', $GLOBALS['STR_MSG_NEW_CUSTOMER']);
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$tpl->assign('MODULES_TOP_PRODUCT_DETAIL', get_modules('top_product_detail', true));
 			$tpl->assign('module_avis_verifie', vn($GLOBALS['site_parameters']['module_avis_verifie']));
 			if(!empty($GLOBALS['site_parameters']['default_picture'])) {
 				$tpl->assign('no_photo_src', get_url_from_uploaded_filename($GLOBALS['site_parameters']['default_picture']));
@@ -147,9 +153,26 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 						'file_type' => get_file_type($product_images[0])
 					));
 			}
+			if ($product_object->get_all_promotions_percentage(false, get_current_user_promotion_percentage(), true) > 0 && !empty($GLOBALS['site_parameters']['thumbnail_promotion_in_products_columns'])) {
+				$tpl->assign('thumbnail_promotion', true);
+				$tpl->assign('promotion', $product_object->get_all_promotions_percentage(false, get_current_user_promotion_percentage(), true));
+			}
+			if (!empty($GLOBALS['site_parameters']['img_promotion_in_products_columns']) && ($product_object->get_all_promotions_percentage(false, get_current_user_promotion_percentage(), true) > 0 || !empty($product_object->on_promo))) {
+				$tpl->assign('img_promotion', $GLOBALS['repertoire_images'].'/'.vb($GLOBALS['site_parameters']['img_promotion_in_products_columns']));
+			}
+			if (!empty($GLOBALS['site_parameters']['img_new_in_products_columns']) && !empty($product_object->on_new)) {
+				$tpl->assign('img_new', $GLOBALS['repertoire_images'].'/'.vb($GLOBALS['site_parameters']['img_new_in_products_columns']));
+			}
+			if (!empty($GLOBALS['site_parameters']['img_exclusif_web_in_products_columns']) && !empty($product_object->exclusif_web)) {
+				$tpl->assign('exclusif_web', $GLOBALS['repertoire_images'].'/'.vb($GLOBALS['site_parameters']['img_exclusif_web_in_products_columns']));
+			}
+			if(!empty($product_object->image9)){
+				$image_9_url = $GLOBALS['repertoire_upload'] . '/' . $product_object->image9;
+			}
 			if(!empty($product_object->image10)){
 				$image_10_url = $GLOBALS['repertoire_upload'] . '/' . $product_object->image10;
 			}
+			$tpl->assign('image_9_url', vb($image_9_url));
 			$tpl->assign('image_10_url', vb($image_10_url));
 			$tpl->assign('a_zoom_attributes', vb($a_zoom_attributes));
 			$tpl->assign('a_other_pictures_attributes', vb($a_other_pictures_attributes));
@@ -419,7 +442,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 			if (!empty($product_object->display_tab)) {
 				// Onglets
 				$tabs = array();
-				// pour connaitre le nombre total d'onglets, on initialise un compteur
+				// pour connaître le nombre total d'onglets, on initialise un compteur
 				$j = 0;
 				if (!empty($GLOBALS['site_parameters']['display_opinion_on_product_tab']) && check_if_module_active('avis')) {
 					$render_avis_public_list = render_avis_public_list($product_object->id, 'produit', null, true);
@@ -447,6 +470,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					tab5_title_' . $_SESSION['session_langue'] . ' AS tab5_title,
 					tab6_title_' . $_SESSION['session_langue'] . ' AS tab6_title';
 				if ($tab = get_product_infos($product_object->id, true, $sql_fields)) {
+					// var_dump($tab);
 					for ($i = 1; $i <= 6; $i++) {
 						$title = trim($tab['tab' . $i . '_title']);
 						if (!empty($title)) {
@@ -481,7 +505,17 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 			}
 			$tpl->assign('display_share_tools_on_product_pages', !empty($GLOBALS['site_parameters']['display_share_tools_on_product_pages']));
 			// Charge les produits associés
-			$tpl->assign('associated_products', affiche_produits(null, 3, 'associated_product', $GLOBALS['site_parameters']['nb_produit_page'], (!empty($product_object->technical_code) && $product_object->technical_code== 'tuto'?'line':vb($GLOBALS['site_parameters']['associated_products_display_mode'])), true, $product_object->id, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), false));
+			
+			if (empty($GLOBALS['site_parameters']['ajax_products'])) {
+				$tpl->assign('associated_products', affiche_produits(null, 3, 'associated_product', $GLOBALS['site_parameters']['nb_produit_page'], (!empty($product_object->technical_code) && $product_object->technical_code== 'tuto'?'line':vb($GLOBALS['site_parameters']['associated_products_display_mode'])), true, $product_object->id, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), false));
+			} else {
+				$tpl->assign('associated_products', get_api_ref_product($product_object->id));
+			}
+			if(check_if_module_active('product_pack')){
+				$tpl->assign('associated_product_pack', get_product_pack_html($product_object->id, true));
+			} else {
+				$tpl->assign('associated_product_pack', '');
+			}
 			$tpl->assign('javascript', null); // Pour compatibilité anciens templates avant restructuration javascript v7.1
 			$hook_result = call_module_hook('product_details_additional_infos', array('id' => $product_object->id, 'id_utilisateur' => $product_object->id_utilisateur, 'categorie_id' => $product_object->categorie_id, 'current_catid' => $current_catid, 'position' => $product_object->position), 'array');
 			foreach($hook_result as $this_key => $this_value) {
@@ -499,8 +533,8 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
             /**
              Afficher les details de commentaire interne
             */
-			$tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details(0, $product_object->id_marque, $_SESSION['session_utilisateur']);
-			$tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details(0, $product_object->id_marque, $_SESSION['session_utilisateur'], 'waiting');
+			$tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details(0, $product_object->id_marque, vb($_SESSION['session_utilisateur']));
+			$tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details(0, $product_object->id_marque, vb($_SESSION['session_utilisateur']), 'waiting');
 
 			$tpl->assign('data', $tmpData);
             /**fin*/
@@ -520,7 +554,7 @@ if (!function_exists('get_products_list_brief_html')) {
 	 * @param string $type
 	 * @return
 	 */
-	function get_products_list_brief_html($catid, $display_subcategories = true, $type = 'category', $id_marque = null)
+	function get_products_list_brief_html($catid, $display_subcategories = true, $type = 'category', $id_marque = null, $product_display_disable = null)
 	{
 		// Si c'est une marque, on vérifie s'il ne faut pas se baser sur une catégorie de plus bas niveau
 		if($id_marque)
@@ -604,8 +638,8 @@ if (!function_exists('get_products_list_brief_html')) {
 					}
 				}
 			}
-			$suggestion_description_details = get_suggestion_description_details($catid, $id_marque, $_SESSION['session_utilisateur']);
-			$suggestion_description_details_waiting = get_suggestion_description_details($catid, $id_marque, $_SESSION['session_utilisateur'], 'waiting');
+			$suggestion_description_details = get_suggestion_description_details($catid, $id_marque, vb($_SESSION['session_utilisateur']));
+			$suggestion_description_details_waiting = get_suggestion_description_details($catid, $id_marque, vb($_SESSION['session_utilisateur']), 'waiting');
 			if(isset($suggestion_description_details_waiting['description'])){
 				$suggest_description_details = $suggestion_description_details_waiting['description'];
 			} elseif (!empty($GLOBALS['site_parameters']['cat_description_details'])) {
@@ -614,21 +648,24 @@ if (!function_exists('get_products_list_brief_html')) {
             /**
              Afficher les details de commentaire interne
             */
-			$tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details($catid, 0, $_SESSION['session_utilisateur']);
-			$tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details($catid, 0, $_SESSION['session_utilisateur'], 'waiting');
+			$tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details($catid, 0, vb($_SESSION['session_utilisateur']));
+			$tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details($catid, 0, vb($_SESSION['session_utilisateur']), 'waiting');
 			$tpl->assign('data', $tmpData);
-           /**fin*/
-			$cat = array(
+           /**fin*/			
+		   $cat = array(
 				'name' => $page_h1,
 				'id_categorie' => intval($catid),
-				'id_marque' => intval($id_marque),
-				'description_details' => vb($cat_infos['description_details']),
-				'description_details_html' => getTextEditor('textarea_suggest_description_details', 1170, 100, StringMb::html_entity_decode_if_needed(vb($suggest_description_details))),
-				'suggestion_description_details' => $suggestion_description_details,
-				'suggestion_description_details_waiting' => $suggestion_description_details_waiting
+				'id_marque' => intval($id_marque)
 			);
-
-			$tpl->assign('display_description_details', a_priv('admin*') || a_priv('util_sale'));
+		   if (a_priv('admin*') || a_priv('util_sale')) {
+				$cat['description_details'] = vb($cat_infos['description_details']);
+				$cat['description_details_html'] = getTextEditor('textarea_suggest_description_details', 1170, 100, StringMb::html_entity_decode_if_needed(vb($suggest_description_details)));
+				$cat['suggestion_description_details'] = $suggestion_description_details;
+				$cat['suggestion_description_details_waiting'] = $suggestion_description_details_waiting;
+				$tpl->assign('display_description_details', true);
+		   } else {	
+				$tpl->assign('display_description_details', false);
+			}
 			// Pour enregistrer la suggestion de description en base de données
 			if(isset($_POST['suggest_description_details'])){
 				$set_suggestion_description_details = set_suggestion_description_details($_POST['suggest_description_details'], $catid, $id_marque, $_SESSION['session_utilisateur']);
@@ -720,16 +757,18 @@ if (!function_exists('get_products_list_brief_html')) {
 
 		$additional_sql_cond = '';
 		//On vérifie si on est dans l'affichage par défaut de la marque avec les catégories mère définis dans le tableau $GLOBALS['site_parameters']['index_id_category_brand']
-		if(!is_array($catid)){
-			$tpl->assign('associated_products', affiche_produits($catid, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond, null, null, null, null, false, null, 'full', $id_marque));
-		} else {
-			//
-			$associated_products = '';
-			foreach($catid as $id){
-				 $associated_products .= affiche_produits($id, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond, null, null, null, null, false, null, 'full', $id_marque);
+		if (empty($product_display_disable)) {
+			if(!is_array($catid)){
+				$tpl->assign('associated_products', affiche_produits($catid, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond, null, null, null, null, false, null, 'full', $id_marque));
+			} else {
+				//
+				$associated_products = '';
+				foreach($catid as $id){
+					 $associated_products .= affiche_produits($id, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond, null, null, null, null, false, null, 'full', $id_marque);
+				}
+				$tpl->assign('on_brand_homepage', true);
+				$tpl->assign('associated_products', $associated_products);
 			}
-			$tpl->assign('on_brand_homepage', true);
-			$tpl->assign('associated_products', $associated_products);
 		}
 		
 		$module_ariane_active = get_modules_array(true,null,'ariane');
@@ -1416,6 +1455,10 @@ if (!function_exists('affiche_critere_stock')) {
 			// cette valeur save_cart_id sera envoyée en POST à caddie_ajout, qui supprimera le produit du panier sauvegardé.
 			$tpl->assign('save_cart_id', $save_cart_id);
 		}
+		$tpl->assign('get_possible_sizes_array', $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true));
+		$tpl->assign('STR_PRICE', $GLOBALS['STR_PRICE']);
+		$tpl->assign('product_technical_code', $product_object->technical_code);
+		$tpl->assign('is_sizes_select', empty($GLOBALS['site_parameters']['is_sizes_array']));
 		$tpl->assign('save_suffix_id', $save_suffix_id);
 		$tpl->assign('is_in_catalog', $is_in_catalog);
 		$tpl->assign('urlprod_with_cid', $urlprod_with_cid);
@@ -1716,7 +1759,7 @@ if (!function_exists('affiche_critere_stock')) {
 				$tpl->assign('affiche_etat_stock', '<p style="color: red;">'.$GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"]. $product_object->delai_stock . '&nbsp;'. $scale_stock .'</p>');
 			}
 		}
-		$tpl->assign('display_javascript_for_price_update', display_javascript_for_price_update($product_object, $save_suffix_id, $form_id, 0, !empty($update_product_price_needed), null, $sizes_id_out_stock));
+		$tpl->assign('display_javascript_for_price_update', display_javascript_for_price_update($product_object, $save_suffix_id, $form_id, vn($GLOBALS['site_parameters']['taille_display_mode'],0), !empty($update_product_price_needed), null, $sizes_id_out_stock));
 		// Si vous ne voulez pas gérer la notion de disponibilité en stock pour les produits à télécharger,
 		// alors activez la ligne suivante et l'accolade fermante ensuite
 		// if (empty($product_object->on_download)) {
@@ -2285,9 +2328,10 @@ if (!function_exists('affiche_arbre_categorie')) {
 			if(empty($id_marque)){
 			// On évite les cas de boucles entre catégories qui ont pour Nème parent une catégorie dont elles sont elles-même parents => sinon boucle sans fin
 			// Fonction utilisée également en back office pour le module comparateur => utilisation de use_admin_right inutile, on veut pouvoir récupérer les catégories ste_id = 0 dans l'export pour les comparateurs également.
-			$qid = query('SELECT parent_id, nom_' . $_SESSION['session_langue'] . ' AS nom, nom_court_' . $_SESSION['session_langue'] . ' AS nom_court
-				FROM peel_categories
-				WHERE id = "' . intval($catid) . '"' . (empty($GLOBALS['site_parameters']['categories_disabled_show_to_admin_in_front']) || !a_priv("admin_products", false)?' AND etat = "1"':'') . ' AND ' . get_filter_site_cond('categories') . '');
+				$sql = 'SELECT parent_id, nom_' . $_SESSION['session_langue'] . ' AS nom, nom_court_' . $_SESSION['session_langue'] . ' AS nom_court
+					FROM peel_categories
+					WHERE id = "' . intval($catid) . '"' . (empty($GLOBALS['site_parameters']['categories_disabled_show_to_admin_in_front']) || !a_priv("admin_products", false)?' AND etat = "1"':'') . ' AND ' . get_filter_site_cond('categories') . '';
+				$qid = query($sql);
 			} else {
 				$qid = query('SELECT COUNT(*) as nombre_produits, c.*, c.nom_' . $_SESSION['session_langue'] . ' AS nom
 					FROM peel_produits p
@@ -2376,7 +2420,7 @@ if (!function_exists('get_product_in_container_html')) {
 	 * @param float $display_minimal_price
 	 * @return
 	 */
-	function get_product_in_container_html(&$product_object, $only_show_products_with_picture = true, $display_minimal_price = null)
+	function get_product_in_container_html(&$product_object, $only_show_products_with_picture = true, $display_minimal_price = null, $disable_display_price = false)
 	{
 		static $tpl;
 		$output = '';
@@ -2419,6 +2463,7 @@ if (!function_exists('get_product_in_container_html')) {
 				}
 				$tpl->assign('more_detail_label', $GLOBALS['STR_MORE_DETAILS']);
 				
+				$tpl->assign('disable_display_price', $disable_display_price);
 				
 				if (empty($GLOBALS['site_parameters']['product_price_display_disable'])) {
 					if ($product_object->on_estimate) {
@@ -2517,7 +2562,7 @@ if (!function_exists('display_javascript_for_price_update')) {
 	select_size = document.getElementById("taille' . $save_suffix_id . '");
 	size_id = select_size.options[select_size.selectedIndex].value;
 ';
-				} else {
+				} elseif($taille_display_mode == 1) {
 					// Affichage sous forme de boutons radio de la taille
 					$get_infos_js .= '
 	select_size = document.getElementById("taille' . $save_suffix_id . '");
@@ -2528,6 +2573,12 @@ if (!function_exists('display_javascript_for_price_update')) {
 		}
 	}
 ';
+				} else {
+					// Affichage de toutes les tailles et la quantité sous forme de tableau 
+					// On utilise .map jQuery avec pour récupérer les variables "qte_array" et "size_id_array"
+					$get_infos_js .= '
+	qte_array=jQuery(".qte_array").map(function(){return jQuery(this).val();}).get();
+	size_id_array=jQuery(".size_id_array").map(function(){return jQuery(this).attr("value");}).get();';
 				}
 			}
 			if(!empty($colors_infos_array) && count($colors_infos_array)>=1){
@@ -2539,6 +2590,8 @@ if (!function_exists('display_javascript_for_price_update')) {
 function update_product_price' . ($save_suffix_id) . '(){
 	var attribut_list="";
 	var size_id="";
+	var qte_array ="";	
+	var size_id_array ="";
 	var quantite="";
 	var color_id="";
 	if(typeof sel != "undefined"){
@@ -2549,7 +2602,7 @@ function update_product_price' . ($save_suffix_id) . '(){
 		var first_elem = true;
 	}
 	' . $get_infos_js . '
-	jQuery.post("'.$GLOBALS['wwwroot'].'/get_product_price.php", {product_id: '.$product_object->id.', product2_id: '.(!empty($product_object2)?$product_object2->id:'""').', size_id: size_id, attribut_list: attribut_list, quantite: quantite, hash: \''.sha256('HFhza8462naf'.$product_object->id).'\', color_id: color_id}, function(data){
+	jQuery.post("'.$GLOBALS['wwwroot'].'/get_product_price.php", {product_id: '.$product_object->id.', product2_id: '.(!empty($product_object2)?$product_object2->id:'""').', attribut_list: attribut_list, quantite: quantite, qte_array:qte_array,size_id_array:size_id_array,size_id:size_id, color_id: color_id, hash: \''.sha256('HFhza8462naf'.$product_object->id).'\'}, function(data){
 		var divtoshow = "#prix_' . vn($product_object->id) . $save_suffix_id . '";
 		if(data.length >0) {
 			jQuery(divtoshow).show();
@@ -2791,10 +2844,15 @@ if (!function_exists('get_suggestion_commentaire_details')) {
 		} else {
 			return false;
 		}
+		if (is_array($id_categorie)) {
+			$where_category = "id_categorie IN (" . nohtml_real_escape_string(implode(',', $id_categorie)) . ")";
+		} else {
+			$where_category = 'id_categorie = "' . intval($id_categorie) . '"';
+		}
 		$query = query('SELECT *
 			FROM suggestions_details_comment
 			WHERE id_utilisateur_insere = '.intval($utilisateur['id_utilisateur']).'
-			AND '.($type == 'category' ? 'id_categorie = "'.$id_categorie.'"' : 'id_marque = "'.$id_marque.'"').
+			AND '.($type == 'category' ? $where_category : 'id_marque = "' . intval($id_marque) . '"').
 			($statut ? 'AND statut = "'.$statut.'"' : '').'
 			ORDER BY date_insere DESC'
 		);

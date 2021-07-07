@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: caddie_content_html.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -29,6 +29,9 @@
 				<div class="col-sm-6">
 				{if $enable_code_promo}
 					<div class="code_promo">
+					{if isset($STR_AMOUNT_TO_ORDER_DISPLAY_MESSAGE)}
+					<div style="padding-bottom:20px;"><span class="badge badge-success" style="font-size: 24px !important;font-weight:bold;">{$STR_AMOUNT_TO_ORDER_DISPLAY_MESSAGE}</span></div>
+					{/if}
 					{if isset($code_promo)}
 						<div class="input-group">
 							<span class="input-group-addon"><label for="code_promo">{$code_promo.txt}{$STR_BEFORE_TWO_POINTS}: </label></span>
@@ -117,7 +120,7 @@
 												<option value="{$sto.value|str_form_value}"{if $sto.issel} selected="selected"{/if}>{$sto.name|html_entity_decode_if_needed}</option>
 												{/foreach}
 											</select>
-											{else}
+										{else}
 											<table class="shipping_type_display_mode">
 												{foreach $shipping_type_options as $sto}
 												<tr>

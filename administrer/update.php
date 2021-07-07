@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 64897 2020-11-03 15:18:28Z sdelaporte $
+// $Id: update.php 67242 2021-06-15 14:58:09Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -1882,7 +1882,7 @@ UPDATE `peel_statut_livraison` SET `id`= `id`+100 WHERE id = 0;
 UPDATE `peel_statut_paiement` SET `id`= `id`+100 WHERE id = 0;
 UPDATE `peel_commandes` SET `id_statut_paiement`= `id_statut_paiement`+100 WHERE id_statut_paiement = 0;
 UPDATE `peel_commandes` SET `id_statut_livraison`= `id_statut_livraison`+100 WHERE id_statut_livraison = 0;
--- Ajout des champs technical code. Pour ces tables des codes techniques ont été ajoutés pour permettre leur manipulations par le code sans pour autant connaitre l'id à l'avance. Ce procédé est plus propore et est rendu indispensable suite au passage du multisite.
+-- Ajout des champs technical code. Pour ces tables des codes techniques ont été ajoutés pour permettre leur manipulations par le code sans pour autant connaître l'id à l'avance. Ce procédé est plus propore et est rendu indispensable suite au passage du multisite.
 ALTER TABLE `peel_statut_paiement` ADD `technical_code` varchar(255) NOT NULL;
 ALTER TABLE `peel_statut_livraison` ADD `technical_code` varchar(255) NOT NULL;
 ALTER TABLE `peel_types` ADD `technical_code` varchar(255) NOT NULL;
@@ -2387,9 +2387,9 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('modules_back_office_only_array', 'modules', 'array', '\"exaprint\"', '', NOW(), '', 1, 0),
 ('modules_front_office_js_array', 'modules', 'array', '[forum] => \"/modules/forum/forum.js\"', '', NOW(), '', 1, 0),
 ('modules_no_optional_array', 'modules', 'array', '\"forum\", \"reseller\", \"thumbs\", \"attributs\", \"marques_promotion\", \"category_promotion\", \"devises\", \"ecotaxe\", \"url_rewriting\", \"annonces\", \"abonnement\", \"references\"', '', NOW(), '', 1, 0),
-('modules_admin_functions_array', 'modules', 'array', '[tagcloud] => \"/modules/tagcloud/administrer/fonctions.php\", [devises] => \"/modules/devises/administrer/fonctions.php\", [gift_check] => \"/modules/gift_check/administrer/fonctions.php\", [attributs] => \"/modules/attributs/administrer/fonctions.php\", [avis] => \"/modules/avis/administrer/fonctions.php\", [lot] => \"/modules/lot/administrer/fonctions.php\", [annonces] => \"/modules/annonces/administrer/fonctions.php\", [abonnement] => \"/modules/abonnement/administrer/fonctions.php\", [banner] => \"/modules/banner/administrer/fonctions.php\", [vitrine] => \"/modules/vitrine/administrer/fonctions.php\", [lexique] => \"/modules/lexique/administrer/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/administrer/fonctions.php\", [payment_by_product] => \"/modules/payment_by_product/administrer/fonctions.php\", [download] => \"/modules/download/administrer/fonctions.php\", [affiliation] => \"/modules/affiliation/administrer/fonctions.php\", [partenaires] => \"/modules/partenaires/administrer/fonctions.php\", [parrainage] => \"/modules/parrainage/administrer/fonctions.php\", [webmail] => \"/modules/webmail/administrer/fonctions.php\", [profil] => \"/modules/profil/administrer/fonctions.php\", [telechargement] => \"/modules/telechargement/administrer/fonctions.php\", [faq] => \"/modules/faq/administrer/fonctions.php\", [groups] => \"/modules/groups/administrer/fonctions.php\", [references] => \"/modules/references/administrer/fonctions.php\", [relance_avance] => \"/modules/relance_avance/administrer/fonctions.php\", [comparateur] => \"/modules/comparateur/administrer/fonctions.php\"', '', NOW(), '', 1, 0),
+('modules_admin_functions_array', 'modules', 'array', '[tagcloud] => \"/modules/tagcloud/administrer/fonctions.php\", [devises] => \"/modules/devises/administrer/fonctions.php\", [gift_check] => \"/modules/gift_check/administrer/fonctions.php\", [attributs] => \"/modules/attributs/administrer/fonctions.php\", [avis] => \"/modules/avis/administrer/fonctions.php\", [lot] => \"/modules/lot/administrer/fonctions.php\", [annonces] => \"/modules/annonces/administrer/fonctions.php\", [abonnement] => \"/modules/abonnement/administrer/fonctions.php\", [banner] => \"/modules/banner/administrer/fonctions.php\", [vitrine] => \"/modules/vitrine/administrer/fonctions.php\", [lexique] => \"/modules/lexique/administrer/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/administrer/fonctions.php\", [payment_by_product] => \"/modules/payment_by_product/administrer/fonctions.php\", [download] => \"/modules/download/administrer/fonctions.php\", [affiliation] => \"/modules/affiliation/administrer/fonctions.php\", [partenaires] => \"/modules/partenaires/administrer/fonctions.php\", [parrainage] => \"/modules/parrainage/administrer/fonctions.php\", [webmail] => \"/modules/webmail/administrer/fonctions.php\", [profil] => \"/modules/profil/administrer/fonctions.php\", [telechargement] => \"/modules/telechargement/administrer/fonctions.php\", [faq] => \"/modules/faq/administrer/fonctions.php\", [groups] => \"/modules/groups/administrer/fonctions.php\", [references] => \"/modules/references/administrer/fonctions.php\", [relance_avance] => \"/modules/relance_avance/administrer/fonctions.php\", [comparateur] => \"/modules/comparateur/administrer/fonctions.php\", [maps] => \"/modules/maps/administrer/fonctions.php\"', '', NOW(), '', 1, 0),
 ('modules_crons_functions_array', 'modules', 'array', '[annonces] => \"/modules/annonces/administrer/fonctions.php\"', '', NOW(), '', 1, 0),
-('modules_front_office_functions_files_array', 'modules', 'array', '[url_rewriting] => \"/modules/url_rewriting/rewrite.php\", [devises] => \"/modules/devises/fonctions.php\", [reseller] => \"/modules/reseller/fonctions.php\", [menus] => \"/modules/menus/fonctions.php\", [best_seller] => \"/modules/best_seller/fonctions.php\", [last_views] => \"/modules/last_views/fonctions.php\", [gift_check] => \"/modules/gift_check/fonctions.php\", [relance_avance] => \"/modules/relance_avance\", [spam] => \"/modules/spam/fonctions.php\", [carrousel] => \"/modules/carrousel/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/fonctions.php\", [download] => \"/modules/download/fonctions.php\", [facebook] => \"/modules/facebook/fonctions.php\", [facebook_connect] => \"/modules/facebook_connect/fonctions.php\", [sign_in_twitter] => \"/modules/sign_in_twitter/fonctions.php\", [openid] => \"/modules/openid/fonctions.php\", [cmcic] => \"/modules/cmcic/cmcic.php\", [bluepaid] => \"/modules/bluepaid/fonctions.php\", [omnikassa] => \"/modules/omnikassa/fonctions.php\", [paybox] => \"/modules/paybox/fonctions.php\", [spplus] => \"/modules/spplus/fonctions.php\", [systempay] => \"/modules/systempay/functions.php\", [paypal] => \"/modules/paypal/fonctions.php\", [faq] => \"/modules/faq/fonctions.php\", [lexique] => \"/modules/lexique/fonctions.php\", [avis] => \"/modules/avis/fonctions.php\", [comparateur] => \"/modules/comparateur/administrer/fonctions.php\", [profil] => \"/modules/profil/fonctions.php\", [lot] => \"/modules/lot/fonctions.php\", [birthday] => \"/modules/birthday/administrer/bons_anniversaires.php\", [good_clients] => \"/modules/good_clients\", [groups] => \"/modules/groups/fonctions.php\", [facture_advanced] => \"/modules/facture_advanced\", [statistiques] => \"/modules/statistiques\", [expeditor] => \"/modules/expeditor\", [duplicate] => \"/modules/duplicate/administrer/fonctions.php\", [welcome_ad] => \"/modules/welcome_ad/fonctions.php\", [chart] => \"/modules/chart/open-flash-chart.php\", [kekoli] => \"/modules/kekoli/administrer/fonctions.php\", [tnt] => \"/modules/tnt/fonctions.php,/modules/tnt/class/Tnt.php\", [reseller_map] => \"/modules/reseller_map/fonctions.php\", [clients] => \"/modules/clients/fonctions.php\", [photodesk] => \"/modules/photodesk/fonctions.php\", [conditionnement] => \"/modules/conditionnement/fonctions.php\", [commerciale] => \"/modules/commerciale/administrer/fonctions.php\", [webmail] => \"/modules/webmail/fonctions.php\", [agenda] => \"/modules/agenda/fonctions.php\", [sauvegarde_recherche] => \"/modules/sauvegarde_recherche/fonctions.php\", [annonces] => \"/modules/annonces/class/Annonce.php,/modules/annonces/fonctions.php,/modules/annonces/display_annonce.php\", [cart_popup] => \"/modules/cart_popup/fonctions.php\", [tagcloud] => \"/modules/tagcloud/fonctions.php\", [banner] => \"/modules/banner/fonctions.php\", [rss] => \"/modules/rss/fonctions.php\", [pensebete] => \"/modules/pensebete/fonctions.php\", [thumbs] => \"/modules/thumbs/fonctions.php\", [search] => \"/modules/search/fonctions.php\", [attributs] => \"/modules/attributs/fonctions.php\", [marques_promotion] => \"/modules/marques_promotion/fonctions.php\", [category_promotion] => \"/modules/category_promotion/fonctions.php\", [micro_entreprise] => \"/modules/micro_entreprise/fonctions.php\", [gifts] => \"/modules/gifts/fonctions.php\", [precedent_suivant] => \"/modules/precedent_suivant/fonctions.php\", [ariane_panier] => \"/modules/ariane_panier/fonctions.php\", [cart_preservation] => \"/modules/cart_preservation/fonctions.php\", [parrainage] => \"/modules/parrainage/fonctions.php\", [affiliation] => \"/modules/affiliation/fonctions.php\", [ecotaxe] => \"/modules/ecotaxe/fonctions.php\", [devis] => \"/modules/devis/fonctions.php\", [captcha] => \"/modules/captcha/fonctions.php\", [vacances] => \"/modules/vacances/fonctions.php\", [newsletter] => \"/modules/newsletter/peel/fonctions.php\", [factures] => \"/modules/factures\", [export] => \"/modules/export\", [picking] => \"/modules/picking\", [marges] => \"/modules/marges\", [flash] => \"/modules/flash\", [iphone-ads] => \"/modules/iphone-ads\", [bounces] => \"/modules/bounces\", [vatlayer] => \"/modules/vatlayer/functions.php\", [faq] => \"/modules/faq/fonctions.php\"', '', NOW(), '', 1, 0);
+('modules_front_office_functions_files_array', 'modules', 'array', '[url_rewriting] => \"/modules/url_rewriting/rewrite.php\", [devises] => \"/modules/devises/fonctions.php\", [reseller] => \"/modules/reseller/fonctions.php\", [menus] => \"/modules/menus/fonctions.php\", [best_seller] => \"/modules/best_seller/fonctions.php\", [last_views] => \"/modules/last_views/fonctions.php\", [gift_check] => \"/modules/gift_check/fonctions.php\", [relance_avance] => \"/modules/relance_avance\", [spam] => \"/modules/spam/fonctions.php\", [carrousel] => \"/modules/carrousel/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/fonctions.php\", [download] => \"/modules/download/fonctions.php\", [facebook] => \"/modules/facebook/fonctions.php\", [facebook_connect] => \"/modules/facebook_connect/fonctions.php\", [sign_in_twitter] => \"/modules/sign_in_twitter/fonctions.php\", [openid] => \"/modules/openid/fonctions.php\", [cmcic] => \"/modules/cmcic/cmcic.php\", [bluepaid] => \"/modules/bluepaid/fonctions.php\", [omnikassa] => \"/modules/omnikassa/fonctions.php\", [paybox] => \"/modules/paybox/fonctions.php\", [spplus] => \"/modules/spplus/fonctions.php\", [systempay] => \"/modules/systempay/functions.php\", [paypal] => \"/modules/paypal/fonctions.php\", [faq] => \"/modules/faq/fonctions.php\", [lexique] => \"/modules/lexique/fonctions.php\", [avis] => \"/modules/avis/fonctions.php\", [comparateur] => \"/modules/comparateur/administrer/fonctions.php\", [profil] => \"/modules/profil/fonctions.php\", [lot] => \"/modules/lot/fonctions.php\", [birthday] => \"/modules/birthday/administrer/bons_anniversaires.php\", [good_clients] => \"/modules/good_clients\", [groups] => \"/modules/groups/fonctions.php\", [facture_advanced] => \"/modules/facture_advanced\", [statistiques] => \"/modules/statistiques\", [expeditor] => \"/modules/expeditor\", [duplicate] => \"/modules/duplicate/administrer/fonctions.php\", [welcome_ad] => \"/modules/welcome_ad/fonctions.php\", [chart] => \"/modules/chart/open-flash-chart.php\", [kekoli] => \"/modules/kekoli/administrer/fonctions.php\", [tnt] => \"/modules/tnt/fonctions.php,/modules/tnt/class/Tnt.php\", [reseller_map] => \"/modules/reseller_map/fonctions.php\", [clients] => \"/modules/clients/fonctions.php\", [photodesk] => \"/modules/photodesk/fonctions.php\", [conditionnement] => \"/modules/conditionnement/fonctions.php\", [commerciale] => \"/modules/commerciale/administrer/fonctions.php\", [webmail] => \"/modules/webmail/fonctions.php\", [agenda] => \"/modules/agenda/fonctions.php\", [sauvegarde_recherche] => \"/modules/sauvegarde_recherche/fonctions.php\", [annonces] => \"/modules/annonces/class/Annonce.php,/modules/annonces/fonctions.php,/modules/annonces/display_annonce.php\", [cart_popup] => \"/modules/cart_popup/fonctions.php\", [tagcloud] => \"/modules/tagcloud/fonctions.php\", [banner] => \"/modules/banner/fonctions.php\", [rss] => \"/modules/rss/fonctions.php\", [pensebete] => \"/modules/pensebete/fonctions.php\", [thumbs] => \"/modules/thumbs/fonctions.php\", [search] => \"/modules/search/fonctions.php\", [attributs] => \"/modules/attributs/fonctions.php\", [marques_promotion] => \"/modules/marques_promotion/fonctions.php\", [category_promotion] => \"/modules/category_promotion/fonctions.php\", [micro_entreprise] => \"/modules/micro_entreprise/fonctions.php\", [gifts] => \"/modules/gifts/fonctions.php\", [precedent_suivant] => \"/modules/precedent_suivant/fonctions.php\", [ariane_panier] => \"/modules/ariane_panier/fonctions.php\", [cart_preservation] => \"/modules/cart_preservation/fonctions.php\", [parrainage] => \"/modules/parrainage/fonctions.php\", [affiliation] => \"/modules/affiliation/fonctions.php\", [ecotaxe] => \"/modules/ecotaxe/fonctions.php\", [devis] => \"/modules/devis/fonctions.php\", [captcha] => \"/modules/captcha/fonctions.php\", [vacances] => \"/modules/vacances/fonctions.php\", [newsletter] => \"/modules/newsletter/peel/fonctions.php\", [factures] => \"/modules/factures\", [export] => \"/modules/export\", [picking] => \"/modules/picking\", [marges] => \"/modules/marges\", [flash] => \"/modules/flash\", [iphone-ads] => \"/modules/iphone-ads\", [bounces] => \"/modules/bounces\", [vatlayer] => \"/modules/vatlayer/functions.php\", [faq] => \"/modules/faq/fonctions.php\", [counter] => \"/modules/counter/functions.php\", [payline] => \"/modules/payline/functions.php\"', '', NOW(), '', 1, 0);
 ";
 
 $sql_update_array['8.0.0'] = '';
@@ -2682,14 +2682,7 @@ $sql_update_array['8.0.5'] .= "
 	ALTER TABLE `peel_adresses` ADD `address_hash` VARCHAR(2) NOT NULL DEFAULT '' AFTER `latitude`;
 ";
 $sql_update_array['9.0.0'] = "";
-foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-	$sql_update_array['9.0.0'] .= "
-	ALTER TABLE `peel_categories` ADD `nom_court_".$this_lang."` VARCHAR(255) NOT NULL;";
-}
 $sql_update_array['9.0.0'] .= "
-ALTER TABLE `peel_pays` ADD `prices_decimal_separator` CHAR(1) NOT NULL, ADD `prices_thousands_separator` CHAR(1) NOT NULL AFTER `prices_decimal_separator`;";
-
-$sql_update_array['9.0.0'] = "
 	ALTER TABLE `peel_categories` ADD `franco` FLOAT(15,5) NOT NULL DEFAULT '0.00000';
 	ALTER TABLE `peel_couleurs` ADD `image` VARCHAR(255) NOT NULL DEFAULT '';
 	ALTER TABLE `peel_codes_promos` ADD `brand_not_apply_code_promo` TEXT NOT NULL AFTER `promo_code_combinable`; 
@@ -2756,18 +2749,31 @@ if(file_exists($GLOBALS['dirroot'] . '/modules/partenaires')) {
 ";
 }
 $sql_update_array['9.2.0'] = "";
+if(file_exists($GLOBALS['dirroot'] . '/modules/carrousel')) {
+	$sql_update_array['9.2.0'] .= "
+-- Uniquement pour Carrousel
+ALTER TABLE `peel_vignettes_carrousels` ADD `site_country` varchar(255) NOT NULL DEFAULT '';
+";
+}
 $sql_update_array['9.2.1'] = "";
-
-
 
 $sql_update_array['9.2.2'] = "
 	ALTER TABLE `peel_adresses` ADD `num_tva` VARCHAR(15) NOT NULL DEFAULT '';
 	ALTER TABLE `peel_tarifs` ADD `on_franco` TINYINT(1) NOT NULL DEFAULT '0';
 	ALTER TABLE `peel_tarifs` ADD `on_franco_amount` float(15,5) NOT NULL DEFAULT '0.00000';
-	ALTER TABLE `peel_commandes` ADD `suspect` TINYINT(11) NOT NULL DEFAULT '0' AFTER `moneybookers_payment_methods`;
+	ALTER TABLE `peel_commandes` ADD `suspect` TINYINT(1) NOT NULL DEFAULT '0' AFTER `moneybookers_payment_methods`;
 	ALTER TABLE `peel_commandes` ADD `num_tva` VARCHAR(15) NOT NULL DEFAULT '' AFTER `moneybookers_payment_methods`;
 	INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`, `site_id`) VALUES ('y_max_allowed_last_page_without_comment', 'core', 'integer', '4', '', NOW(), 'update9.3', 1, 1);
 ";
+$sql_update_array['9.3.0'] = "
+ALTER TABLE `peel_banniere` ADD `on_product_details` TINYINT(1) NOT NULL DEFAULT '0';
+";
+
+if(file_exists($GLOBALS['dirroot'] . '/modules/cart_preservation')) {
+	$sql_update_array['9.3.0'] .= "
+ALTER TABLE `peel_save_cart` CHANGE `id_attribut` `id_attribut` VARCHAR( 255 ) NOT NULL  DEFAULT '';
+";
+}
 // FIN du SQL par version
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	

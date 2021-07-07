@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: specific_field.tpl 63117 2020-04-08 10:39:31Z sdelaporte $
+// $Id: specific_field.tpl 66831 2021-05-11 09:56:51Z sdelaporte $
 *}{if !empty($text_only) && $f.field_type != "upload"}
 	{$f.field_value}
 {elseif $f.field_type == "radio"}
@@ -68,7 +68,7 @@
 {elseif $f.field_type == "hidden"}
 <input name="{$f.field_name|str_form_value}" type="hidden" value="{$f.field_value|str_form_value}" id="{$f.field_id}" />
 {elseif $f.field_type == "textarea"}
-<textarea rows="4" {if !empty($f.mandatory)} required="required"{/if} {if !empty($f.readonly)} readonly="readonly"{/if} {if !empty($f.readonly)} readonly="readonly"{/if} {if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} name="{$f.field_name|str_form_value}" id="{$f.field_id}" class="form-control"{if !empty($f.field_placeholder)} placeholder="{$f.field_placeholder|str_form_value}"{/if}>{$f.field_value}</textarea>
+<textarea rows="6" {if !empty($f.mandatory)} required="required"{/if} {if !empty($f.readonly)} readonly="readonly"{/if} {if !empty($f.readonly)} readonly="readonly"{/if} {if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} name="{$f.field_name|str_form_value}" id="{$f.field_id}" class="form-control"{if !empty($f.field_placeholder)} placeholder="{$f.field_placeholder|str_form_value}"{/if}>{$f.field_value}</textarea>
 {elseif $f.field_type == "html"}
 {$f.text_editor_html}
 {elseif $f.field_type == "separator" || $f.field_type == "tag"}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_commande_liste.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}{if $return == 'full_html'}
 <div class="entete">{$STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT}{$STR_BEFORE_TWO_POINTS}: {$links_nbRecord}</div>
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
@@ -73,6 +73,7 @@
 			{$res.tr_rollover}
 			{if $return == 'full_html'}
 				<td class="center">
+					<input type="checkbox" name="change_statut{$res.id}" id="checkbox_tbl_{$res.id}" value="1" />
 					<a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$STR_MODIFY}</a><br />
 				{if $is_duplicate_module_active}
 					<a href="{$res.dup_href|escape:'html'}" data-confirm="{$STR_ADMIN_ORDER_DUPLICATE_WARNING|str_form_value}" title="{$STR_ADMIN_ORDER_DUPLICATE|str_form_value}"><img src="{$res.dup_src|escape:'html'}" alt="" /></a>
@@ -82,12 +83,10 @@
 				<td class="center"><a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$res.order_id}</a></td>
 				<td class="center">{if !empty($res.numero)}<a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$res.numero|default:'&nbsp;'}{/if}</a></td>
 				<td class="center">{$res.date}</td>
-				<td class="center" style="{if empty($res.suspect)}background-color:green;{else}background-color:red;{/if}"></td>
 				<td class="center">{$res.montant_prix}</td>
 				<td class="center">{$res.avoir_prix}</td>
 				<td class="center">{$res.modifUser}</td>
 			{if $return == 'full_html'}
-				<td class="center"><input type="checkbox" name="change_statut{$res.id}" id="checkbox_tbl_{$res.id}" value="1" /></td>
 				<td class="center">{$res.payment_name}</td>
 			{/if}
 				<td class="center"><input type="hidden" name="id[]" value="{$res.id|str_form_value}" />
@@ -109,41 +108,48 @@
 			{if !empty($res.type)}
 				<td class="center"><center><table><tr><td>{$res.type}</td></tr></table></center></td>
 			{/if}
+			<td class="center">{if !empty($res.suspect)}<span class="fa fa-exclamation-circle fa-3x" style="color:red;"></span>{/if}</td>
 			</tr>
 			{/foreach}
 		</table>
 	{if $return == 'full_html'}
 	</div>
-	<div style="margin-bottom: 10px; margin-top: 10px;">
-		<div class="row center">
-			<input type="button" value="{$STR_ADMIN_CHECK_ALL|str_form_value}" onclick="if (markAllRows('tablesForm')) return false;" class="btn btn-info" />&nbsp;&nbsp;&nbsp;
-			<input type="button" value="{$STR_ADMIN_UNCHECK_ALL|str_form_value}" onclick="if (unMarkAllRows('tablesForm')) return false;" class="btn btn-info" />
-		</div>
-		<div class="row center" style="margin-top: 15px">
-			<select class="form-control" name="statut_paiement" style="max-width: 200px">
-				<option value="">- {$STR_ORDER_STATUT_PAIEMENT} -</option>
-				{$payment_status_options2}
-			</select>
-			<select class="form-control" name="statut_livraison" style="max-width: 200px">
-				<option value="">- {$STR_ORDER_STATUT_LIVRAISON} -</option>
-				{$delivery_status_options2}
-			</select>
-			<input type="submit" value="{$STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION|str_form_value}" class="btn btn-primary" />
-		</div>
-	</div>
-		{if $is_module_genere_pdf_active}
-	<div style="margin-bottom: 10px; margin-top: 10px;">
-		<div class="row center">
-			<input type="submit" name="export_pdf" value="{$STR_MODULE_FACTURES_ADMIN_TITLE|str_form_value}" class="btn btn-primary" />
-		</div>
-	</div>
-		{/if}
-		{if !empty($get_csv_export_from_html_table)}
-	<div class="row center">
-		<a href="{$get_current_url}?mode=export" class="btn btn-primary">{$STR_ADMIN_EXPORT}</a>
-		</div>
-		{/if}
 	<div class="center">{$links_multipage}</div>
+	
+	
+	<div class="entete">{$STR_ADMIN_MODIFICATION_MULTIPLE}</div>
+	<div class="well">
+		<div style="margin-bottom: 10px; margin-top: 10px;">
+			<div class="row center">
+				<input type="button" value="{$STR_ADMIN_CHECK_ALL|str_form_value}" onclick="if (markAllRows('tablesForm')) return false;" class="btn btn-info" />&nbsp;&nbsp;&nbsp;
+				<input type="button" value="{$STR_ADMIN_UNCHECK_ALL|str_form_value}" onclick="if (unMarkAllRows('tablesForm')) return false;" class="btn btn-info" />
+			</div>
+			
+			<div class="row center" style="margin-top: 15px">
+				<select class="form-control" name="statut_paiement" style="max-width: 200px">
+					<option value="">- {$STR_ORDER_STATUT_PAIEMENT} -</option>
+					{$payment_status_options2}
+				</select>
+				<select class="form-control" name="statut_livraison" style="max-width: 200px">
+					<option value="">- {$STR_ORDER_STATUT_LIVRAISON} -</option>
+					{$delivery_status_options2}
+				</select>
+				<input type="submit" value="{$STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION|str_form_value}" class="btn btn-primary" />
+			</div>
+		</div>
+		{if $is_module_genere_pdf_active}
+			<div class="row center" style="margin-top: 15px">
+				<input type="submit" name="export_pdf" value="{$STR_MODULE_FACTURES_ADMIN_TITLE|str_form_value}" class="btn btn-primary" />
+			</div>
+		{/if}
+	</div>
+	
+	<div style="margin-bottom: 10px; margin-top: 10px;">
+	
+		{if !empty($get_csv_export_from_html_table)}
+			<a href="{$get_current_url}?mode=export" class="btn btn-primary">{$STR_ADMIN_LIVRAISONS_EXCEL_EXPORT}</a>
+		{/if}
+	</div>
 	{/if}
 {else}
 	<p>{$STR_ADMIN_COMMANDER_NO_ORDER_FOUND}</p>

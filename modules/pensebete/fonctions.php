@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -122,7 +122,7 @@ function display_product_in_reminder($return_mode = false)
 	$tpl->assign('STR_DELETE_PROD_CART', $GLOBALS['STR_DELETE_PROD_CART']);
 	$tpl->assign('ttc_ht', (display_prices_with_taxes_active() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 	$user_info = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
-	$tpl->assign('pseudo', $user_info['pseudo']);
+	$tpl->assign('pseudo', vb($user_info['pseudo']));
 	
 	if (num_rows($query) > 0) {
 		$tpl->assign('are_prods', true);

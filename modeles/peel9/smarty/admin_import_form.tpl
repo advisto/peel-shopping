@@ -1,22 +1,33 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_import_form.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_import_form.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}{if $mode == 'import' && $general_configuration_is_valid}
 <form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" id="import_export_form" enctype="multipart/form-data">
  	{$form_token}
 	<h2>{if !empty($test_mode)}{$STR_ADMIN_CHECK_DATA}{else}{$STR_ADMIN_IMPORT_STATUS}{/if}</h2>
-	{if $error}<div class="alert alert-danger"><p><b>{$STR_ADMIN_CHECK_DATA_BEFORE_IMPORT}{$STR_BEFORE_TWO_POINTS}:</b></p><br />{$error}</div>
-	{else}<p>{$STR_FILE}{$STR_BEFORE_TWO_POINTS}: <a href="{$import_file.url|escape:'html'}">{$import_file.form_value}</a></p>{/if}
+	
+	{if $error}
+		{if !empty($force_import_despite_of_error)}
+			<div class="alert alert-danger"><p><b>{$STR_ADMIN_LINE_WITH_ERROR_NOT_IMPORT}{$STR_BEFORE_TWO_POINTS}:</b></p><br />{$error}</div>
+			<p>{$STR_FILE}{$STR_BEFORE_TWO_POINTS}: <a href="{$import_file.url|escape:'html'}">{$import_file.form_value}</a></p>
+		{else}
+			<div class="alert alert-danger"><p><b>{$STR_ADMIN_CHECK_DATA_BEFORE_IMPORT}{$STR_BEFORE_TWO_POINTS}:</b></p><br />{$error}</div>
+		{/if}
+	{else}
+		<p>{$STR_FILE}{$STR_BEFORE_TWO_POINTS}: <a href="{$import_file.url|escape:'html'}">{$import_file.form_value}</a></p>
+	{/if}
+	
+	
 	{if $import_output}<div class="well">{$import_output}</div>{/if}
 	{if !empty($test_mode)}
 	<input type="hidden" name="type" value="{$type}" />
@@ -33,10 +44,12 @@
 		{if empty($error)}
 	<input type="hidden" name="mode" value="import" />
 	<input type="hidden" name="test_mode" value="0" />
-	<p class="center"><input type="submit" name="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" /></p>
+	<p class="center"><input type="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" /></p>
 		{else}
-	<input type="hidden" name="mode" value="" />
-	<p class="center"><input type="submit" name="submit" value="{$STR_BACK|str_form_value}" class="btn btn-danger" /></p>
+	<a onclick="if(bootbox.confirm('{$STR_CONTINUE_WITH_ERROR_CONFIRM|filtre_javascript:true:true:false}', function(result) {ldelim}if(result) {ldelim}force_import_with_error_line();{rdelim} {rdelim} ));" href="#" class="btn btn-primary">{$STR_CONTINUE_WITH_ERROR}</a>
+		
+	<input type="hidden" name="mode" id="mode" value="" />
+	<p class="center"><input type="submit" value="{$STR_BACK|str_form_value}" class="btn btn-danger" /></p>
 		{/if}
 	{/if}
 </form>
@@ -63,7 +76,8 @@
 
 	<h2>{$STR_ADMIN_IMPORT_FILE_NAME}{$STR_BEFORE_TWO_POINTS}:</h2>
 	<div class="center">
-		<p>{$STR_ADMIN_IMPORT_FILE_ENCODING}{$STR_BEFORE_TWO_POINTS}: <select class="form-control" name="data_encoding" style="width: 150px" onchange="window.imported_file=null; change_import_type();">
+		<p>{$STR_ADMIN_IMPORT_FILE_ENCODING}{$STR_BEFORE_TWO_POINTS}: <select class="form-control" name="data_encoding" style="width: 200px" onchange="window.imported_file=null; change_import_type();">
+				<option value=""{if $data_encoding == ''} selected="selected"{/if}>Auto{$STR_BEFORE_TWO_POINTS}: UTF-8 / ISO 8859-1</option>
 				<option value="utf-8"{if $data_encoding == 'utf-8'} selected="selected"{/if}>UTF-8</option>
 				<option value="iso-8859-1"{if $data_encoding == 'iso-8859-1'} selected="selected"{/if}>ISO 8859-1</option>
 			</select></p>

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -56,7 +56,7 @@
 	{{ fresh_ad_presentation }}
 {% endif %}
 	{{ categorie_accueil }}
-	{% if notre_selection and website_type and website_type == 'shop' %}
+	{% if notre_selection and website_type and website_type == 'shop' and page_columns_third is empty %}
 	</div></div></div></div></div>
 		<div class="full_size_background_section">
 			<div class="container">
@@ -66,6 +66,10 @@
 			</div>
 		</div>
 	<div class="container"><div class="row"><div class="middle_column col-sm-12"><div class="middle_column_repeat"><div class="page_home_content">
+	{% else %}
+	<div class="row">
+		{{ notre_selection }}
+	</div>
 	{% endif %}
 	{{ home_middle }}
 	<div class="row">

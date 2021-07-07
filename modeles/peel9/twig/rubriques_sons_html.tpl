@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -19,7 +19,7 @@
 		<img src="{{ item.image_src|escape('html') }}" alt="" /><br />
 		{% endif %}
 		<b><a href="{{ item.href|escape('html') }}">{% if (item.lien_src) %}<img src="{{ item.lien_src|escape('html') }}" alt="{{ item.name }}" />{% else %}{{ item.name }}{% endif %}</a></b>
-		{% if (description) %}<p>{{ description }}</p>{% endif %}
+		{% if (item.description) %}<p>{{ item.description }}</p>{% endif %}
 	</li>
 {% endfor %}
 </ul>

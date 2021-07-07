@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 64973 2020-11-09 13:07:30Z sdelaporte $
+// $Id: database.php 67411 2021-06-28 07:39:35Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -500,7 +500,11 @@ function create_sql_from_array($array, $separator = ',')
 {
 	$sql_array = array();
 	foreach($array as $key => $value) {
-		$sql_array[] = "`" . word_real_escape_string($key) . "`='" . real_escape_string($value) . "'";
+		if ($value === null) {
+			$sql_array[] = "`" . word_real_escape_string($key) . "`=NULL";
+		} else {
+			$sql_array[] = "`" . word_real_escape_string($key) . "`='" . real_escape_string($value) . "'";
+		}
 	}
 	return implode($separator, $sql_array);
 }
@@ -681,7 +685,7 @@ function get_join_infos($table_name, $this_field_name, $table_view = null, $fiel
  * @return
  */
 function get_select_infos($table_name, $this_field_name) {
-	if(!empty($GLOBALS['database_fields_select_values_array'][$table_name . '.' . $this_field_name])) {
+	if(array_key_exists($table_name . '.' . $this_field_name, vb($GLOBALS['database_fields_select_values_array'], array()))) {
 		return $GLOBALS['database_fields_select_values_array'][$table_name . '.' . $this_field_name];
 	} elseif(!empty($GLOBALS['database_fields_select_values_array'][$this_field_name])) {
 		return $GLOBALS['database_fields_select_values_array'][$this_field_name];
@@ -705,6 +709,7 @@ function get_select_infos($table_name, $this_field_name) {
  * @param mixed $cols
  * @param boolean $forced_cgst
  * @param boolean $row_key_col
+ * @param string $search_field_forced
  * @return
  */
 function &get_table_rows($table, $id = null, $search = null, $one_row_mode = false, $limit = null, $npu = null, $one_col_mode = false, $sql_cond = null, $group_by = null, $forced_order_by = null, $cols = null, $forced_cgst = null, $row_key_col = null, $search_field_forced = null) {
@@ -746,13 +751,13 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 		// Cas général si pas de hook spécifiant la recherche
 		// On recherche sur les champs texte
 		foreach($database_field_infos_array as $this_field_infos) {
-			if(strpos($this_field_infos['Type'], 'text(') !== false || strpos($this_field_infos['Type'], 'blob') !== false || strpos($this_field_infos['Type'], 'char(') !== false) {
+			if(is_numeric($search) || (strpos($this_field_infos['Type'], 'text(') !== false || strpos($this_field_infos['Type'], 'blob') !== false || strpos($this_field_infos['Type'], 'char(') !== false)) {
 				$search_fields_array[] = $this_field_infos['Field'];
 			}
 		}
 	}
 	// A mettre  ? Compliqué suivant les cas...
-	if(!empty($id)) {
+	if(!empty($id) || $id === '0') {
 		$where_array = array_merge_recursive_distinct($where_array, get_where_array_from_id_infos($table, $primary_key, $id, $database_field_infos_array));
 		$limit = 1;
 	}
@@ -1019,8 +1024,18 @@ function get_field_title($field_name, $type_or_table_name, $force_no_empty = fal
 			$output = preg_replace('/(?<! )(?<!^)(?<![A-Z])[A-Z]/', ' $0', $output);
 			// Ajout d'un espace avant un nombre
 			$output = preg_replace('/(?<! )(?<!^)(?<![0-9])[0-9]/', ' $0', $output);
+			foreach($GLOBALS['lang_names'] as $this_lang => $this_lang_name) {
+				if(StringMb::substr($output, -3) == '_' . $this_lang) {
+					$output = StringMb::substr($output, 0, StringMb::strlen($output) - 3) . ' (' . $this_lang_name . ')';
+				}
+			}
 			$return = trim(str_replace('  ', ' ', str_replace('_', ' ', $output)));
 		}
+		if(is_mobile_browser()) {
+			// On veut prendre moins d'espace sur mobile : on abrège certains mots
+			$return = str_replace(array('Collaborateur', 'Collaborator', 'Exceptionnel', 'Exceptional'), array('Collab.', 'Collab.', 'Excep.', 'Excep.'), $return);
+		}
+
 		if($add_table_name_if_full_field_name) {
 			$return = (!empty($GLOBALS["STR_MODULE_TEMPS_TABLE_NAMES_ARRAY"][$this_table]) ? $GLOBALS["STR_MODULE_TEMPS_TABLE_NAMES_ARRAY"][$this_table] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' : '') . $return;
 		}
@@ -1124,6 +1139,7 @@ function &listTables($name_part = null, $table_type = null)
 		// Pour certains sites faisant beaucoup usage de SHOW TABLES, c'est intéressant de mettre les informations en cache de session. L'initialisation de $GLOBALS['store_table_infos_in_session'] est à gérer par ailleurs de manière spécifique, en ne concernant pas les administrateurs par exemple.
 		$tables_array[$cache_id] = $_SESSION['table_infos'][$cache_id];
 	} elseif (!isset($tables_array[$cache_id])) {
+		$tables_array[$cache_id] = array();
 		// Compatibilité avec connexions BDD multiples : si 
 		$database_name = $GLOBALS['database_names_array'][$GLOBALS['implicit_database_object_var']];
 		if(!empty($table_type)) {

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 66961 2021-05-24 13:26:45Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -420,7 +420,7 @@ function supprime_attribut()
 
 	if ($bd = fetch_assoc($qid)) {
 		query("DELETE FROM peel_attributs WHERE id='" . intval($id) . "'");
-		query("DELETE FROM peel_produits_attributs WHERE nom_attribut_id='" . intval($id) . "'");
+		query("DELETE FROM peel_produits_attributs WHERE attribut_id='" . intval($id) . "'");
 		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MSG_OPTION_DELETED_OK"], StringMb::html_entity_decode_if_needed($bd['descriptif']))))->fetch();
 		echo $message;
 	}
@@ -801,7 +801,7 @@ function get_attributs_names($lang)
  */
 function assign_or_unassign_attribut($frm) {
 	$output='';
-	if (!empty($frm['submit_product_attribut_form'])) {
+	if (!empty($frm['submit_product_attribut_form']) && !empty($frm['attribut_id'])) {
 		// on récupère la liste des ids de produits concerné par le formulaire.
 		$sql= "SELECT produit_id 
 			FROM peel_produits_categories 

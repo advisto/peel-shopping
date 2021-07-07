@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -123,10 +123,10 @@
 		{% endif %}
 						<script><!--//--><![CDATA[//><!--
 						function verif_form{{ save_suffix_id }}(check_color, check_size) {
-							if (check_color == 1 and document.getElementById("couleur{{ save_suffix_id }}").options[document.getElementById("couleur{{ save_suffix_id }}").selectedIndex].value == 0) {
+							if (check_color == 1 && document.getElementById("couleur{{ save_suffix_id }}").options[document.getElementById("couleur{{ save_suffix_id }}").selectedIndex].value == 0) {
 								bootbox.alert("{{ STR_NONE_COLOR_SELECTED|filtre_javascript(true,false,true,false) }}");
 								return false;
-							} else if (check_size == 1 and document.getElementById("taille{{ save_suffix_id }}").options[document.getElementById("taille{{ save_suffix_id }}").selectedIndex].value == 0) {
+							} else if (check_size == 1 && document.getElementById("taille{{ save_suffix_id }}").options[document.getElementById("taille{{ save_suffix_id }}").selectedIndex].value == 0) {
 								bootbox.alert("{{ STR_NONE_SIZE_SELECTED|filtre_javascript(true,false,true,false) }}");
 								return false;
 							} else {
@@ -135,7 +135,7 @@
 						}
 						//--><!]]></script>
 						{% if is_quote is empty %}
-							<input type="submit" class="btn btn-primary submit-once-only" onclick="{% if popup_stock_alert %}alert('{{ popup_stock_alert }}');return false;{% endif %}if (verif_form{{ save_suffix_id }}({{ color_array_result }}, {{ sizes_infos_array_result }}) == true) { {{ anim_prod_var }} } else { return false; }" value="{{ STR_ADD_CART|str_form_value }}" />
+							<input type="submit" class="btn btn-primary" onclick="{% if popup_stock_alert %}alert('{{ popup_stock_alert }}');return false;{% endif %}if (verif_form{{ save_suffix_id }}({{ color_array_result }}, {{ sizes_infos_array_result }}) == true) { {{ anim_prod_var }} } else { return false; }" value="{{ STR_ADD_CART|str_form_value }}" />
 						{% else %}
 							<input onclick="get_quote_form('{{ product_id }}', '{{ LANG.STR_CANCEL|filtre_javascript(true,true,false) }}'); return false;" type="submit" class="btn btn-primary btn-line" value="{{ LANG.STR_PDF_QUOTATION }}" align="absmiddle" />
 						{% endif %}

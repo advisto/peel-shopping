@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: types.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -57,14 +57,14 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$output .= maj_type($_POST['id'], $_POST);
-			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_TYPES_MSG_UPDATED_OK'], vn($_POST['id']))))->fetch();
+			$output .= maj_type($frm['id'], $frm);
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_TYPES_MSG_UPDATED_OK'], vn($frm['id']))))->fetch();
 			$output .= affiche_liste_type();
 		} else {
 			if ($form_error_object->has_error('token')) {
 				$output .= $form_error_object->text('token');
 			}
-			$output .= affiche_formulaire_modif_type($_GET['id'], $frm);
+			$output .= affiche_formulaire_modif_type($frm['id'], $frm);
 		}
 		break;
 

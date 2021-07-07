@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: caddie_affichage.php 66961 2021-05-24 13:26:45Z sdelaporte $
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -88,6 +88,7 @@ if (isset($_POST['func'])) {
 if ($mode) {
 	switch ($mode) {
 		case "enleve" :
+			call_module_hook('delete_cart_line', array('frm'=>$_GET));
 			// On récupère le produit en surcoût, si il en existe, avec le technical_code "over_cost"
 			$sql_over_cost = 'SELECT id
 				FROM peel_produits 
@@ -132,8 +133,16 @@ if ($mode) {
 		case "recalc" :
 		case "commande" :
 		default :
-			// change_lines_data : mise à jour de chaque ligne du panier à partir des valeurs du formulaire du panier. Si le module de stock est installé, le recalcul de la quantité disponible pour le produit est fait à partir des valeurs de peel_stock_temp (voir fonction reservation_stock_temp)
 			$_SESSION['session_caddie']->change_lines_data($_POST);
+			$hook_result = call_module_hook('change_lines_data', $_POST, 'array');
+			if (!empty($hook_result)) {
+				// le hook peut éventuellement modifier les valeurs envoyées dans le formulaire
+				$frm = $hook_result;
+			} else {
+				$frm = $_POST;
+			}
+			// change_lines_data : mise à jour de chaque ligne du panier à partir des valeurs du formulaire du panier. Si le module de stock est installé, le recalcul de la quantité disponible pour le produit est fait à partir des valeurs de peel_stock_temp (voir fonction reservation_stock_temp)
+			$_SESSION['session_caddie']->change_lines_data($frm);
 			if($mode!='recalc') {
 				if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 					// Frais de port calculés à partir du poids total ou du montant total d'une commande

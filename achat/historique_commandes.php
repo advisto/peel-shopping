@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: historique_commandes.php 66961 2021-05-24 13:26:45Z sdelaporte $
 include("../configuration.inc.php");
 necessite_identification();
 if (!empty($GLOBALS['site_parameters']['order_history_for_user_disable']) && empty($_SESSION['session_utilisateur']['access_history'])) {
@@ -48,6 +48,7 @@ switch (vb($_REQUEST['mode'])) {
 				}
 			}
 			if(!empty($numeric_value)) {
+				// compatibilité avec les anciennes version.
 				$allow_status_change = !in_array($this_order['id_statut_paiement'], $payment_status_forbid_payment);
 			} else {
 				$allow_status_change = !in_array($this_order['statut_paiement'], $payment_status_forbid_payment);

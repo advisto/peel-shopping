@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 64863 2020-10-30 11:05:39Z sdelaporte $
+// $Id: admin_en.php 67425 2021-06-28 12:27:13Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -362,6 +362,7 @@ $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "Add or edit an ecotax";
 $GLOBALS["STR_ADMIN_EXPORT_CSV"] = "CSV Export";
 $GLOBALS["STR_ADMIN_EXPORT_PDF"] = "PDF export";
 $GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "Do not export prices (for export CSV)";
+$GLOBALS["STR_ADMIN_EXPORT_PAGE_BREAK_EACH_GROUP"] = "Page break to each group for printing";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Choose your export criteria";
 $GLOBALS["STR_ADMIN_EXPORT_SHOW_DETAILS"] = "Show detail lines";
 $GLOBALS["STR_ADMIN_EXPORT_SKIP_EMPTY_TOTALS"] = "Remove rows with zero total";
@@ -458,6 +459,7 @@ $GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE_EXPLANATION"] = "Once the type of data
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_FOUND"] = "Chosen column not found in file: %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "Column #%s unhandled import (purely descriptive when exporting): %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "Column #%s not recognized and therefore not imported: %s";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_FILE_STRUCTURE"] = "The structure of the CSV file seems to be problematic in terms of the number of row column %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "You must check at least one box.<br />Importing stopped.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND"] = "File not found!<br />Importing stopped.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS"] = "Problem while importing: there are several columns \"%s\" in the source file - not import.";
@@ -901,6 +903,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_BRAND"] = "SELECT BRAND ASSOCIATED";
 $GLOBALS["STR_ADMIN_DISTRIBUTOR_PRODUITS_CHOOSE_BRAND"] = "Choose the brand associated with the distributor";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_EXPLAIN"] = "If you select the automatic calculation option, the associated products displayed on the product sheet products will be the ones ordered by other users at the same time as this one. In this case, the list of products above will not be taken into account.";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE"] = "SELECT PRODUCTS RELATED REFERENCES (cross-selling)";
+$GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_PACKS"] = "SELECT PRODUCTS PACKS RELATED REFERENCES";
 $GLOBALS["STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST"] = "You must first create a category of products";
 $GLOBALS["STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT"] = "display this default color front office";
 $GLOBALS["STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER_CONSTRAINT"] = "Number between 1 and 10";
@@ -1549,6 +1552,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_NO_ACCOUNT_MANAGER"] = "Client unmanaged";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_ADMIN_RIGHT_TO_LIST"] = "You do not have permission to view the list of directors nor the emails of users";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED"] = "No group defined";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND"] = "No orders recorded for this client.";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NO_FACT_FOUND"] = "No bills recorded for this client.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NO_SUPPLIER_FOUND"] = "No provider registered in the database.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_NOT_FOUND"] = "The user was not found.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ON_HOLIDAY_SUPPLIER"] = "Supplier holiday";
@@ -1775,6 +1779,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_VIEWED"] = "Viewed";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_WIDTH"] = "Width (dimension px)";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"] = "The banner <b>%s</b> has been created.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ON_BACKGROUND_SITE"] = "On the background of the site";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_ON_PRODUCT_DETAILS"] = "On product details";
 $GLOBALS["STR_MODULE_BOUNCES_BAD_EMAILS_TITLE"] = "Email list problem";
 $GLOBALS["STR_MODULE_BOUNCES_ACTIONS_SELECTION"] = "Selecting actions";
 $GLOBALS["STR_MODULE_BOUNCES_SEARCH_EMAIL_PROBLEM"] = "Find an email problem";
@@ -2141,6 +2146,7 @@ $GLOBALS["STR_ADMIN_COLUMN_CONTAINS_CHOICE"] = "The \"%s\" column must contain e
 $GLOBALS["STR_ADMIN_FIELD_UNIQUE"] = "The value of the \"%s\" field must be unique.";
 $GLOBALS["STR_ADMIN_IMPORT_USER_END"] = "End of user import: %s inserted, %s UPDATE <br /> Emails with generated password sent.";
 $GLOBALS["STR_ADMIN_IMPORT_FILE_END"] = "End of file import: %s lines inserted,%s UPDATE";
+$GLOBALS["STR_ADMIN_INSERT_VALUE_FORBIDDEN"] = "Insertion in table %s prohibited";
 $GLOBALS["STR_ADMIN_NO_PROBLEM_OCCURED"] = "No anomaly found, you can validate below to perform the import";
 $GLOBALS["STR_ADMIN_LINE"] = "Line";
 $GLOBALS["STR_ADMIN_SIMULATION"] = "Simulation";
@@ -2171,6 +2177,7 @@ $GLOBALS["STR_ADMIN_SEND_EMAIL_TO_USERS"] = "Send emails to users";
 $GLOBALS["STR_ADMIN_HTML_PRODUCT_PAGE_FOOTER"] = "Product footer";
 $GLOBALS["STR_ADMIN_HTML_HOME_HEADER"] = "Home page below menu";
 $GLOBALS["STR_ADMIN_SHOW_TAG_LIST_EXPLANATION"] = "A tag is an element that will be automatically replaced by the correct value (associated with the recipient) when sending the email. To add a tag to the email text you can click on it.";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE'] = "Group action on the selection";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION'] = "Display on the home page and in the section Our selection";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION'] = "Do not display on the home page and in the section Our selection";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW'] = "Display in the News section";
@@ -2182,8 +2189,20 @@ $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_BEST_SELLERS'] = "Do not display i
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_RECOMMENDED_PRODUCTS'] = "Display in recommended products";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_TOP'] = "Display in the block Headlines";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_ETAT'] = "Put online";
-$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_STAT'] = "Put offline";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_ETAT'] = "Offline";
 $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_SUPPR_PRODUCT'] = "Delete selected products";
-$GLOBALS['STR_ADMIN_UPDATE_WARNING'] = "Are you sure you want to change?";
 $GLOBALS['STR_ADMIN_NO_UPDATE_VERSION'] = "This page is not used to update the database for this site. Please contact support";
+$GLOBALS['STR_CONTINUE_WITH_ERROR'] = "Force the import of valid rows only";
+$GLOBALS['STR_CONTINUE_WITH_ERROR_CONFIRM'] = "The file you want to import has anomalies on some lines. Are you sure you want to ignore these lines and import the other lines that are valid?";
+$GLOBALS['STR_ADMIN_LINE_WITH_ERROR_NOT_IMPORT'] = "Line(s) with anomaly and therefore not imported";
+$GLOBALS["STR_ADMIN_MORE_INFOS"] = "Show more information";
+$GLOBALS["STR_ADMIN_LESS_INFOS"] = "Show less information";
+$GLOBALS["STR_ADMIN_GENERAL"] = "General";
+$GLOBALS["STR_ADMIN_CONTACT_DATE"] = "Contact date";
+$GLOBALS["STR_ADMIN_CALL_AND_EVENT"] = "Call / Event";
+$GLOBALS["STR_ADDRESSES"] = "Addresses";
+$GLOBALS["STR_ADMIN_CLIENT_HISTORY"] = "Customer history";
+$GLOBALS["STR_ADMIN_CONTACT_PLANIFICATION"] = "Contact planning";
+$GLOBALS["STR_ADMIN_CLIENT_PAGE"] = "Customer card";
+$GLOBALS["STR_ADMIN_CONTACT_AND_ACTION"] = "Contacts and actions";
+$GLOBALS["STR_ADMIN_CONNECTION_HISTORY"] = "Connection history";

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 64750 2020-10-21 16:20:30Z sdelaporte $
+// $Id: utilisateurs.php 67314 2021-06-21 13:37:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -38,6 +38,8 @@ if (!empty($_POST['print_all_bill'])) {
 		$is_pdf_generated = $invoice_pdf->FillDocument(null, null, null, null, null, $user_id, null, 'standard', false);
 		if($is_pdf_generated) {
 			die();
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_ADMIN_UTILISATEURS_NO_FACT_FOUND"]))->fetch();
 		}
 	} else {
 		if ($form_error_object->has_error('token')) {
@@ -50,7 +52,6 @@ if (isset($_POST['send_email_to_selected'])) {
 	// envoi d'email aux utilisateurs cochés
 	redirect_and_die($GLOBALS['wwwroot'] . '/modules/webmail/administrer/webmail_send.php?'.http_build_query(array('user_ids' => $_REQUEST['user_ids'])));
 }
-
 switch (vb($_REQUEST['mode'])) {
 	case 'insert_address':
 		if(insert_or_update_address($_POST, false, $id_utilisateur)) {
@@ -454,6 +455,11 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
+	case "maj_vitrine" :
+		if (check_if_module_active('vitrine')) {
+			$output .= create_or_update_vitrine($_POST);
+		}
+		break;
 		
 	case "phone_call" :
 		if ((!empty($_POST['phone_emitted_submit']) || !empty($_GET['phone_emitted_submit']))) {
@@ -799,7 +805,7 @@ function affiche_formulaire_modif_utilisateur($id_utilisateur)
 			$frm['last_date'] = $last_date['date'];
 		}
 		if (!empty($last_date['user_ip'])) {
-			$frm['user_ip'] = long2ip($last_date['user_ip']);
+			$frm['user_ip'] = long2ip(intval($last_date['user_ip']));
 		}
 		if (!empty($comments['comments'])) {
 			$frm['comments'] = $comments['comments'];
@@ -822,10 +828,10 @@ function affiche_formulaire_modif_utilisateur($id_utilisateur)
  */
 function afficher_formulaire_utilisateur(&$frm)
 {
+		
 	$output = '';
 	$GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = true;
 	$frm = call_module_hook('user_edit_form_data', $frm, 'array', true);
-
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_form.tpl');
 	
 	$tpl->assign('hook_actions', call_module_hook('user_edit_actions', array('id_utilisateur' => vb($frm['id_utilisateur'])), 'string'));
@@ -1045,6 +1051,7 @@ function afficher_formulaire_utilisateur(&$frm)
 		$tpl->assign('vitrine_admin', affiche_vitrine_admin($frm['id_utilisateur']));
 	}
 
+	$tpl->assign('is_annonces_module_active', check_if_module_active('annonces'));
 	$tpl->assign('is_abonnement_module_active', check_if_module_active('abonnement'));
 	if (check_if_module_active('abonnement') && !empty($frm['id_utilisateur'])) {
 		$tpl->assign('abonnement_admin', affiche_abonnement_admin($frm['id_utilisateur'], true));
@@ -1123,6 +1130,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('titre_soumet', vb($frm['titre_soumet']));
 	$tpl->assign('pseudo_is_not_used', !empty($GLOBALS['site_parameters']['pseudo_is_not_used']));
 	if (check_if_module_active('annonces')) {
+		$tpl->assign('STR_ADMIN_MENU_MODERATION_ADS_HEADER', StringMb::ucfirst(StringMb::strtolower($GLOBALS['STR_ADMIN_MENU_MODERATION_ADS_HEADER'])));
 		if (vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'checkbox') {
 			$tpl->assign('id_categories', get_ad_select_options(null, vb($frm['id_categories']), 'id', false, false, 'checkbox', 'id_categories'));	
 		} elseif (vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'select') {
@@ -1222,6 +1230,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('STR_PORTABLE', $GLOBALS['STR_PORTABLE']);
 	$tpl->assign('form_placeholder_portable', vb($GLOBALS['site_parameters']['form_placeholder_portable']));
 	$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
+	$tpl->assign('STR_ADDRESSES', $GLOBALS['STR_ADDRESSES']);
 	$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
 	$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
 	$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
@@ -1284,32 +1293,55 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('STR_ADMIN_ADDRESS_CLIENT', $GLOBALS['STR_ADMIN_ADDRESS_CLIENT']);
+	$tpl->assign('STR_ADMIN_GENERAL', $GLOBALS['STR_ADMIN_GENERAL']);
+	$tpl->assign('STR_ADMIN_CONNECTION_HISTORY', $GLOBALS['STR_ADMIN_CONNECTION_HISTORY']);
+	$tpl->assign('STR_ADMIN_CONTACT_AND_ACTION', $GLOBALS['STR_ADMIN_CONTACT_AND_ACTION']);
+	$tpl->assign('STR_ADMIN_CLIENT_PAGE', $GLOBALS['STR_ADMIN_CLIENT_PAGE']);
+	$tpl->assign('STR_ADMIN_CONTACT_DATE', $GLOBALS['STR_ADMIN_CONTACT_DATE']);
+	$tpl->assign('STR_ADMIN_CALL_AND_EVENT', $GLOBALS['STR_ADMIN_CALL_AND_EVENT']);
+	$tpl->assign('STR_ADMIN_INFO', $GLOBALS['STR_ADMIN_INFO']);
+	$tpl->assign('STR_ADMIN_MENU_SALES_SALES_TITLE', $GLOBALS['STR_ADMIN_MENU_SALES_SALES_TITLE']);
+	
+	$tpl->assign('STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING', $GLOBALS['STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION', $GLOBALS['STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_SAVE_EVENT', $GLOBALS['STR_ADMIN_UTILISATEURS_SAVE_EVENT']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT', $GLOBALS['STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_ORDERS_LIST', $GLOBALS['STR_ADMIN_UTILISATEURS_ORDERS_LIST']);
+	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
+	$tpl->assign('STR_ORDER_NAME', $GLOBALS['STR_ORDER_NAME']);
+	$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
+	$tpl->assign('STR_TOTAL', $GLOBALS['STR_TOTAL']);
+	$tpl->assign('ttc_ht', (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
+	$tpl->assign('STR_AVOIR', $GLOBALS['STR_AVOIR']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_PRODUCTS_ORDERED', $GLOBALS['STR_ADMIN_UTILISATEURS_PRODUCTS_ORDERED']);
+	$tpl->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
+	$tpl->assign('STR_DELIVERY', $GLOBALS['STR_DELIVERY']);
+	$tpl->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
+	$tpl->assign('STR_PRINT', $GLOBALS['STR_PRINT']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS', $GLOBALS['STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND']);
+	$tpl->assign('STR_ADMIN_CONTACT_PLANIFICATION', $GLOBALS['STR_ADMIN_CONTACT_PLANIFICATION']);
+	$tpl->assign('STR_ADMIN_CLIENT_HISTORY', $GLOBALS['STR_ADMIN_CLIENT_HISTORY']);
+	
 	$tpl->assign('hook_output', call_module_hook('user_admin_form_additional_part', array('frm' => $frm), 'string'));
-	$output = $tpl->fetch();
-
+	$tpl->assign('mini_liste_commande_src', $GLOBALS['administrer_url'] . '/images/mini_liste_commande.gif');
+	$columns = 8;
+	if (check_if_module_active('parrainage')) {
+		$columns++;
+	}
+	$tpl->assign('columns', $columns);
+	$tpl->assign('event_comment', (!empty($_POST['event_comment']) ? $_POST['event_comment'] : ''));
 	if (!empty($frm['id_utilisateur'])) {
-		$columns = 8;
-		if (check_if_module_active('parrainage')) {
-			$columns++;
-		}
-
-		$tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_form_isutil.tpl');
+		// $tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_form_isutil.tpl');
 		
-		$tpl2->assign('action', get_current_url(false) . '?id_utilisateur=' . intval($_REQUEST['id_utilisateur']) . '&mode=modif');
-		$tpl2->assign('pseudo', (!empty($frm['pseudo'])?$frm['pseudo']:vb($frm['email'])));
-		$tpl2->assign('event_comment', (!empty($_POST['event_comment']) ? $_POST['event_comment'] : ''));
-		$tpl2->assign('affiche_recherche_connexion_user',  affiche_recherche_connexion_user(array('user_id' => $frm['id_utilisateur']), false));
+		$tpl->assign('affiche_recherche_connexion_user',  affiche_recherche_connexion_user(array('user_id' => $frm['id_utilisateur']), false));
 		if (check_if_module_active('annonces')) {
-			$tpl2->assign('affiche_liste_abus', affiche_liste_abus(array('annonceur' => $frm['pseudo']), true, false));
+			$tpl->assign('affiche_liste_abus', affiche_liste_abus(array('annonceur' => $frm['pseudo']), true, false));
 		}
-		$tpl2->assign('actions_moderations_user', affiche_actions_moderations_user($frm['id_utilisateur']));
-		$tpl2->assign('columns', $columns);
-		$tpl2->assign('mini_liste_commande_src', $GLOBALS['administrer_url'] . '/images/mini_liste_commande.gif');
-		$tpl2->assign('is_parrainage_module_active', check_if_module_active('parrainage'));
-		$tpl2->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-		$tpl2->assign('printer_src', $GLOBALS['wwwroot_in_admin'] . '/images/t_printer.gif');
-		$tpl2->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
-		$tpl2->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
+		$tpl->assign('actions_moderations_user', affiche_actions_moderations_user($frm['id_utilisateur']));
+		$tpl->assign('is_parrainage_module_active', check_if_module_active('parrainage'));
+		$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
+		$tpl->assign('printer_src', $GLOBALS['wwwroot_in_admin'] . '/images/t_printer.gif');
 
 		$query = query("SELECT c.*, GROUP_CONCAT(ca.nom_produit SEPARATOR '<br />') AS ordered_products
 			FROM peel_commandes c
@@ -1350,31 +1382,13 @@ function afficher_formulaire_utilisateur(&$frm)
 					);
 				$i++;
 			}
-			$tpl2->assign('results', $tpl_results);
-			$tpl2->assign('action2', $_SERVER['REQUEST_URI']);
-			$tpl2->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['id_utilisateur']));
-			$tpl2->assign('user_id', intval(vn($frm['id_utilisateur'])));
+			$tpl->assign('results', $tpl_results);
+			$tpl->assign('action2', $_SERVER['REQUEST_URI']);
+			$tpl->assign('form_token2', get_form_token_input($_SERVER['PHP_SELF'] . $frm['id_utilisateur']));
+			$tpl->assign('user_id', intval(vn($frm['id_utilisateur'])));
 		}
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING', $GLOBALS['STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION', $GLOBALS['STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_SAVE_EVENT', $GLOBALS['STR_ADMIN_UTILISATEURS_SAVE_EVENT']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT', $GLOBALS['STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_ORDERS_LIST', $GLOBALS['STR_ADMIN_UTILISATEURS_ORDERS_LIST']);
-		$tpl2->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
-		$tpl2->assign('STR_ORDER_NAME', $GLOBALS['STR_ORDER_NAME']);
-		$tpl2->assign('STR_DATE', $GLOBALS['STR_DATE']);
-		$tpl2->assign('STR_TOTAL', $GLOBALS['STR_TOTAL']);
-		$tpl2->assign('ttc_ht', (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
-		$tpl2->assign('STR_AVOIR', $GLOBALS['STR_AVOIR']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_PRODUCTS_ORDERED', $GLOBALS['STR_ADMIN_UTILISATEURS_PRODUCTS_ORDERED']);
-		$tpl2->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
-		$tpl2->assign('STR_DELIVERY', $GLOBALS['STR_DELIVERY']);
-		$tpl2->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
-		$tpl2->assign('STR_PRINT', $GLOBALS['STR_PRINT']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS', $GLOBALS['STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS']);
-		$tpl2->assign('STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND']);
-		$output .= $tpl2->fetch();
 	}
+	$output = $tpl->fetch();
 	return $output;
 }
 

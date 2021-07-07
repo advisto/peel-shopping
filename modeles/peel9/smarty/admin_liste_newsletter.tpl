@@ -1,26 +1,30 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_newsletter.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_liste_newsletter.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="10">{$STR_ADMIN_NEWSLETTERS_TITLE}</td>
 	</tr>
 	<tr>
-		<td colspan="10">{if $is_crons_module_active}<p class="alert alert-success">{$STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN}</p>
-		{else}<p class="alert alert-danger">{$STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN}</p>{/if}</td>
+		<td colspan="10">
+			<div style="margin-top:5px;">
+				<p><a href="{$add_href|escape:'html'}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {$STR_ADMIN_NEWSLETTERS_CREATE}</a></p>
+			</div>
+		</td>
 	</tr>
 	<tr>
-		<td colspan="10"><p><img src="{$add_src|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_href|escape:'html'}">{$STR_ADMIN_NEWSLETTERS_CREATE}</a></p></td>
+		<td colspan="10">{if $is_crons_module_active}<p class="alert alert-success">{$STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN}</p>
+		{else}<p class="alert alert-danger">{$STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN}</p>{/if}</td>
 	</tr>
 {if isset($results)}
 	{$links_header_row}

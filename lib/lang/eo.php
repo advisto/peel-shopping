@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: eo.php 67177 2021-06-09 13:38:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -256,7 +256,7 @@ $GLOBALS["STR_ERR_KEYB"] = "Premu la klavon <b>x</b> por fermi.";
 $GLOBALS["STR_ERR_LOGIN"] = "Vi ne difinis vian kromnomon.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Vi ne difinis vian mesaĝon.\n";
 $GLOBALS["STR_ERR_MISMATCH_PASSWORD"] = "La pasvortoj malsamas, bonvolu nove enmeti la pasvortojn.";
-$GLOBALS['STR_ERR_MONDIAL_RELAY']= "Please select a relay point";
+$GLOBALS["STR_ERR_MONDIAL_RELAY"] = "Please select a relay point";
 $GLOBALS["STR_ERR_NAME"] = "Vi ne difinis vian familinomon.\n";
 $GLOBALS["STR_ERR_NEWPASS_CONFIRM"] = "Bonvolu konfirmi la novan pasvorton.\n";
 $GLOBALS["STR_ERR_NEWPASS"] = "Vi ne enmetis novan pasvorton.\n";
@@ -824,7 +824,7 @@ $GLOBALS["STR_SUBMIT"] = "Validigi";
 $GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "";
 $GLOBALS["STR_SUGGEST"] = "Via kredito ebligas vin akiri pliajn varojn rilataj. <a href=\"achat/suggest.php\">Ni proponas vin konsulti la sugest-liston por kompletigi vian aĉetadon</a>.";
 $GLOBALS["STR_SUPPORT"] = "Pri ĉiaj informpetoj, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">eblas kontakti nin pere de ĉi formularo</a>.";
-$GLOBALS["STR_SWIFT"] = "SWIFT-/BIC-kodo";
+$GLOBALS["STR_SWIFT"] = "BIC-kodo";
 $GLOBALS["STR_SYNC_OK"] = "La rekopio de dosieroj sukcese efektiviĝis";
 $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "Ĉi tabelo listigas la varojn en la aĉetkorbo";
 $GLOBALS["STR_TABLE_SUMMARY_ORDERS"] = "Ĉi tabelo prezentas la mend-liston";
@@ -940,7 +940,7 @@ $GLOBALS["STR_PIECE"] = "";
 $GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "";
 $GLOBALS["STR_ERR_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "";
-$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
@@ -961,6 +961,16 @@ $GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "monato";
+$GLOBALS["STR_ORDER_SUSPECT"] = "";
 $GLOBALS["STR_CODE_CHORUS"] = "";
 $GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "";
 $GLOBALS["STR_NAME_ADDRESS"] = "";
+
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_1'] = "";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_2'] = "";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_3'] = "";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_FREE_OF_CHARGE'] = "";
+$GLOBALS["STR_EMAIL_INCORRECT"] = "";
+$GLOBALS["STR_AMOUNT_TVA"] = "";
+$GLOBALS["STR_VAT_PERCENTAGE"] = "";
+$GLOBALS["STR_VAT_DETAIL"] = "";

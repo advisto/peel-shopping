@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 65116 2020-11-18 15:03:29Z sdelaporte $
+// $Id: display_article.php 67330 2021-06-21 16:31:14Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -89,7 +89,7 @@ if (!function_exists('get_article_details_html')) {
 			$tpl->assign('rub_banner_head_article', thumbs($result['image_head'], vn($GLOBALS['site_parameters']['medium_width_image_head_article'],100), vn($GLOBALS['site_parameters']['medium_height_image_head_article'],100), 'fit', null, null, true, true));
 		}
 		
-		$hook_result = call_module_hook('article_details_html_template_data', array('rubid' => $article['rubrique_id'], 'id' => $article_id), 'array');
+		$hook_result = call_module_hook('article_details_html_template_data', array('rubid' => vn($article['rubrique_id']), 'id' => $article_id), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
 		}
@@ -133,10 +133,10 @@ if (!function_exists('get_rubriques_sons_html')) {
 				if (!empty($rub['image_lien'])) {
 					$tmp['lien_src'] = thumbs($rub['image_lien'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit', null, null, true, true);
 				}
+				$tmp['description'] = StringMb::str_shorten(trim(StringMb::strip_tags(StringMb::html_entity_decode_if_needed($rub['description_' . $_SESSION['session_langue']]))),500,'','...',450);
 				$data[] = $tmp;
 			}
 			$tpl->assign('data', $data);
-			$tpl->assign('description', StringMb::str_shorten(trim(StringMb::strip_tags(StringMb::html_entity_decode_if_needed($rub['description_' . $_SESSION['session_langue']]))),500,'','...',450));
 			$output .= $tpl->fetch();
 		}
 		correct_output($output, true, 'html', $_SESSION['session_langue']);
@@ -339,7 +339,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('plus', $plus);
 			}
 		}
-		$hook_result = call_module_hook('articles_list_brief_html', array('rubid' => $rubid, 'technical_code' => $rowrub['technical_code']), 'array');
+		$hook_result = call_module_hook('articles_list_brief_html', array('rubid' => $rubid, 'technical_code' => vb($rowrub['technical_code'])), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
 		}

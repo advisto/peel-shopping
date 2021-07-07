@@ -2587,7 +2587,7 @@ class TCPDF_STATIC {
 				$page_mode = 'UseOC';
 				break;
 			}
-			case '': {
+			case 'UseAttachments': {
 				$page_mode = 'UseAttachments';
 				break;
 			}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -32,6 +32,7 @@
 			<option value="{{ this_type }}" {% if selected_type == this_type %}selected="selected"{% endif %}>{{ type }}</option>
 		{% endfor %}
 		</select></p>
+		<div id="export_type_explanation"></div>
 	
 			<div class="row" id="fields_rules" style="display:none;">
 			<div class="col-lg-12">
@@ -171,9 +172,9 @@
 		<div id="main_group_by" class="div_hidden_by_default col-sm-6">
 			<div class="well">
 		{% for this_type,this_array in group_by_type_array %}
-				<div id="group_by_{$this_type}" class="div_hidden_by_default div_for_type_{$this_type}">
+				<div id="group_by_{{ this_type }}" class="div_hidden_by_default div_for_type_{{ this_type }}">
 		<div class="row">
-			<div class="col-sm-12">{$STR_GROUP_BY}{$STR_BEFORE_TWO_POINTS}:</div>
+			<div class="col-sm-12">{{ STR_GROUP_BY }} {{ STR_BEFORE_TWO_POINTS }}:</div>
 					</div>
 			{% for i in 2..5 %}
 					<div id="new_group_by_{{ this_type }}_{{ i }}" {% if i>1 %}style="display:none;" class="new_order_by_group_by_select" {% endif %}>
@@ -283,17 +284,23 @@
 				<div class="col-sm-6"><input type="text" name="page_bottom" value="" class="form-control" /></div>
 			</div>
 		</div>
+	{% if format == 'html' %}
+		<div class="row" id="data_encoding_form" >
+			<div class="col-sm-6"></div>
+			<div class="col-sm-6"><input type="checkbox" id="page_break_checkbox" name="page_break" {% if page_break %} checked="checked"{% endif %} value="1" /> {{ STR_ADMIN_EXPORT_PAGE_BREAK_EACH_GROUP }}</div>
+		</div>
+	{% endif %}
 	{% if format == 'csv' %}
 	<div class="row div_hidden_by_default" id="data_encoding_form" >
-		<div class="col-sm-4">{{ STR_ADMIN_IMPORT_FILE_ENCODING }}{{ STR_BEFORE_TWO_POINTS }}:</div>
-		<div class="col-sm-8"><select class="form-control" name="data_encoding" style="width: 150px">
+		<div class="col-sm-6">{{ STR_ADMIN_IMPORT_FILE_ENCODING }}{{ STR_BEFORE_TWO_POINTS }}:</div>
+		<div class="col-sm-6"><select class="form-control" name="data_encoding" style="width: 150px">
 				<option value="utf-8"{% if data_encoding == 'utf-8' %} selected="selected"{% endif %}>UTF-8</option>
 				<option value="iso-8859-1"{% if data_encoding == 'iso-8859-1' %} selected="selected"{% endif %}>ISO 8859-1</option>
 			</select></div>
 	</div>
 	<div class="row div_hidden_by_default" id="separator_form">
-		<div class="col-sm-4">{{ STR_ADMIN_IMPORT_SEPARATOR }}{{ STR_BEFORE_TWO_POINTS }}:</div>
-		<div class="col-sm-8"><input style="width:50px" type="text" class="form-control" name="separator" value="{{ separator }}"  id="separator"/> ({{ STR_ADMIN_EXPORT_SEPARATOR_EXPLAIN }})</div>
+		<div class="col-sm-6">{{ STR_ADMIN_IMPORT_SEPARATOR }}{{ STR_BEFORE_TWO_POINTS }}:</div>
+		<div class="col-sm-6"><input style="width:50px" type="text" class="form-control" name="separator" value="{{ separator }}"  id="separator"/> ({{ STR_ADMIN_EXPORT_SEPARATOR_EXPLAIN }})</div>
 	</div>
 	<div class="row div_hidden_by_default" id="header_form">
 		<div class="col-sm-12">

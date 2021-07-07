@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: flot.php 64750 2020-10-21 16:20:30Z sdelaporte $
+// $Id: flot.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -106,7 +106,7 @@ function get_flot_chart($width, $height, $url, $chart_type = 'bar', $base = '', 
 			},
 			combine: {
                 color: "#999999",
-                threshold: 0.03,
+                threshold: ' . vb($params['threshold'], '0.03') . ',
 				label: "' . $GLOBALS["STR_OTHER"] . '"
             }
 		}
@@ -251,6 +251,7 @@ window.'.$id.' = $.plot($("#'.$id.'"), data,
 				$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/chart/js/jquery.flot.'.$this_js.'.js';
 			}
 		}
+		// NB : Si on veut rajouter dans le plothover la mention S31 pour numéro de semaine : (vb($params['period'], 'jour') == 'semaine' ? StringMb::strtoupper(StringMb::substr($GLOBALS['strWeeks'], 0, 1)) . [mettre le numéro de semaine en JS] . ' ':'') 
 		$plot .= '
 		$("<div id=\"tooltip\"></div>").css({
 			position: "absolute",
@@ -267,9 +268,13 @@ window.'.$id.' = $.plot($("#'.$id.'"), data,
 			}
 			if (item) {
 				var s = new Date(item.datapoint[0]*1000).toLocaleDateString("fr-FR")
-				$("#tooltip").html(item.series.label + " " + s+ " : " + item.datapoint[1] + "' . vb($params['unit']) . '")
-					.css({top: item.pageY+5, left: item.pageX+5})
-					.fadeIn(200);
+				
+				if(item.pageX<=$("#' . $id . '").width()/2 || item.pageX<$("#' . $id . '").width()-$("#tooltip").width()) {
+					this_left = item.pageX+5;
+				} else {
+					this_left = item.pageX-5-$("#tooltip").width();
+				}
+				$("#tooltip").html(item.series.label + " " + s + " : " + item.datapoint[1] + "' . vb($params['unit']) . '").css({top: item.pageY+5, left: this_left}).fadeIn(200);
 			} else {
 				$("#tooltip").hide();
 			}

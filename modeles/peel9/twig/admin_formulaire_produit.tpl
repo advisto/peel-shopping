@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -151,7 +151,7 @@
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_REFERENCE_FOURNISSEUR }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="reference_fou" value="{{ reference_fou|html_entity_decode_if_needed|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="reference_fournisseur" value="{{ reference_fournisseur|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_TECHNICAL_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>

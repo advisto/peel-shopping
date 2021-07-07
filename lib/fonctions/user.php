@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: user.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -644,6 +644,7 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 		$_SESSION['session_login_tried'] = 0;
 	}
 	$_SESSION['session_login_tried']++;
+	$redirect_user_url = false;
 	if ($_SESSION['session_login_tried'] < 30) {
 		// Limitation à 30 tentatives de login dans la même session
 		$utilisateur = verifier_authentification(trim($email_or_pseudo), trim($mot_passe), null, $check_password, $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash, $check_parameters_array);
@@ -709,6 +710,15 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 			
 			$hook_result = call_module_hook('user_login_now', array(), 'array');
 			$_SESSION['session_utilisateur'] = array_merge_recursive_distinct($_SESSION['session_utilisateur'], vb($hook_result, array()));
+
+			$current_priv_array = explode('+', $utilisateur['priv']);
+			foreach($current_priv_array as $this_priv) {
+				if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$this_priv])) {
+					// l'utilisateur à au moins un privilège concerné, on redirige.
+					$redirect_user_url = $GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$this_priv];
+					break;
+				}
+			}
 		}
 		if (!empty($GLOBALS['site_parameters']['save_cart_auto_enable'])) {
 			$sql = "SELECT *
@@ -718,20 +728,11 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 			while($result = fetch_assoc($query)) {
 				// Il ne faut pas mettre les données stocké dans le cookie directement dans le panier. Les données dans le cookies peuvent être erronées, ou frauduleuse.
 				$product_object = new Product($result['produit_id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-				$product_object->set_configuration($result['couleur_id'], $result['taille_id'], $result['id_attribut'], is_reseller_module_active() && is_reseller());
+				$product_object->set_configuration($result['couleur_id'], $result['taille_id'], $result['id_attribut'], check_if_module_active('reseller') && is_reseller());
 				$_SESSION['session_caddie']->add_product($product_object, $result['quantite'], null);
 				unset($product_object);
 			}
 			$_SESSION['session_caddie']->update();
-		}
-		$current_priv_array = explode('+', $utilisateur['priv']);
-		$redirect_user_url = false;
-		foreach($current_priv_array as $this_priv) {
-			if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$this_priv])) {
-				// l'utilisateur à au moins un privilège concerné, on redirige.
-				$redirect_user_url = $GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$this_priv];
-				break;
-			}
 		}
 		if (!empty($redirect_user_url)) {
 			// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
@@ -1039,22 +1040,25 @@ function get_current_user_promotion_percentage($user_info = null)
 /**
  * is_user_tva_intracom_for_no_vat()
  *
- * @param mixed $user_id
+ * @param integer $user_id
+ * @param string $intracom_for_billing
  * @return
  */
-function is_user_tva_intracom_for_no_vat($user_id = null)
+function is_user_tva_intracom_for_no_vat($user_id = null, $intracom_for_billing = null)
 {
-	if (empty($user_id) && est_identifie()) {
-		$user_id = $_SESSION['session_utilisateur']['id_utilisateur'];
-	}
-	if (!empty($user_id)) {
-		if ($user_infos = get_user_information($user_id)) {
-			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			$intracom_for_billing = $user_infos['intracom_for_billing'];
+	if(empty($intracom_for_billing)) {
+		if (empty($user_id) && est_identifie()) {
+			$user_id = $_SESSION['session_utilisateur']['id_utilisateur'];
 		}
-	}
-	if (!empty($_SESSION['session_caddie']->num_tva)) {
-		$intracom_for_billing = $_SESSION['session_caddie']->num_tva;
+		if (!empty($user_id)) {
+			if ($user_infos = get_user_information($user_id)) {
+				// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
+				$intracom_for_billing = $user_infos['intracom_for_billing'];
+			}
+		}
+		if (!empty($_SESSION['session_caddie']->num_tva)) {
+			$intracom_for_billing = $_SESSION['session_caddie']->num_tva;
+		}
 	}
 	if(!empty($intracom_for_billing)) {
 		if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && StringMb::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !empty($intracom_for_billing) && !is_numeric(StringMb::substr($intracom_for_billing, 0, 2)) && StringMb::substr(StringMb::strtoupper($intracom_for_billing), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $intracom_for_billing)) >= 7 && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $intracom_for_billing)) <= 14) {

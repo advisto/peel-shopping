@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: caddie_ajout.php 66961 2021-05-24 13:26:45Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -135,8 +135,10 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 					unset($_SESSION["session_display_popup"]["upload_error_text"]); 
 				}
 			}
-
-			if (!empty($_POST['critere']) || !empty($_POST['critere_' . $i])) {
+			if (!empty($_POST['size_id_array'])) {
+				$taille_id = intval(vn($_POST['size_id_array'][$i]));
+				$couleur_id = intval(vn($_POST['couleur_' . $i]));
+			} elseif (!empty($_POST['critere']) || !empty($_POST['critere_' . $i])) { 
 				// Affichage des combinaisons de couleur et taille dans un unique select
 				if (!empty($_POST['critere_' . $i])) {
 					$criteres = explode("|", $_POST['critere_' . $i]);

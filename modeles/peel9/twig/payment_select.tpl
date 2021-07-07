@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -38,7 +38,7 @@
 				{{ STR_ORDER_FORM }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" name="{{ technical_code }}_payment_methods" value="" /> <br />{% if order_form_payment_methods_error is defined %}{{ order_form_payment_methods_error }}{% endif %}
 			</span>
 {% else %}
-			<input {% if payment_alert_text %} onclick='{$payment_alert_text}' {% else %} onclick="if(document.getElementById('payment_method')) {document.getElementById('payment_method').style.display='none';}"  {% endif %} type="radio" name="payment_technical_code" value="{{ technical_code|str_form_value }}"{% if issel %} checked="checked"{% endif %} /> {{ nom|html_entity_decode_if_needed }}
+			<input {% if payment_alert_text %} onclick='{{ payment_alert_text }}' {% else %} onclick="if(document.getElementById('payment_method')) {document.getElementById('payment_method').style.display='none';}"  {% endif %} type="radio" name="payment_technical_code" value="{{ technical_code|str_form_value }}"{% if issel %} checked="checked"{% endif %} /> {{ nom|html_entity_decode_if_needed }}
 {% endif %}
 	{% if (fprix_tarif) %}
 			{{ STR_BEFORE_TWO_POINTS }}: + {{ fprix_tarif }}

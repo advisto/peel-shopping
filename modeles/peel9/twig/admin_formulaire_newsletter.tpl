@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -76,7 +76,7 @@
 								<td colspan="{% if associated_product_multiple_add_to_cart %}3{% else %}2{% endif %}" class="title_label center" style="width:65px">{{ STR_REFERENCE }} - {{ STR_ADMIN_NAME }}</td>
 							</tr>
 						</thead>
-						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}
+						{# Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! #}
 						<tbody id="dynamic_order_lines">{% for o in produits_options %}<tr class="top" id="sortable_{{ o.i }}">
 									<td>
 										<img src="{{ administrer_url }}/images/b_drop.png" alt="{{ STR_DELETE }}" onclick="if(bootbox.confirm('{{ STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript(true,true,false) }}', function(result) {if(result) {admin_delete_products_list_line({{ o.i }}, true);}} ))return false;" title="{{ STR_ADMIN_PRODUCT_ORDERED_DELETE }}" style="cursor:pointer" />

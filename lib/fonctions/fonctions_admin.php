@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 64973 2020-11-09 13:07:30Z sdelaporte $
+// $Id: fonctions_admin.php 67425 2021-06-28 12:27:13Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -111,7 +111,7 @@ function get_admin_menu()
 			$GLOBALS['menu_items']['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=liste&priv=supplier'] = $GLOBALS["STR_ADMIN_MENU_USERS_SUPPLIERS_LIST"];
 		}
 		}
-		if (check_if_module_active('pages_stats', 'administrer/pages_stats.php')) {
+		if (check_if_module_active('pages_stats', 'administrer/pages_stats.php') && !empty($GLOBALS['site_parameters']['page_stats_module_tracert_ip_page_consultation_enable'])) {
 			$GLOBALS['menu_items']['users_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/pages_stats/administrer/pages_stats.php'] = $GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"];
 		}
 		if (a_priv('admin_white_label,admin_sales,admin_users,admin_content,admin_communication,admin_finance,admin_operations,admin_productsline', true)) {
@@ -723,7 +723,7 @@ function file_uncompress($source_filename, $destination_filename)
 }
 
 /**
- * Fonction permettant de connaitre l'id d'un produit
+ * Fonction permettant de connaître l'id d'un produit
  *
  * @param string $name
  * @param boolean $large_search
@@ -1037,6 +1037,12 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
 	$sql_inner = '';
 	$sql_cond = '';
 	$sql = "";
+		
+	// On va utiliser sur cette page spécifiquement les icônes Font Awesome 
+	$GLOBALS['css_files']['font-awesome'] = get_url('/lib/css/font-awesome.min.css');
+	// On exclue ce fichier de la minification car usage ponctuel
+	$GLOBALS['site_parameters']['minify_css_exclude_array'][] = 'font-awesome.min.css';
+		
 	if(!empty($frm)) {
 		if (!empty($frm['client_info'])) {
 			$sql_cond .= ' AND (c.email LIKE "%' . nohtml_real_escape_string($frm['client_info']) . '%"
@@ -1084,13 +1090,36 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
 	}
 	$Links = new Multipage($sql, 'affiche_liste_commandes_admin', ($return == 'html_array'?'*':50));
 	if ($return == 'html_array') {
-		$HeaderTitlesArray = array('id' => $GLOBALS['STR_ADMIN_ID'], 'numero' => $GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER"], 'o_timestamp' => $GLOBALS['STR_DATE'], 'suspect' => $GLOBALS['STR_ORDER_SUSPECT'], 'montant' => $GLOBALS['STR_TOTAL'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']), $GLOBALS['STR_AVOIR'], 'id_utilisateur' => $GLOBALS['STR_CUSTOMER'], 'id_statut_paiement' => $GLOBALS['STR_PAYMENT'], 'id_statut_livraison' => $GLOBALS['STR_DELIVERY'], 'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']);
+		$HeaderTitlesArray = array(
+			'id' => $GLOBALS['STR_ADMIN_ID'],
+			'numero' => $GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER"],
+			'o_timestamp' => $GLOBALS['STR_DATE'],
+			'montant' => $GLOBALS['STR_TOTAL'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']),
+			$GLOBALS['STR_AVOIR'],
+			'id_utilisateur' => $GLOBALS['STR_CUSTOMER'],
+			'id_statut_paiement' => $GLOBALS['STR_PAYMENT'],
+			'id_statut_livraison' => $GLOBALS['STR_DELIVERY'],
+			'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']
+		);
 	} else {
-		$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'id' => $GLOBALS['STR_ADMIN_ID'], 'numero' => $GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER"], 'o_timestamp' => $GLOBALS['STR_DATE'], 'suspect' => $GLOBALS['STR_ORDER_SUSPECT'], 'montant' => $GLOBALS['STR_TOTAL'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']), $GLOBALS['STR_AVOIR'], 'id_utilisateur' => $GLOBALS['STR_CUSTOMER'], $GLOBALS['STR_PAYMENT'], $GLOBALS['STR_PAYMENT'], 'id_statut_paiement' => $GLOBALS['STR_PAYMENT'], 'id_statut_livraison' => $GLOBALS['STR_DELIVERY'], 'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']);
+		$HeaderTitlesArray = array(
+			$GLOBALS['STR_ADMIN_ACTION'],
+			'id' => $GLOBALS['STR_ADMIN_ID'],
+			'numero' => $GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER"],
+			'o_timestamp' => $GLOBALS['STR_DATE'],
+			'montant' => $GLOBALS['STR_TOTAL'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']),
+			$GLOBALS['STR_AVOIR'],
+			'id_utilisateur' => $GLOBALS['STR_CUSTOMER'],
+			$GLOBALS['STR_PAYMENT'],
+			'id_statut_paiement' => $GLOBALS['STR_PAYMENT'],
+			'id_statut_livraison' => $GLOBALS['STR_DELIVERY'],
+			'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']
+		);
 	}
 	if(!empty($GLOBALS['site_parameters']['admin_order_list_display_delivery_mode_column'])) {
 		$HeaderTitlesArray['type'] = $GLOBALS['STR_ADMIN_MENU_MANAGE_DELIVERY'];
 	}
+	$HeaderTitlesArray['suspect'] = $GLOBALS['STR_ORDER_SUSPECT'];
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
 	$Links->OrderDefault =  vb($GLOBALS['site_parameters']['liste_commandes_admin_order_default'],'o_timestamp');
 	$Links->SortDefault = 'DESC';
@@ -1199,6 +1228,8 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
 		$tpl->assign('get_current_url', get_current_url(false));
 	}
 	$tpl->assign('return', $return);
+	$tpl->assign('STR_ADMIN_LIVRAISONS_EXCEL_EXPORT', $GLOBALS['STR_ADMIN_LIVRAISONS_EXCEL_EXPORT']);
+	$tpl->assign('STR_ADMIN_MODIFICATION_MULTIPLE', $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_CHECK_ALL', $GLOBALS['STR_ADMIN_CHECK_ALL']);
@@ -1221,7 +1252,7 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
 	$tpl->assign('STR_ADMIN_CHECK_ALL', $GLOBALS['STR_ADMIN_CHECK_ALL']);
 	$tpl->assign('STR_ADMIN_UNCHECK_ALL', $GLOBALS['STR_ADMIN_UNCHECK_ALL']);
 	$tpl->assign('STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION', $GLOBALS['STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION']);
-	$tpl->assign('STR_ADMIN_COMMANDER_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_COMMANDER_NO_ORDER_FOUND']);
+	$tpl->assign('STR_ADMIN_COMMANDER_NO_ORDER_FOUND',  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_NO_ORDER_FOUND']))->fetch());
 	$tpl->assign('STR_NOTA_BENE', $GLOBALS['STR_NOTA_BENE']);
 	$tpl->assign('STR_MODULE_FACTURES_ADMIN_TITLE', $GLOBALS['STR_MODULE_FACTURES_ADMIN_TITLE']);
 	$tpl->assign('STR_ORDER_SUSPECT', $GLOBALS['STR_ORDER_SUSPECT']);
@@ -1264,16 +1295,18 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 		$commande_data = $commande;	
 	}
 	if (!empty($commande_frm)) {
-		if ($page == 'quote_prepare' && empty($commande_frm['Num_Devis']) && !empty($commande_data['Num_Devis'])) {
-			// cas particulier pour les numéros de devis, on veut dans tous les cas la valeur qui vient de la base de données si le champ n'a pas été rempli. En effet le champ Num_Devis est rempli automatiquement et mis en BDD si le champ text est vide
-			$commande_frm['Num_Devis'] = $commande_data['Num_Devis'];
-		}
-		if ($commande_frm['cout_transport'] == '') {
-            // si le champ a été vidé (et non pas 00.0), on souhaite recalculer automatiquement le cout de transport. Ce cout est calculé et stocké en BDD lors de la validation du formulaire
-            $commande_frm['cout_transport'] = $commande['cout_transport'];
-        }
 		// on reprend les infos du formulaire, que l'on complète avec ce qui vient de la base de données.
 		// array_merge : Si les tableaux d'entrées ont des clés en commun, alors, la valeur finale pour cette clé écrasera la précédente.
+		if ($page == 'quote_prepare') {
+			if (empty($commande_frm['Num_Devis']) && !empty($commande['Num_Devis'])) {
+				// cas particulier pour les numéros de devis, on veut dans tous les cas la valeur qui vient de la base de données si le champ n'a pas été rempli. En effet le champ Num_Devis est rempli automatiquement et mis en BDD si le champ text est vide
+				$commande_frm['Num_Devis'] = $commande['Num_Devis'];
+			}
+			if (empty($commande_frm['Libelle']) && !empty($commande['Libelle'])) {
+				// cas particulier pour les libellé de devis, on veut dans tous les cas la valeur qui vient de la base de données si le champ n'a pas été rempli. En effet le champ Libelle est rempli automatiquement et mis en BDD si le champ text est vide
+				$commande_frm['Libelle'] = $commande['Libelle'];
+			}
+		}
 		$commande = array_merge($commande, $commande_frm);
 	}
 	if (!empty($commande) || $action == 'insere' || $action == 'ajout') {
@@ -1627,6 +1660,8 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 		$tpl->assign('montant_displayed_prix', fprix($montant_displayed, true, vb($commande['devise']), true, vn($commande['currency_rate'])));
 		$tpl->assign('ttc_ht', (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 		$tpl->assign('ht', $GLOBALS['STR_HT']);
+		$tpl->assign('ttc', $GLOBALS['STR_TTC']);
+		$tpl->assign('montant', fprix(vn($commande['montant']), true, vb($commande['devise']), true, vn($commande['currency_rate'])));
 		$tpl->assign('amount_ht', fprix(vn($commande['montant_ht']), true, vb($commande['devise']), true, vn($commande['currency_rate'])));
 		$tpl->assign('amount_tva', fprix(vn($commande['montant'])-vn($commande['montant_ht']), true, vb($commande['devise']), true, vn($commande['currency_rate'])));
 
@@ -1665,7 +1700,7 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 			$specific_fields = get_specific_field_infos($commande, $form_error_object, 'order');
 		}
 		$tpl->assign('specific_fields', $specific_fields);
-		$assign_array = call_module_hook('specific_field_form_part', array('specific_field_infos_array'=>$specific_fields), 'array');
+		$assign_array = call_module_hook('specific_field_form_part', array('specific_field_infos_array'=>$specific_fields, 'order_infos'=>$commande), 'array');
 		$tpl->assign('specific_field_form_part', display_specific_field_form($specific_fields, 'div', false, false, 'admin_commande_details_specific_field_form_part.tpl', $assign_array));
 		
 		if (empty($order_detail_fields_disable['client_address'])) {
@@ -1714,7 +1749,7 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 					foreach(array_keys($hook_result['order_line_parameters_for_js']) as $this_key) {
 						$line_data[$this_key] = vb($commande[$this_key.$i]);
 					}
-					$tpl_order_lines[] = get_order_line($line_data, null, null, null, $i, $page);
+					$tpl_order_lines[] = get_order_line($line_data, null, null, null, $i, $page, $commande);
 				}
 			}
 		} elseif (!empty($id)) {
@@ -1749,7 +1784,8 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 					, oi.remise
 					, oi.remise_ht
 					, oi.percent_remise_produit AS percent
-					, oi.on_download ";
+					, oi.on_download
+					, oi.email_check ";
 				if( check_if_module_active('listecadeau') ) {
 					$sql .= ", oi.listcadeaux_owner ";
 				}
@@ -1761,7 +1797,7 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 					WHERE commande_id = '" . intval($id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi', true) . "
 					ORDER BY ".$order_by;
 			} else {
-				// SQL de sélection de produit qui vient du hook, pour gérer la liste de produit sur une autre table que peel_commandes_articles.
+				// SQL de sélection de produit qui vient du hook, pour gérer la liste de produits sur une autre table que peel_commandes_articles.
 				$sql = $hook_result['order_lines_sql'];
 			}
 			$query = query($sql);
@@ -1809,8 +1845,9 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 						}
 					}
 				}
+				$line_data['i'] = $i;
 				$tva_options_html = get_vat_select_options(vb($line_data['tva_percent']));
-				$tpl_order_lines[] = get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i, $page);
+				$tpl_order_lines[] = get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i, $page, $commande);
 				$i++;
 				if(!empty($product_object)) {
 					unset($product_object);
@@ -1844,7 +1881,7 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 			// cas standard
 			$order_lines_parameters_for_js_array = array('id' => '[id]', 'ref' => '[ref]', 'nom' => '[nom]', 'image_thumbs' => '[image_thumbs]', 'image' => '[image_large]', 'quantite' => '[quantite]', 'remise' => '[remise]', 'remise_ht' => '[remise_ht]', 'percent' => '[percent]', 'purchase_prix' => '[purchase_prix]', 'purchase_prix_ht' => '[purchase_prix_ht]', 'tva_percent' => '[tva_percent]', 'prix_cat' => '[prix_cat]', 'prix_cat_ht' => '[prix_cat_ht]');
 		}
-		$GLOBALS['js_content_array'][] = "new_order_line_html='".filtre_javascript(get_order_line($order_lines_parameters_for_js_array, '[color_options_html]', '[size_options_html]', '[tva_options_html]', '[i]', $page), true, true, false, true, false)."';";
+		$GLOBALS['js_content_array'][] = "new_order_line_html='".filtre_javascript(get_order_line($order_lines_parameters_for_js_array, '[color_options_html]', '[size_options_html]', '[tva_options_html]', '[i]', $page, $commande), true, true, false, true, false)."';";
 
 		$tpl->assign('site_avoir', $GLOBALS['site_parameters']['avoir']);
 		if (check_if_module_active('parrainage')) {
@@ -2038,6 +2075,7 @@ function send_facture_pdf_commandes($frm)
 
 /**
  * Crée ou modifie en base de données une commande et les produits commandés qui y sont associés
+ * ATTENTION : Les données venant de l'utilisateur n'ont pas été retraitées avant l'appel à cet fonction
  *
  * @param array $frm Array with all fields data
  * @return
@@ -2072,7 +2110,6 @@ function save_commande_in_database($frm)
 	handle_specific_fields($frm, $form_usage);
 
 	// Le code de préremplissage des informations de facturation est géré par la fonction create_or_update_order, et uniquement à cet endroit.
-
 	if (empty($frm['nb_produits'])) {
 		$frm['nb_produits'] = 5;
 	}
@@ -2089,7 +2126,7 @@ function save_commande_in_database($frm)
 			$frm['site_id'] = $GLOBALS['site_id'];
 		}
 	}
-	
+
 	if (empty($frm['commandeid'])) {
 		if (!empty($frm['email1'])) {
 			// On crée une nouvelle commande
@@ -2167,29 +2204,29 @@ function save_commande_in_database($frm)
 							$this_result = get_country_name($result['pays']);
 						} else {
 							$this_result = $result[$this_item];
-					}
+						}
 						$frm[$this_frm_item . '1'] = $this_result;
 						$frm[$this_frm_item . '2'] = $this_result;
 					}
 				} else {
-					foreach($result as $key => $data){
-						if ($key == 'telephone') {
+					foreach($result as $key => $data) {
+						if ($key === 'telephone') {
 							$this_frm_item = 'contact';
-						} elseif ($key == 'zip') {
+						} elseif ($key === 'zip') {
 							$this_frm_item = 'code_postal';
 						} else {
 							$this_frm_item = $key;
-					}
-						if ($this_frm_item == 'pays') {
+						}
+						if ($this_frm_item === 'pays') {
 							$this_result = get_country_name($result['pays']);
 						} else {
 							$this_result = $result[$key];
-				}
+						}
 						$frm[$this_frm_item . '1'] = $this_result;
 						$frm[$this_frm_item . '2'] = $this_result;
+					}
+				}
 			}
-		}
-	}
 		}
 	}
 	// Calcul des coûts et insertion de la commande
@@ -2209,7 +2246,7 @@ function save_commande_in_database($frm)
 		}
 	}
 	
-	if(empty($frm['zoneId']) && !empty($frm['pays2'])) {
+	if(empty($frm['zoneId'])) {
 		if (check_if_module_active('departements')) {
 			$zone = departements_get_zone_id($frm['code_postal2']);	
 			if(!empty($zone['zone'])) {
@@ -2222,7 +2259,7 @@ function save_commande_in_database($frm)
 			$frm['zoneId'] = false;
 			$frm['apply_vat'] = true;
 			$frm['zoneFranco'] = '';
-		} else {
+		} elseif(!empty($frm['pays2'])) {
 			// On récupère les informations sur les zones
 			$sqlPays = 'SELECT p.id, p.pays_' . $frm['lang'] . ' as pays, z.id AS zone, z.tva, z.on_franco
 				FROM peel_pays p
@@ -2364,7 +2401,7 @@ function save_commande_in_database($frm)
 		}
 		// Calcul remise en %
 		$remise_percent = get_float_from_user_input(vn($frm["perc" . $i]));
-		
+
 		$total_prix = $prix * $real_stock_used;
 		$total_prix_ht = $prix_ht * $real_stock_used;
 		$tva = $total_prix - $total_prix_ht;
@@ -2390,6 +2427,8 @@ function save_commande_in_database($frm)
 			$this_article['tailleId'] = vn($frm['size_' . $i]);
 		}
 		$this_article['giftlist_owners'] = vn($frm['giftlist_owners_' . $i]);
+		$this_article['data_check']['email_check'] = vb($frm['email_check_' . $i]);
+
 		$this_article['prix'] = $prix;
 		$this_article['prix_ht'] = $prix_ht;
 		$this_article['prix_cat'] = $prix_cat;
@@ -2557,9 +2596,11 @@ function save_commande_in_database($frm)
  * @param string $size_options_html
  * @param string $tva_options_html
  * @param integer $i
+ * @param string $page
+ * @param array $commande
  * @return
  */
-function get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i, $page)
+function get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i, $page, &$commande)
 {
 	if (empty($size_options_html)) {
 		$size_options_html = '<option value="">-</option>';
@@ -2570,14 +2611,13 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 	if (empty($tva_options_html)) {
 		$tva_options_html = '<option value="">-</option>';
 	}
-
 	if (!is_numeric($i)) {
 		// $i peut contenir le tag [i] qui est automatiquement remplacé lors de l'ajout dynamique de la ligne
 		$line_style_id = 1;
 	} else {
 		$line_style_id = $i;
 	}
-	$hook_output = call_module_hook('get_order_line_html', array('line_style_id' => $line_style_id, 'i' => $i, 'line_data' => $line_data, 'page' => $page), 'string');
+	$hook_output = call_module_hook('get_order_line_html', array('line_style_id' => $line_style_id, 'i' => $i, 'line_data' => $line_data, 'page' => $page, 'commande' => &$commande), 'string');
 	if (!empty($hook_output)) {
 		$output = $hook_output;
 	} else {
@@ -2599,9 +2639,11 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 		if (check_if_module_active('attributs')) {
 			$attribute_display = str_replace("\n", '<br />', display_option_image(vb($line_data['nom_attribut']), true));
 		}
+
 		$output = tr_rollover($line_style_id, true, null, null, 'sortable_'.$i) .'
 					<td>
 						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.StringMb::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="bootbox.confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, true, true) .'\', function(result) {if(result) {admin_delete_products_list_line(' . $i . ', \'order\');}}); return false;" title="' . StringMb::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer;max-width: none;" />
+						<input name="email_check_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['email_check'])) . '" />
 						<input name="giftlist_owners_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['listcadeaux_owner'])) . '" />
 						<input name="nom_attribut_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['nom_attribut'])) . '" />
 						<input name="attributs_list_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['attributs_list'])) . '" />
@@ -2609,8 +2651,7 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 		if (check_if_module_active('tnt')) {
 			$output .= '
 						<input name="tnt_parcel_number_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['tnt_parcel_number'])) . '" />
-						<input name="tnt_tracking_url_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['tnt_tracking_url'])) . '" />
-						';
+						<input name="tnt_tracking_url_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['tnt_tracking_url'])) . '" />';
 		}
 		$output .= '
 					</td>
@@ -2822,7 +2863,7 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 				$current_user = get_user_information($connexion['user_id'], true);
 				$tpl_result = array('id' => $connexion['id'],
 					'date' => get_formatted_date($connexion['date'], 'short', true),
-					'ip' => (!a_priv('demo') ? long2ip($connexion['user_ip']): '0.0.0.0 [demo]'),
+					'ip' => (!a_priv('demo') ? long2ip(intval($connexion['user_ip'])): '0.0.0.0 [demo]'),
 					'site_id' => get_site_name($connexion['site_id']),
 					'user_id' => (!a_priv('demo')?'<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&amp;id_utilisateur=' . intval($connexion['user_id']) . '">'.$connexion['user_id'].'</a>':'private [demo]'),
 					'prenom' => vb($current_user['prenom']),
@@ -2831,7 +2872,7 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 					);
 				$rollover_style = null;
 				if(!empty($geoIP)) {
-					$country_id = $geoIP->geoIPCountryIDByAddr(long2ip($connexion['user_ip']));
+					$country_id = $geoIP->geoIPCountryIDByAddr(long2ip(intval($connexion['user_ip'])));
 					foreach(array('country_ip' => $country_id, 'country_account' => vn($current_user['pays'])) as $this_key => $this_value) {
 						$sql = 'SELECT iso, pays_' . $_SESSION['session_langue'] . '
 							FROM peel_pays
@@ -2901,13 +2942,13 @@ function affiche_phone_event($user_id)
 		LIMIT 1');
 	$res = fetch_assoc($q);
 	$output = '
-	<form class="entryform form-inline" method="post" id="phone" action="' . get_current_url(false) . '#phone_section" >
+	<form class="entryform form-inline" method="post" id="phone" action="' . get_current_url(false) . '#tab4" >
 		<input type="hidden" name="mode" value="phone_call" />
 		<input type="hidden" name="id_utilisateur" value="' . intval($user_id) . '" />';
 	if (!empty($res)) {
 		// warning : phone call not ended;
 		$output .= '
-			<hr /><h2 id="phone_section" style="color:green">' . sprintf(($res['action'] == 'PHONE_EMITTED'?$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_EMITTED"]:$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_RECEIVED"]), vb($res['pseudo_membre'])) . ' : '.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_ON"].' ' . get_formatted_date($res['date']) . '</h2>
+			<hr /><h2 id="phone_section" style="color:green">' . sprintf(($res['action'] == 'PHONE_EMITTED'?$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_EMITTED"]:$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_RECEIVED"]), vb($res['pseudo_membre'])) . ' : '.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_ON"].' ' . get_formatted_date($res['date'], 'short', true) . '</h2>
 			<br />
 			<center>
 				<table class="full_width">
@@ -2918,6 +2959,9 @@ function affiche_phone_event($user_id)
 						</td>
 					</tr>
 					<tr>
+						<td colspan="2" class="center">&nbsp;</td>
+					</tr>
+					<tr>
 						<td></td>
 						<td class="center"><input name="turn_off_phone" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_CLOSE"].'" class="btn btn-primary" /></td>
 					</tr>
@@ -2925,7 +2969,6 @@ function affiche_phone_event($user_id)
 			</center>';
 	} else {
 		$output .= '
-				<h2 id="phone_section">'.$GLOBALS["STR_ADMIN_UTILISATEURS_MANAGE_CALLS"].'</h2>
 				<center>
 					<table >
 						<tr>
@@ -2937,7 +2980,8 @@ function affiche_phone_event($user_id)
 							</td>
 						</tr>
 					</table>
-					<table >
+					<br />
+					<table>
 						<tr>
 							<td class="center" style="width:50%;">
 								<table class="full_width">
@@ -2955,7 +2999,8 @@ function affiche_phone_event($user_id)
 							</td>
 						</tr>
 					</table>
-				</center>';
+				</center>
+					<br />';
 	}
 	$output .= '
 	</form>';
@@ -3744,9 +3789,9 @@ if (!function_exists('check_admin_date_data')) {
 	{
 		$output = '';
 		if (!empty($form_data['an1'])) {
-			if (!checkdate(str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT), $form_data['jour1'], $form_data['an1'])) {
+			if (!checkdate(intval(str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT)), intval($form_data['jour1']), intval($form_data['an1']))) {
 				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $form_data['jour1'] . '-' . str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT) . '-' . $form_data['an1'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
-			} elseif (!checkdate(str_pad($form_data['mois2'], 2, 0, STR_PAD_LEFT), $form_data['jour2'], $form_data['an2'])) {
+			} elseif (!checkdate(intval(str_pad($form_data['mois2'], 2, 0, STR_PAD_LEFT)), intval($form_data['jour2']), intval($form_data['an2']))) {
 				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $form_data['jour2'] . '-' . str_pad($form_data['mois2'], 2, 0, STR_PAD_LEFT) . '-' . $form_data['an2'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
 			} else {
 				$dateAdded1 = $form_data['an1'] . '-' . str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($form_data['jour1'], 2, 0, STR_PAD_LEFT) . " 00:00:00";
@@ -3839,6 +3884,7 @@ if (!function_exists('affiche_liste_produits')) {
 			$tpl->assign('is_stock_advanced_module_active', check_if_module_active('stock_advanced'));
 			$tpl->assign('is_gifts_module_active', check_if_module_active('gifts'));
 			
+			$tpl->assign('STR_ADMIN_MODIFICATION_MULTIPLE', $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE']);
 			$tpl->assign('STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION', $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION']);
 			$tpl->assign('STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION', $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION']);
 			$tpl->assign('STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW', $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW']);
@@ -3918,7 +3964,7 @@ if (!function_exists('affiche_liste_produits')) {
 					if (check_if_module_active('gifts')) {
 						$tmpLigne['points'] = $ligne['points'];
 					}
-					if (!empty($ligne['id_utilisateur']) && $user_infos = get_user_information($ligne['id_utilisateur'])) {
+					if (!empty($ligne['id_utilisateur']) && ($user_infos = get_user_information($ligne['id_utilisateur']))) {
 						$tmpLigne['utilisateur_href'] = $GLOBALS['administrer_url'] . "/utilisateurs.php?mode=modif&id_utilisateur=" . $user_infos['id_utilisateur'];
 						$tmpLigne['societe'] = $user_infos['societe'];
 					}
@@ -4634,18 +4680,18 @@ function get_payment_status_options($selected_status_id = null)
  * @param boolean $option_vat_choice_null
  * @return
  */
-function get_vat_select_options($selected_vat = null, $approximative_amount_selected = false, $option_vat_choice_null = false)
+function get_vat_select_options($selected_vat = null, $approximative_amount_selected = false, $option_vat_choice_null = false, $excluded_vat_array = array())
 {
 	$output = '';
 	
 	$tpl = $GLOBALS['tplEngine']->createTemplate('select_options.tpl');
 	$tpl_options = array();
-
+	if (empty($selected_vat)) {
+		$selected_vat = get_default_vat();
+	}
 	$hook_result = call_module_hook('vat_select_options', array('selected_vat' => $selected_vat, 'approximative_amount_selected' => $approximative_amount_selected), 'array');
+
 	if (empty($hook_result['hook_done'])) {
-		if (empty($selected_vat)) {
-			$selected_vat = get_default_vat();
-		}
 		$sql_paiement = 'SELECT id, tva, site_id
 			FROM peel_tva
 			WHERE ' . get_filter_site_cond('tva').  '
@@ -4667,7 +4713,10 @@ function get_vat_select_options($selected_vat = null, $approximative_amount_sele
 		} else {
 			$value = $this_vat_array['tva'];
 		}
-		
+		if (!empty($excluded_vat_array) && in_array($value, $excluded_vat_array)) {
+			// on ne veut pas de ce taux de TVA
+			continue;
+		}
 		if ($approximative_amount_selected) {
 			// Pour éviter problèmes d'arrondis sur la TVA calculée à partir de la BDD, on regarde si elle vaut la valeur dans le select à 0,1% près
 			$is_selected = (abs(floatval($selected_vat) - floatval($value)) * 1000 <= abs($value));
@@ -4793,7 +4842,8 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 	ob_start();
 	// Met à jour la table de configuration
 	foreach($frm as $this_key => $this_value) {
-		if(!in_array($this_key, array('token', 'keep_old_orders_intact_date', 'site_id'))) {
+		if(!in_array($this_key, array('token', 'site_id'))) {
+			// A prioiri aucune raison d'exclure keep_old_orders_intact_date
 			foreach(array('module_', 'display_mode_', 'etat_', 'position_', 'home_', 'install') as $this_begin) {
 				if(StringMb::substr($this_key, 0, StringMb::strlen($this_begin)) == $this_begin && is_numeric(StringMb::substr($this_key, StringMb::strlen($this_begin)))) {
 					// On ne traite pas ici les données qui concernent le contenu de peel_modules
@@ -4916,7 +4966,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		while($result = fetch_assoc($query)) {
 			$zones_availables[$result['id']] = $zone_to_coutry[$result['technical_code']];
 			if ($result['technical_code'] == 'france_mainland') {
-				// On a besoin de connaitre l'id de la zone pour la france pour gérer les tarifs
+				// On a besoin de connaître l'id de la zone pour la france pour gérer les tarifs
 				$france_zone_id = $result['id'];
 			}
 		}
@@ -4938,7 +4988,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 				}
 			}
 		}
-		// Les templates d'emails par défaut ont été insérés avec l'id de catégorie par défaut (1), il faut mettre à jour cette id de catégorie. Les emails installés par defaut sont tous dans la catégories automatic_sending.
+		// Les templates d'emails par défaut ont été insérés avec l'id de catégorie par défaut (1), il faut mettre à jour cette id de catégorie. Les emails installés par défaut sont tous dans la catégories automatic_sending.
 		$query = query('SELECT id 
 			FROM peel_email_template_cat
 			WHERE technical_code="automatic_sending" AND ' . get_filter_site_cond('email_template_cat', null, false, $site_id));
@@ -5446,6 +5496,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			}
 			$tpl->assign('STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED', $GLOBALS['STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED']);
          }
+		$tpl->assign('STR_ADMIN_MODIFICATION_MULTIPLE', $GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE']);
 		$tpl->assign('STR_ADMIN_ASSIGN', $GLOBALS['STR_ADMIN_ASSIGN']);
 		$tpl->assign('STR_ADMIN_UNASSIGN', $GLOBALS['STR_ADMIN_UNASSIGN']);
 		$tpl->assign('STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP', $GLOBALS['STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP']);
@@ -5976,7 +6027,7 @@ function preload_modules()
 		} else {
 			// Module pas installé et inconnu 
 			foreach(array('fonctions.php', 'functions.php', StringMb::ucfirst($this_module) . '.php', 'functions/emails.php') as $this_filename) {
-				if(!in_array(StringMb::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php', '/modules/crons/crons.php')) && file_exists($folder_path . '/' . $this_filename)) {
+				if(!in_array(StringMb::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/fpdi/fpdi.php', '/modules/calc/calc.php', '/modules/crons/crons.php')) && file_exists($folder_path . '/' . $this_filename)) {
 					// Fichier de classe ou de fonctions du module
 					$file_path = $folder_path . '/' . $this_filename;
 					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), vb($GLOBALS['site_parameters']['load_site_specific_files_before_others'], array())) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), vb($GLOBALS['site_parameters']['load_site_specific_files_after_others'], array()))) {
@@ -6320,31 +6371,33 @@ function import_export_init($import_or_export, &$params) {
 				$GLOBALS['database_fields_by_type_array'][$this_type] = get_array_from_string($GLOBALS['database_fields_by_type_array'][$this_type]);
 			}
 		}
+		if(empty($GLOBALS['database_import_export_table_by_type_array']) || empty($GLOBALS['database_import_export_table_by_type_array'][$this_type])) {
+			// La table n'est pas définie pour un type non virtuel, donc on considère que le type est le nom de la table
+			$GLOBALS['database_import_export_table_by_type_array'][$this_type] = $this_type;
+		} 
+		if(empty($GLOBALS['database_field_infos_by_type_array'][$this_type])) {
+			$GLOBALS['database_field_infos_by_type_array'][$this_type] = array();
+		}
 		if(empty($GLOBALS['database_mode_by_type_array'][$this_type]) || $GLOBALS['database_mode_by_type_array'][$this_type] != 'virtual') {
 			// ICI : le type correspond à 1 ou plusieurs tables réelles
 			// Si on veut un type avec un nom complètement différent d'une table, ou avoir un lien vers plusieurs tables table1|table2, il faut une correspondance entre type et table(s)
 			// NB : Le type sert notamment pour des noms en javascript, donc il ne doit pas contenir |
 			// Les tables sont dans $GLOBALS['database_import_export_table_by_type_array'][$this_type];
-			if(empty($GLOBALS['database_import_export_table_by_type_array']) || empty($GLOBALS['database_import_export_table_by_type_array'][$this_type])) {
-				// La table n'est pas définie pour un type non virtuel, donc on considère que le type est le nom de la table
-				$GLOBALS['database_import_export_table_by_type_array'][$this_type] = $this_type;
-			} 
 			if(empty($GLOBALS['database_fields_by_type_array'][$this_type])) {
 				// Si on n'a pas défini explicitement la liste des champs correspondant à un type donné : on génère la liste à partir de la structure de la table (ou des tables) correspondant au type
 				$GLOBALS['database_fields_by_type_array'][$this_type] = array();
-				$GLOBALS['database_field_infos_by_type_array'][$this_type] = array();
 				foreach(explode('|', $GLOBALS['database_import_export_table_by_type_array'][$this_type]) as $this_table) {
 					if(function_exists('get_ordered_table_fields')) {
 						// On récupère les noms des champs de la table avec les informations, et les champs joints
 						$field_infos_array = get_ordered_table_fields($this_table, $import_or_export, 'simple', false, false);
 						// On ne trie pas ces champs //sort($database_field_names);
 						$GLOBALS['database_fields_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], array_keys($field_infos_array));
-						$GLOBALS['database_field_infos_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], $field_infos_array);
+						$GLOBALS['database_field_infos_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_field_infos_by_type_array'][$this_type], $field_infos_array);
 					} else {
 						// Sans la gestion automatique des jointures (get_ordered_table_fields), on fait plus basiquement
 						$database_field_names = get_table_field_names($this_table);
 						$GLOBALS['database_fields_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], $database_field_names);
-						$GLOBALS['database_field_infos_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], get_table_field_types($this_table));
+						$GLOBALS['database_field_infos_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_field_infos_by_type_array'][$this_type], get_table_field_types($this_table));
 					}	
 				}
 			}
@@ -6362,7 +6415,7 @@ function import_export_init($import_or_export, &$params) {
 				}	
 			}
 		}
-		// On rajoute ensuite des colonnes additionnelle (calculées ou générées spécifiquement en PHP)
+		// On rajoute ensuite des colonnes additionnelles (calculées ou générées spécifiquement en PHP)
 		foreach (vb($GLOBALS['database_field_additional_by_type_array'][$this_type], array()) as $this_field => $this_title) {
 			if(is_numeric($this_field)) {
 				// On n'a pas le couple champ => titre, mais le nom du champ
@@ -6431,9 +6484,13 @@ function import_export_init($import_or_export, &$params) {
 		$params['data_encoding'] = $_POST['data_encoding'];
 	} elseif (!empty($_GET['data_encoding'])) {
 		$params['data_encoding'] = $_GET['data_encoding'];
-	}
+	} 
 	if (empty($params['data_encoding'])) {
-		if (!empty($GLOBALS['site_parameters']['export_encoding'])) {
+		if($import_or_export == 'import') {
+			// Import avec encodage en mode automatique : 
+			// on va tout faire fonctionner en utf-8 et assurer compatibilité avec fichier iso
+			$params['data_encoding'] = '';
+		} elseif (!empty($GLOBALS['site_parameters']['export_encoding'])) {
 			$params['data_encoding'] = $GLOBALS['site_parameters']['export_encoding'];
 		} else {
 			$params['data_encoding'] = 'utf-8';
@@ -6470,7 +6527,7 @@ function import_export_init($import_or_export, &$params) {
 				if($import_or_export == 'import') {
 					// ordered_fields_selected va contenir la correspondance entre champs en BDD et colonnes du fichier
 					$this_corresp = explode('=', $val);
-					$params['ordered_fields_selected'][$this_corresp[0]] = vb($this_corresp[1]);
+					$params['ordered_fields_selected'][$this_corresp[0]] = StringMb::rawurldecode(vb($this_corresp[1]));
 				} else {
 					// ordered_fields_selected est fait pour contenir la liste des champs à exporter dans l'ordre
 					$params['ordered_fields_selected'][] = $val;
@@ -6582,10 +6639,17 @@ window.move_draggable_fields = function(origin, destination, mode="basic") {
 		$(origin+" .field_draggable").detach().appendTo($(destination)); 
 	} else {
 		// Association si nom de champ correspond
-		$(origin+" .field_draggable").each(function( index, element ) {
-			cell = $(mode+"_"+$(this).attr("id").replace("filecol_",""));
+		$(origin+" .field_draggable").each(function( index, element_to_move ) {
+			cell = $(mode+$.escapeSelector("_"+$(this).attr("id").replace("filecol_","")));
 			if(cell.length) {
 				$(this).detach().appendTo(cell);
+			} else {
+				$(destination).each(function( index_dest, element_dest ) {
+					if($(element_dest).prev().prev().text().replace(" *","") == $(element_to_move).text()) {
+						$(element_to_move).detach().appendTo($(element_dest));
+						return true;
+					}
+				});
 			}
 		});
 	}
@@ -6598,6 +6662,7 @@ window.move_draggable_fields = function(origin, destination, mode="basic") {
 window.imported_file = null;
 window.change_import_type = function() {
 	import_type = $("#import_export_type").val();
+	data_encoding = $("select[name=data_encoding]").val();
 	$(".div_hidden_by_default").hide();
 	$(".div_hidden_by_default input").prop("disabled", true);
 	$(".container_drop_draggable").empty();
@@ -6629,8 +6694,10 @@ window.change_import_type = function() {
 				file="' . $GLOBALS['wwwroot'] . '"+window.imported_file;
 			}';
 			if (!empty($GLOBALS['site_parameters']['iso_encoded_url_file_for_ajax'])) {
+				// on demande au serveur de donner le fichier en précisant l'encodage
+				// iso_encoded_url_file_for_ajax utilise l'information d'encodage demandé par l'utilisateur : data_encoding (qui peut être vide pour détection automatique)
 				$this_js_content .= '
-				if($("select[name=data_encoding]").val()=="iso-8859-1") {
+				if(data_encoding!="utf-8") {
 					file = ' . $GLOBALS['site_parameters']['iso_encoded_url_file_for_ajax'] . '
 				}';
 			}
@@ -6641,10 +6708,18 @@ window.change_import_type = function() {
 				async: false,
 				success : function(data) {
 					if(data.length) {
-						var lines = data.split("\n");
+						var lines = data.split("\r\n").join("\n").split("\r").join("\n").split("\n");
 						var separator = $("#separator").val();
 						if (separator == "") {
-							window.cols_array = lines[0].split(";");
+							if (lines[0].split("\t").length > 1) {
+								window.cols_array = lines[0].split("\t");
+							} else if (lines[0].split(";").length > 1) {
+								window.cols_array = lines[0].split(";");
+							} else if (lines[0].split(",").length > 1) {
+								window.cols_array = lines[0].split(",");
+							} else {
+								window.cols_array = lines[0].split("\t");
+							}
 						} else if (separator == "\\\t") {
 							window.cols_array = lines[0].split("\t");
 						} else {
@@ -6671,10 +6746,13 @@ window.change_import_type = function() {
 		// Récupère la première ligne du fichier CSV
 		// Crée des span pour chaque colonne du CSV téléchargé 
 		$.each(cols_array, function(key, field) {
+			if(field.substring(0,1)==\'"\' && field.substring(field.length-1)==\'"\') {
+				field = field.substring(1,field.length-1);
+			}
 			field = field.trim();
 			cols_array[key]=field;
 			//split("/").join("_").split(" ").join("_") suppression des slash, des parenthèses et des guillemets et des espaces dans le id de champ sinon ça pose problème lors du chargement de la règle sauvegardée (erreur JS)
-			$("' . $contains_draggable_js . '").append("<span class=\'field_draggable\' id=\'filecol_"+field.replace(".", "\\\.").split("\'").join("_").split(")").join("_").split("(").join("_").split("/").join("_").split(" ").join("_")+"\' draggable=\'true\'>"+field+"<br /></span>");
+			$("' . $contains_draggable_js . '").append("<span class=\'field_draggable\' id=\'filecol_"+field.replace(".", "\\\.").split("\'").join("_").split(")").join("_").split("(").join("_").split("/").join("_").split(" ").join("_").split("&").join("_").split("=").join("_")+"\' draggable=\'true\'>"+field+"<br /></span>");
 		});
 		drag_and_drop_fields("' . $contains_draggable_js . '", ".field_draggable", "#"+div_id+" .container_drop_draggable");
 		if($("#correspondance_type").val()==import_type) {
@@ -6797,6 +6875,11 @@ window.change_export_type = function(first_load) {
 				}
 				if(data.max_subtotals_level_default) {
 					$("#max_subtotals_level_select").val(data.max_subtotals_level_default);
+				}	
+				if(data.export_type_explanation) {
+					$("#export_type_explanation").html(data.export_type_explanation);
+				} else {
+					$("#export_type_explanation").html("");
 				}
 				if(!data.skip_empty_totals_fields) {
 					$("#skip_empty_totals").hide();
@@ -6808,7 +6891,7 @@ window.change_export_type = function(first_load) {
 				if (typeof first_load !=="undefined" && first_load === true) {
 					load_rules("last_submit"); // Chargement de la dernière version validée du formulaire
 				}
-				$("div").filter(":visible").children("input, select, textarea").prop("disabled", false);
+				$("div").filter(":visible").children("input:not(.keep_disabled), select:not(.keep_disabled), textarea:not(.keep_disabled)").prop("disabled", false);
 			}
 		});
 	} else {
@@ -6828,11 +6911,11 @@ window.load_fields_correspondance = function(source, params) {
 		$.each(source.split("&"), function(this_key,this_col_corresp) {
 			temp=this_col_corresp.split("=");
 			field=temp[0];
-			filecol=temp[1];
+			filecol=decodeURIComponent(temp[1]);
 			' . ($import_or_export == 'import'?'
-			$("' . $contains_draggable_js . ' #filecol_"+filecol.replace(".", "\\\.").split("\'").join("_").split(")").join("_").split("(").join("_").split("/").join("_").split(" ").join("_")+".field_draggable").detach().appendTo($("#"+div_id+" #fields_"+type+"_"+field.replace(".", "\\\.").split("/").join("_")+".container_drop_draggable"));
+			$("' . $contains_draggable_js . ' #filecol_"+filecol.replace(".", "\\\.").split("\'").join("_").split(")").join("_").split("(").join("_").split("/").join("_").split(" ").join("_").split("&").join("_").split("=").join("_")+".field_draggable").detach().appendTo($("#"+div_id+" #fields_"+type+"_"+field.replace(".", "\\\.").split("/").join("_")+".container_drop_draggable"));
 				':'
-			$("' . $contains_draggable_js . ' #filecol_"+field.replace(".", "\\\.")+".field_draggable").detach().appendTo($("#"+div_id+" .container_drop_draggable"));
+			$("' . $contains_draggable_js . ' #filecol_"+field.replace(".", "\\\.").split("\'").join("_").split(")").join("_").split("(").join("_").split("/").join("_").split(" ").join("_").split("&").join("_").split("=").join("_")+".field_draggable").detach().appendTo($("#"+div_id+" .container_drop_draggable"));
 				') . '
 		});	
 		if(params) {
@@ -6886,15 +6969,15 @@ window.load_fields_correspondance = function(source, params) {
 					temp=this_col_corresp.split("=");
 					field=temp[0];
 					filevalue=temp[1];
-					$("#"+field.replace(".", "\\\.")).val(filevalue);
+					$("#"+field.replace(".", "\\\.").split("\'").join("_").split(")").join("_").split("(").join("_").split("/").join("_").split(" ").join("_").split("&").join("_").split("=").join("_")).val(filevalue);
 				});
 			}';
 		} else {
 			// Export. Appelé dans le cadre de handle_export
 			if (!empty($params['additional_input_ids_array'])) {
-				// dans additional_input_ids_array on va stocker la liste de champ à mettre à jour dynamiquement
+				// dans additional_input_ids_array on va stocker la liste de champs à mettre à jour dynamiquement
 				foreach($params['additional_input_ids_array'] as $this_input => $this_field) {
-					if ($this_field == 'header' || $this_field == 'show_details' || $this_field == 'skip_empty_totals') {
+					if ($this_field == 'header' || $this_field == 'show_details' || $this_field == 'skip_empty_totals' || $this_field == 'page_break') {
 						// champ checkbox
 						$this_js_content .= '
 			if (params["'.$this_field.'"] === null) {
@@ -6920,7 +7003,7 @@ window.set_correspondance = function() {
 	$("#fields_"+$("#import_export_type").val()+" .container_drop_draggable").find(".field_draggable").each(function( index, element ) {
 		var db_col;
 		db_col = $(this).parent(".container_drop_draggable").attr("id").replace("fields_"+$("#import_export_type").val()+"_","");
-		correspondance_array.push(db_col+"="+$(this).attr("id").replace("filecol_","").replace("\\\.",".")); 
+		correspondance_array.push(db_col+"="+encodeURIComponent($(this).attr("id").replace("filecol_","").replace("\\\.","."))); 
 	});
 		
 	var type = $("#import_export_type").val();
@@ -7044,7 +7127,7 @@ window.set_rules = function() {
 				if ($this_field == 'order_by_value' || $this_field == 'group_by_value') {
 					$this_js_content .= $this_field.': '.$this_field.',
 					';
-				} elseif ($this_field == 'header' || $this_field == 'show_details' || $this_field == 'skip_empty_totals') {
+				} elseif ($this_field == 'header' || $this_field == 'show_details' || $this_field == 'skip_empty_totals' || $this_field == 'page_break') {
 					$this_js_content .= $this_field.': $("#'.$this_input.'").is(":checked"),
 					';
 				} else {
@@ -7153,11 +7236,12 @@ function get_database_field_properties(&$params) {
 	}
 	if(!empty($GLOBALS['database_fields_by_type_array'])) {
 		// On génère des tableaux avec les tables contenant les champs importables, pour permettre à l'utilisateur de faire des concordances avec des drag & drop
-		foreach ($GLOBALS['database_fields_by_type_array'] as $this_type => &$table_field_names) {
+		foreach(array_keys($GLOBALS['database_import_export_type_names_array']) as $this_type) {
+			$table_field_names = &$GLOBALS['database_fields_by_type_array'][$this_type];
 			//sort($table_field_names);
 			// Pour récupérer le nom de table, d'habitude on utilise foreach(explode('|', $GLOBALS['database_import_export_table_by_type_array'][$this_type]) as $this_table) {
 			// mais là on va utiliser ensuite des fonctions compatibles avec la syntaxe table1|table2
-			$this_table_or_tables = $GLOBALS['database_import_export_table_by_type_array'][$this_type];
+			$this_table_or_tables = vb($GLOBALS['database_import_export_table_by_type_array'][$this_type], $this_type);
 			unset($selected_array);
 			if($this_type == $params['type'] && !empty($params['ordered_fields_selected'])) {
 				$selected_array = &$params['ordered_fields_selected'];
@@ -7172,11 +7256,14 @@ function get_database_field_properties(&$params) {
 				// On construit la liste des champs, qu'on va ordonner ensuite
 				if(empty($GLOBALS['database_mode_by_type_array'][$this_type]) || $GLOBALS['database_mode_by_type_array'][$this_type] != 'virtual') {
 					$required = get_field_required($this_field, $this_table_or_tables);
+					$type = str_replace(',', ', ', vb($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field]));
+					$maxlength = (!empty($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field])?get_field_maxlength($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field]):null);
 				} else {
 					$required = false;
+					$type = 'varchar(255)';
+					$maxlength = null;
 				}
 				$primary = in_array($this_field, $primary_key_array);
-				$type = str_replace(',', ', ', vb($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field]));
 				if(!empty($params['simplified_type_presentation'])) {
 					if(strpos($type, 'blob') !== false || strpos($type, 'text') !== false) {
 						$type = 'texte';
@@ -7202,7 +7289,7 @@ function get_database_field_properties(&$params) {
 					'primary' => $primary,
 					'required' => $required,
 					'default' => vb($params['defaults']['default_'.$this_type.'_'.$this_field]),
-					'maxlength' => (!empty($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field])?get_field_maxlength($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field]):null),
+					'maxlength' => $maxlength,
 					'type' => $type
 				);
 			}
@@ -7240,9 +7327,12 @@ function handle_import($check_access_rights = true, $params = array()) {
 
 	switch ($mode) {
 		case "import":
+			// force_import_despite_of_error cette variable est envoyé en POST (via la fonction JS force_import_with_error_line) uniquement si l'utilisateur force l'import malgré les erreurs. Cette variable permet de modifier l'affichage associé à ce cas de figure
+			$force_import_despite_of_error = !empty($_POST['force_import_despite_of_error']);
 			$test_mode = !empty($_POST['test_mode']);
 			$GLOBALS['nb_insert'] = 0;
 			$GLOBALS['nb_update'] = 0;
+			$joined_table_infos = array();
 			if($check_access_rights) {
 				if (a_priv('demo')) {
 					$error_output[] = sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']));
@@ -7275,13 +7365,29 @@ function handle_import($check_access_rights = true, $params = array()) {
 				$error_output[] = $GLOBALS['STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND'];
 				unset($params['import_file']);
 			} else {
+				if(empty($params['data_encoding'])) {
+					// Détection de l'encodage
+					if(!StringMb::detect_utf8_characters(StringMb::file_get_contents_utf8(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $params['import_file_fullpath'])))) {
+						// Ce n'est pas de l'utf-8, donc on se met en mode iso-8859-1
+						$params['data_encoding'] = 'iso-8859-1';
+					} else {
+						$params['data_encoding'] = 'utf-8';
+					}
+				}
 				// Tout semble configuré et OK
 				// On commence l'import
 
 				// On ouvre le fichier pour charger la première ligne avec les titres de colonnes
 				if($fp = StringMb::fopen_utf8($params['import_file_fullpath'], "rb")) {
 					$general_configuration_is_valid = true;
+					// On récupère la première ligne
 					$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $params['data_encoding']);
+					if(!empty($this_line) && (StringMb::substr($this_line, -1) == "\r" || StringMb::substr($this_line, -1) == "\n")) {
+						$this_line = StringMb::substr($this_line , 0, StringMb::strlen($this_line) - 1);
+						if(!empty($this_line) && (StringMb::substr($this_line, -1) == "\r" || StringMb::substr($this_line, -1) == "\n")) {
+							$this_line = StringMb::substr($this_line , 0, StringMb::strlen($this_line) - 1);
+						}
+					}
 					if (empty($params['separator'])) {
 						// détection automatique du séparateur dans le fichier
 						if (strpos($this_line, "\t") !== false) {
@@ -7297,8 +7403,12 @@ function handle_import($check_access_rights = true, $params = array()) {
 					$file_columns = explode($params['separator'], $this_line);
 
 					// Vérification de cohérence entre $params['ordered_fields_selected'] et les colonnes réellement disponibles dans le fichier (normalement le traitement en AJAX gère déjà cela, mais il faut vérifier le $_POST quoiqu'il arrive)
-					foreach($file_columns as $this_key => $this_field) {
-						$file_columns[$this_key] = str_replace(array("\n","\r","\r\n","\n\r"," ","/","'","(",")"), array('','','','','_','_','_','_','_'), trim($this_field));
+					foreach(array_keys($file_columns) as $this_key) {
+						if (StringMb::substr($file_columns[$this_key], 0, 1) == '"' && StringMb::substr($file_columns[$this_key], -1) == '"') {
+							// Il faut traiter l'escape de guillemets dans les champs
+							$file_columns[$this_key] = str_replace('""', '"', StringMb::substr($file_columns[$this_key], 1, StringMb::strlen($file_columns[$this_key]) - 2));
+						}
+						$file_columns[$this_key] = str_replace(array("\n","\r","\r\n","\n\r"," ","/","'","(",")","&"), array('','','','','_','_','_','_','_','_'), trim($file_columns[$this_key]));
 					}
 					foreach($params['ordered_fields_selected'] as $this_bdd_field => $this_file_field) {
 						// NB : $this_file_field vaut true quand on a une valeur par défaut pour un champ et aucune correspondance avec le fichier importé
@@ -7319,7 +7429,7 @@ function handle_import($check_access_rights = true, $params = array()) {
 					$GLOBALS['line_number'] = 0;
 
 					if(!empty($params['ordered_fields_selected']) && count($params['ordered_fields_selected'])){
-						// On importe au moins un champ
+						// On souhaite importer au moins un champ
 						// Initialisations diverses
 						// A FAIRE : gérer les types qui correspondent à plusieurs tables
 						$table_name = $type;
@@ -7353,36 +7463,54 @@ function handle_import($check_access_rights = true, $params = array()) {
 							$error_output_line_array = array();
 							$primary_key_values = array();
 							$line_in_database_infos = null;
+							$text_in_wait = '';
 							// On récupère une ligne de données :
 							// Si une valeur de cas contient des sauts de ligne, alors on prend quand même la ligne suivante comme si c'était la continuité de cette ligne
 							while (!StringMb::feof($fp) && $last_treated_column < count($file_columns)) {
 								// Tant qu'on n'atteint pas fin de fichier
 								$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $params['data_encoding']);
-								if (empty($this_line)) {
-									continue;
-								}
-								if(StringMb::substr($this_line, -1) == "\r" || StringMb::substr($this_line, -1) == "\n") {
+								if(!empty($this_line) && (StringMb::substr($this_line, -1) == "\r" || StringMb::substr($this_line, -1) == "\n")) {
 									$this_line = StringMb::substr($this_line , 0, StringMb::strlen($this_line) - 1);
+									if(!empty($this_line) && (StringMb::substr($this_line, -1) == "\r" || StringMb::substr($this_line, -1) == "\n")) {
+										$this_line = StringMb::substr($this_line , 0, StringMb::strlen($this_line) - 1);
+									}
+								}
+								if (empty($this_line)) {
+									// ligne vide ou sans données à importer, il faut ignorer la ligne et passer à la suivante
+									continue;
 								}
 								// $output .= '<hr />Ligne du fichier CSV : $this_line';
 								$line_values = explode($params['separator'], $this_line);
-								$text_in_wait = '';
+								if($last_treated_column >= count($file_columns)) {
+									// On a fini une ligne, on réinitialise le texte en attente
+									$text_in_wait = '';
+								}
 								// En cas de séparateur qui se retrouve dans des champs qui sont identifiés par des guillemets au début et à la fin, $line_values va contenir une colonne scindée en N morceaux. Donc $key va être incrémentée à chaque fois qu'un champ est complètement chargé
+										
+										
 								foreach($line_values as $this_value) {
 									// On récupère les valeurs présentes dans la ligne en cours. Pour gérer correctement les colonnes contenant un séparateur, il faut s'occuper de toutes les lignes, même si on n'en a sélectionné que quelques unes
 
 									// Suppression de guillemets indésirables. Les guillemets avant et après une valeur sont supprimé. Ils peuvent être ajoutés à l'insu de créateur du fichier en éditant le fichier avec excel.
 									$this_value = $text_in_wait . trim($this_value);
 									$text_in_wait = '';
-									if ($this_value == '""') {
+									if ($this_value == '""' || $this_value == "''") {
 										$this_value = '';
 									} elseif (StringMb::substr($this_value, 0, 1) == '"' && StringMb::substr($this_value, -1) == '"') {
 										// Il faut traiter l'escape de guillemets dans les champs
 										$this_value = str_replace('""', '"', StringMb::substr($this_value, 1, StringMb::strlen($this_value) - 2));
 									} elseif(StringMb::substr($this_value, 0, 1) == '"') {
-										// Guillemet au début => on attend le guillemet de fin
-										// => on fusionne ce champ avec la suite, et on remet le séparateur qui n'aurait pas dû être retiré
-										$text_in_wait = $this_value . $params['separator'];
+										// Guillemet au début et pas à la fin de la case => on attend le guillemet de fin
+										// => on fusionne ce champ avec la suite, et on remet si nécessaire le séparateur qui n'aurait pas dû être retiré
+										$text_in_wait = $this_value;
+										if(StringMb::substr($this_line, -1) == $params['separator']) {
+											// Si la ligne se terminait par un séparateur, on le remet
+											$text_in_wait .= $params['separator'];
+										} else {
+											// sinon c'est que c'était un saut de ligne, et on met espace à la place
+											// (dans les libellés, etc, on veut plutôt éviter les sauts de ligne)
+											$text_in_wait .= ' ';
+										}
 										continue;
 									}
 									if(isset($file_columns[$last_treated_column])) {
@@ -7398,20 +7526,44 @@ function handle_import($check_access_rights = true, $params = array()) {
 										}
 									} else {
 										// Colonne n'existe pas (problème)
-										$error_output[] = sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], ($last_treated_column+1), $this_value);
+										if ($last_treated_column+1 > count($file_columns)) {
+											 // si un ligne n'a pas le bon nombre de colonne
+											$error_output[] = sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_FILE_STRUCTURE'], $GLOBALS['line_number']);
+										} else {
+											$error_output[] = sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], ($last_treated_column+1), $this_value);
+										}
 									}
 									$last_treated_column++;
 								}
 							}
-							// On rajoute les valeurs par défaut (soit colonne sans correspondance, soit avec correspondance mais ligne avec case vide)
-							foreach($params['ordered_fields_selected'] as $this_field_name => $this_value) {
-								if ((isset($params['defaults']['default_'.$type.'_'.$this_field_name]) && $params['defaults']['default_'.$type.'_'.$this_field_name] !== '') && (!isset($field_values[$this_field_name]) || $field_values[$this_field_name] === '')) {
-									// Il y a une valeur par défaut de disponible pour cette colonne, et la case est vide (car pas de correspondance de colonne, ou car valeur dans le fichier est vide)
-									$field_values[$this_field_name] = $params['defaults']['default_'.$type.'_'.$this_field_name];
+							// On ne tient pas compte de la ligne si elle ne contient que des données vides
+							$skip_this_line = false;
+							if(!empty($field_values)) {
+								$skip_this_line = true;
+								foreach($field_values as $this_value) {
+									// pour chaque champ on vérifie si il y a une valeur
+									if (!empty($this_value)) {
+										// une valeur a été trouvée, on peut continuer.
+										$skip_this_line = false;
+									}
 								}
 							}
-							// On a chargé toutes les colonnes sélectionnées dans $field_values, après avoir étudié toutes les colonnes (c'est nécessaire pour bien gérer les cas de sauts de ligne avec gestion des guillemets).
+							if (!empty($skip_this_line)) {
+								$skip_this_line = false;
+								// toutes les valeurs de la ligne sont vide, on ne fait rien et on passe à la suivante
+								continue;
+							}
+							// NB : Si ligne vide en fin de fichier, $field_values est vide => on ne veut pas compléter avec les valeurs par défaut, mais s'arrêter sans traiter cette ligne
 							if (!empty($field_values)) {
+								// On rajoute les valeurs par défaut (soit colonne sans correspondance, soit avec correspondance mais ligne avec case vide)
+								foreach($params['ordered_fields_selected'] as $this_field_name => $this_value) {
+									if ((isset($params['defaults']['default_'.$type.'_'.$this_field_name]) && $params['defaults']['default_'.$type.'_'.$this_field_name] !== '') && (!isset($field_values[$this_field_name]) || $field_values[$this_field_name] === '')) {
+										// Il y a une valeur par défaut de disponible pour cette colonne, et la case est vide (car pas de correspondance de colonne, ou car valeur dans le fichier est vide)
+										$field_values[$this_field_name] = $params['defaults']['default_'.$type.'_'.$this_field_name];
+									}
+								}
+								// On a chargé toutes les colonnes sélectionnées dans $field_values, après avoir étudié toutes les colonnes (c'est nécessaire pour bien gérer les cas de sauts de ligne avec gestion des guillemets).
+								
 								// On décode le format des dates si nécessaire
 								if(!isset($field_types)) {
 									$field_types = get_table_field_types($table_name);
@@ -7421,8 +7573,19 @@ function handle_import($check_access_rights = true, $params = array()) {
 										if($field_types[$this_field_name] == 'date' || $field_types[$this_field_name] == 'datetime') {
 											$field_values[$this_field_name] = get_mysql_date_from_user_input($this_value);	
 										} elseif(strpos($field_types[$this_field_name], 'float(') !== false || $field_types[$this_field_name] == 'double') {
-											$field_values[$this_field_name] = get_float_from_user_input($this_value);	
+											if (!empty($GLOBALS['database_fields_format']['time']) && in_array($this_field_name, $GLOBALS['database_fields_format']['time'])) {
+												$field_values[$this_field_name] = get_time_from_user_input($this_value);
+											} else {
+												$field_values[$this_field_name] = get_float_from_user_input($this_value);
+											}
 										}
+										
+									/*
+										pour pas prendre de risque on ne fait pas ça. mais structurellement ce serait bien. (problème si on rentre 3.5 pour dire 3h30 par exemple)
+										 elseif(strpos($field_types[$this_field_name], 'int(') !== false) {
+											$field_values[$this_field_name] = intval(get_float_from_user_input($this_value));
+										}
+									*/
 									}
 								}
 							} 
@@ -7466,6 +7629,12 @@ function handle_import($check_access_rights = true, $params = array()) {
 												}
 											}
 										}
+										if (!empty($GLOBALS['database_table_insert_forbidden_array'])) {
+											if (in_array($table_name, $GLOBALS['database_table_insert_forbidden_array'])) {
+												// on interdit l'insertion de données dans cette table
+												$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_INSERT_VALUE_FORBIDDEN'], $table_name);
+											}
+										}
 									}
 								}
 								foreach($field_values as $this_field_name => $this_value) {
@@ -7478,7 +7647,7 @@ function handle_import($check_access_rights = true, $params = array()) {
 												$field_values[$this_field_name] = $this_value = array_search($this_value, $select_infos, true);
 											} else {
 												// On explique que les clés ou les titres sont possibles
-												$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_COLUMN_CONTAINS_CHOICE'], get_field_title($this_field_name, $table_name, true, null, true), implode('" / "', array_keys($select_infos)) . ' ' . $GLOBALS['STR_OR'] . ' ' . implode('" / "', $select_infos));
+												$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_COLUMN_CONTAINS_CHOICE'], get_field_title($this_field_name, $table_name, true, null, true), '"'.implode('" / "', array_keys($select_infos)) . '" ' . (array_keys($select_infos) != array_values($select_infos) ? $GLOBALS['STR_OR'] . ' "' . implode('" / "', $select_infos).'"' : ''));
 											}
 										}
 									}
@@ -7487,17 +7656,23 @@ function handle_import($check_access_rights = true, $params = array()) {
 										$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_CODE_MAX_CHAR_REACHED'], $this_value, StringMb::strlen($this_value), $field_maxlength_array[$this_field_name]);
 									}
 
-									// on traite les champs de jointure avec une autre table
-									$join_infos = get_join_infos($table_name, $this_field_name);
-									if(!empty($join_infos)) {
-										// Vérification des valeurs existantes dans les tables de référence (équivalent de CodeExiste en Delphi - ligne 2209 du fichier Delphi ufrmImportFichiers.pas)
-										if($this_value && $join_infos['target_field'] != 'Affaire') {
-											// PS : Si clé primaire multiple avec la champ Affaire, on exclue du test ci-dessous car les erreurs dans les données sont gérées par ailleurs dans hook
-											$sql_cond = word_real_escape_string($join_infos['target_field']) . '="' .real_escape_string($this_value). '"';
-											$joined_table_infos = get_table_rows($join_infos['target_table'], null, null, true, 1, null, false, $sql_cond);
-											if(empty($joined_table_infos)) {
-												$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE'], $this_value, $join_infos['target_table'], $join_infos['target_field']);
-											} 
+									if($this_value && !in_array($this_field_name, array('CptCaracParam', 'CLT_TNF'))) {
+										// on traite les champs de jointure avec une autre table
+										$join_infos = get_join_infos($table_name, $this_field_name);
+										if(!empty($join_infos)) {
+											// Vérification des valeurs existantes dans les tables de référence (équivalent de CodeExiste en Delphi - ligne 2209 du fichier Delphi ufrmImportFichiers.pas)
+											if($join_infos['target_field'] != 'Affaire' && !in_array($join_infos['target_table'], array('jourvent', 'budfact', 'clients'))) {
+												// PS : On exclut les jointures sur l'affaire car jointure multiple gérée par ailleurs. On exclut la jointure sur table clients car gérée par ailleurs dans le hook import_line_pre (et notamment on peut vouloir rechercher d'abord le code client à partir du 411, donc on ne veut pas traiter ici). Et on exclut la vérification si jourvent ou budfact existe déjà car on va crééer dans le hook la ligne de facturation à partir du détail des lignes importées.
+												// PS : Si clé primaire multiple avec la champ Affaire, on exclue du test ci-dessous car les erreurs dans les données sont gérées par ailleurs dans hook
+												$sql_cond = word_real_escape_string($join_infos['target_field']) . '="' .real_escape_string($this_value). '"';
+												$this_cache_id = md5($join_infos['target_table'] . $sql_cond);
+												if(!array_key_exists($this_cache_id, $joined_table_infos)) {
+													$joined_table_infos[$this_cache_id] = get_table_rows($join_infos['target_table'], null, null, true, 1, null, false, $sql_cond);
+												}
+												if(empty($joined_table_infos[$this_cache_id])) {
+													$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE'], $this_value, $join_infos['target_table'], $join_infos['target_field']);
+												} 
+											}
 										}
 									}
 									// Vérifie que les champs uniques (vides ou non) des colonnes importées sont bien uniques
@@ -7520,11 +7695,16 @@ function handle_import($check_access_rights = true, $params = array()) {
 										// 4ème paramètre à true pour pouvoir utiliser $params_list en référence.
 										$hook_result = call_module_hook('import_line_pre', $params_list, 'string', true);
 
-										$error_output_line .= $hook_result['errors'];
+										$error_output_line .= (!empty($hook_result['errors'])?' ':'') . $hook_result['errors'];
 										$field_values = $hook_result['table_values'];
-										
+
+
 										$set_field_values = $field_values; // On ne va garder dans $set_field_values que les champs qui ne sont pas primaires
 										foreach($primary_key_values as $this_field_name => $this_field_value) {
+											// On MAJ les clés primaires à partir des field_values qui leur correspondent, au cas où un retraitement est fait dans le hook import_line_pre
+											if(!empty($set_field_values[$this_field_name])){
+												$primary_key_values[$this_field_name] = $set_field_values[$this_field_name];
+											}
 											unset($set_field_values[$this_field_name]);
 										}
 										if(!empty($real_table_field_names)) {
@@ -7536,39 +7716,51 @@ function handle_import($check_access_rights = true, $params = array()) {
 											}
 										}
 										// Gérer la création ou la mise à jour
-										$set_sql = create_sql_from_array($set_field_values);
-										if ($line_in_database_infos) {
-											if(empty($test_mode)) {
-												$sql = 'UPDATE ' . word_real_escape_string($table_name) . ' 
-													SET ' . $set_sql . '
-													WHERE ' . create_sql_from_array($primary_key_values, ' AND ');
-												query($sql);
-											}
-											$GLOBALS['nb_update']++;
+										$set_sql = create_sql_from_array($set_field_values);																					
+
+										if(!empty($test_mode)) {
+											// En mode simulation, on va faire le traitement post dans tous les cas pour récupérer les messages d'erreur
+											$import_this_line = true;
+										} elseif(empty($error_output_line)) {
+											// En mode normal, on ne traite la ligne que si pas d'erreur
+											$import_this_line = true;
 										} else {
-											if(empty($test_mode)) {
-												if(!empty($primary_key_values)) {
-													// On rajoute les champs primaires
-													$set_sql .= ', ' . create_sql_from_array($primary_key_values, ', ');
-												}
-												query('INSERT INTO ' . word_real_escape_string($table_name) . '
-													SET ' . $set_sql . '');
-											}
-											$GLOBALS['nb_insert']++;
+											$import_this_line = false;
 										}
-										if(empty($test_mode)) {
-											// On fait aussi des traitements dans les données après mise à jour, comme le fait de mettre des codes en majuscules, etc
-											$this_result_error = call_module_hook('import_line_post', array('type' => $type, 'field_values' => vb($field_values), 'field_infos' => $GLOBALS['database_field_infos_by_type_array'][$type], 'primary_key_values' => $primary_key_values, 'existing_row' => $line_in_database_infos, 'ordered_fields_selected' => $params['ordered_fields_selected'], 'test_mode' => $test_mode), 'string');
-											if(!empty($this_result_error)) {
-												if(!empty($error_output_line)) {
-													$error_output_line .= ' ';
+										if($import_this_line) {
+											if ($line_in_database_infos) {
+												if(empty($test_mode)) {
+													$sql = 'UPDATE ' . word_real_escape_string($table_name) . ' 
+														SET ' . $set_sql . '
+														WHERE ' . create_sql_from_array($primary_key_values, ' AND ');
+													query($sql);
 												}
-												$error_output_line .= $this_result_error;
+												$GLOBALS['nb_update']++;
+											} else {
+												if(empty($test_mode)) {
+													if(!empty($primary_key_values)) {
+														// On rajoute les champs primaires
+														$set_sql .= ', ' . create_sql_from_array($primary_key_values, ', ');
+													}
+
+													query('INSERT INTO ' . word_real_escape_string($table_name) . '
+														SET ' . $set_sql . '');
+												}
+												$GLOBALS['nb_insert']++;
+											}
+											if(empty($test_mode)) {
+												// On fait aussi des traitements dans les données après mise à jour, comme le fait de mettre des codes en majuscules, etc
+												$this_result_error = call_module_hook('import_line_post', array('type' => $type, 'field_values' => vb($field_values), 'field_infos' => $GLOBALS['database_field_infos_by_type_array'][$type], 'primary_key_values' => $primary_key_values, 'existing_row' => $line_in_database_infos, 'ordered_fields_selected' => $params['ordered_fields_selected'], 'test_mode' => $test_mode), 'string');
+												if(!empty($this_result_error)) {
+													if(!empty($error_output_line)) {
+														$error_output_line .= ' ';
+													}
+													$error_output_line .= $this_result_error;
+												}
 											}
 										}
 									}
 								}
-
 								// Affichage du message de succès
 								//$output_line .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'OK !'))->fetch();
 								if(!empty($error_output_line)) {
@@ -7581,7 +7773,7 @@ function handle_import($check_access_rights = true, $params = array()) {
 						$error_output[] = 'ATTENTION : Problème apparemment dans ce fichier - Donc pas d\'action effectuée';
 					}
 					fclose($fp);
-					if(empty($error_output)) {
+					if(empty($error_output) || !empty($force_import_despite_of_error)) {
 						if(!empty($test_mode)) {
 							$output .= '<b>'.StringMb::strtoupper($GLOBALS['STR_ADMIN_SIMULATION']).'</b> : ';
 						}
@@ -7635,6 +7827,7 @@ function handle_import($check_access_rights = true, $params = array()) {
 	$tpl->assign('import_output', $output);
 	$tpl->assign('mode', $mode);
 	$tpl->assign('next_mode', $next_mode);
+	$tpl->assign('force_import_despite_of_error', vb($force_import_despite_of_error));
 	$tpl->assign('error', implode('<br />', $error_output));
 	$tpl->assign('type', vb($type));
 	if($mode == '' || empty($general_configuration_is_valid)) {
@@ -7667,6 +7860,7 @@ function handle_import($check_access_rights = true, $params = array()) {
 	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('STR_ADMIN_CHECK_DATA', $GLOBALS['STR_ADMIN_CHECK_DATA']);
 	$tpl->assign('STR_ADMIN_CHECK_DATA_BEFORE_IMPORT', $GLOBALS['STR_ADMIN_CHECK_DATA_BEFORE_IMPORT']);
+	$tpl->assign('STR_ADMIN_LINE_WITH_ERROR_NOT_IMPORT', $GLOBALS['STR_ADMIN_LINE_WITH_ERROR_NOT_IMPORT']);
 	$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
 	$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
 	$tpl->assign('STR_ADMIN_IMPORT_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
@@ -7689,6 +7883,8 @@ function handle_import($check_access_rights = true, $params = array()) {
 	$tpl->assign('STR_LOAD_RULES', $GLOBALS['STR_LOAD_RULES']);
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_SAVE_RULES', $GLOBALS['STR_SAVE_RULES']);
+	$tpl->assign('STR_CONTINUE_WITH_ERROR', $GLOBALS['STR_CONTINUE_WITH_ERROR']);
+	$tpl->assign('STR_CONTINUE_WITH_ERROR_CONFIRM', $GLOBALS['STR_CONTINUE_WITH_ERROR_CONFIRM']);
 	$tpl->assign('STR_BACK', $GLOBALS['STR_BACK']);
 	$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
 	$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
@@ -7781,9 +7977,15 @@ function create_or_update_user($field_values, $test_mode = false) {
 	}
 	if(empty($insert_field_values['priv'])) {
 		$insert_field_values['priv'] = 'newsletter';
+		$send_user_confirmation = false;
+		$create_password_on_behalf_of_user = false;
+	} else {
+		// si on créer un vrai utilisateur, il faut envoyer le mot de passe par email
+		$send_user_confirmation = true;
+		$create_password_on_behalf_of_user = true;
 	}
-	// On cherche l'utilisateur et on le crée si nécessaire
-	$this_result = insere_utilisateur($insert_field_values, true, !empty($_POST['send_email']), false, false, false, $test_mode);
+	// On cherche l'utilisateur et on le crée si nécessaire. Si l'utilisateur existe déjà, on renvoie true, et si création alors on renvoie l'id (ou 1 si test_mode = true)
+	$this_result = insere_utilisateur($insert_field_values, true, $send_user_confirmation, false, false, $create_password_on_behalf_of_user, $test_mode);
 	if(is_numeric($this_result)) {
 		if(!$test_mode) {
 			$output .= 'OK : Utilisateur créé n°' . $this_result . ' - email : ' . $field_values['email'] . ' <br />';
@@ -7930,7 +8132,7 @@ function handle_export($check_access_rights = true, $params = array()) {
 			} elseif ($type == "ventes_clients_par_produit") {
 				// Export des clients qui ont acheté le produit $_GET['id']
 				// Format du nom de fichier adapté pour Cegid, utilisé dans tous les cas
-				$filename = "jdv_" . StringMB::strtolower(StringMb::substr(date('F', strtotime($_GET["dateadded1"])),0,4)).date('y', time()) . ".csv";
+				$filename = "jdv_" . StringMB::strtolower(StringMb::substr(date('F', time()),0,4)).date('y', time()) . ".csv";
 				$results_array = affiche_liste_clients_par_produit($_GET['id'], true);
 				// **********
 			} elseif(in_array($type, array('ventes', 'one_line_per_product', 'one_line_per_order', 'ventes_chronopost', 'ventes_cegid'))) {
@@ -8131,7 +8333,7 @@ function handle_export($check_access_rights = true, $params = array()) {
 					$results_array[] = $result;
 					unset($product_object);
 					$i++;
-					if($i%10==0) {
+					if($i%10 == 0) {
 						// On transfère au fur et à mesure pour faire patienter utilisateur, et pour éviter erreur du type : Script timed out before returning headers
 						echo StringMb::convert_encoding($output, $params['data_encoding'], GENERAL_ENCODING);
 						$output = '';
@@ -8200,7 +8402,7 @@ function handle_export($check_access_rights = true, $params = array()) {
 						}
 					}
 				}
-				$hook_result = call_module_hook('export', array('type' => $type, 'mode' => $mode, 'results_array' => $results_array, 'table_name' => $table_name, 'domain' => vb($params['domain']), 'format' => $format, 'separator' => $params['separator'], 'ordered_fields_selected' => vb($params['ordered_fields_selected']), 'group_by_array' => vb($group_by_array), 'order_by_array' => vb($order_by_array), 'max_subtotals_level' => vb($params['max_subtotals_level']), 'show_details' => vb($params['show_details']), 'skip_empty_totals' => vb($params['skip_empty_totals']), 'frm' => vb($params['frm'])), 'array');
+				$hook_result = call_module_hook('export', array('type' => $type, 'mode' => $mode, 'results_array' => $results_array, 'table_name' => $table_name, 'domain' => vb($params['domain']), 'format' => $format, 'separator' => $params['separator'], 'ordered_fields_selected' => vb($params['ordered_fields_selected']), 'group_by_array' => vb($group_by_array), 'order_by_array' => vb($order_by_array), 'max_subtotals_level' => vb($params['max_subtotals_level']), 'show_details' => vb($params['show_details']), 'skip_empty_totals' => vb($params['skip_empty_totals']), 'frm' => vb($params['frm']), 'report_header' => vb($params['report_header'])), 'array');
 
 				if(isset($hook_result['disable_colresizable'])) {
 					$params['disable_colresizable'] = $hook_result['disable_colresizable'];
@@ -8271,7 +8473,7 @@ table tr td, table tr th { font-size:11px; padding: 2px; border: 1px solid #e5e5
 }
 </style>
 					';
-					if(!empty($params['report_header'])) {
+					if(!empty($params['report_header']) && empty($GLOBALS['disable_report_header'])) {
 						$output = '<div class="report_header">'. $params['report_header'] . '</div>' . $output;
 					}
 					if(!empty($params['report_footer'])) {
@@ -8423,6 +8625,7 @@ table tr td, table tr th { font-size:11px; padding: 2px; border: 1px solid #e5e5
 			if (!empty($GLOBALS['database_skip_empty_totals_fields_by_type_array'])) {
 				$tpl->assign('skip_empty_totals', vb($params['skip_empty_totals']));
 			}
+			$tpl->assign('page_break', vb($params['page_break']));
 			$tpl->assign('action', get_current_url(true));
 			$tpl->assign('mode', $mode);
 			$tpl->assign('next_mode', $next_mode);
@@ -8445,6 +8648,7 @@ table tr td, table tr th { font-size:11px; padding: 2px; border: 1px solid #e5e5
 			}
 			$tpl->assign('format', $format);
 			$tpl->assign('admin_date_filter_form', get_admin_date_filter_form($GLOBALS['STR_ADMIN_VENTES_RESULTS_TITLE'], $information_select_html, null, false, false));
+			$tpl->assign('STR_ADMIN_EXPORT_PAGE_BREAK_EACH_GROUP', $GLOBALS['STR_ADMIN_EXPORT_PAGE_BREAK_EACH_GROUP']);
 			$tpl->assign('STR_ADMIN_TEXT_FOR_PDF_EXPORT', $GLOBALS['STR_ADMIN_TEXT_FOR_PDF_EXPORT']);
 			$tpl->assign('STR_ADMIN_COLUMN_TTTLE_FIRST_LINE', $GLOBALS['STR_ADMIN_COLUMN_TTTLE_FIRST_LINE']);
 			$tpl->assign('STR_ADMIN_ADD_FOOTER_FILE_EXPORT', $GLOBALS['STR_ADMIN_ADD_FOOTER_FILE_EXPORT']);
@@ -8630,7 +8834,7 @@ function get_export_table(&$lines, $table_name = null, $format = 'csv', $separat
 						$style = 'padding: 0px';
 					} elseif(in_array($this_format, array('float', 'time', 'currency', 'currency3', 'percent')) || (empty($this_format) && (is_numeric($this_value) || strpos($this_value, '&nbsp;€') !== false))) {
 						$class = 'right';
-						if(floatval(str_replace(array(',', ' '), '',$this_value))<0) {
+						if(floatval(str_replace(array(',', 'h', "'", ' ', '&nbsp;'), '',$this_value))<0) {
 							$class .= ' red';
 						}
 						if($this_value === null) {
@@ -8642,6 +8846,9 @@ function get_export_table(&$lines, $table_name = null, $format = 'csv', $separat
 						if($this_value === 0 || $this_value === '0,00' || $this_value === "0h00'") {
 							$class .= ' grey';
 						}
+					} elseif(strpos($this_field_name, 'E_Mail') !== false || strpos($this_field_name, 'Email') !== false) {
+						// Césure entre N emails
+						$this_value = str_replace(array(',', ';'), array(',<wbr>', ';<wbr>'), $this_value);
 					}
 				}
 				if($format != 'csv') {
@@ -8680,6 +8887,7 @@ function get_export_table(&$lines, $table_name = null, $format = 'csv', $separat
 	if($format != 'csv') {
 		$output .= '</table></div>
 ';
+		
 	} else {
 		// On ne veut qu'une seule ligne de noms de colonnes, et non pas une à chaque fois pour un sous-groupe
 		// Comme $params est passé en référence, le plus simple est de changer la valeur de $params['header'] ici
@@ -8727,6 +8935,7 @@ function handle_order_insert_or_update($frm, $bill_mode='commander', $form_error
 				$order_id = 0;
 			}
 		}
+		// Affichage du formulaire éventuellement géré par le hook
 		$hook_output = call_module_hook('handle_order_insert_or_update', array('form_error_object' => $form_error_object, 'save_commande' => $save_commande, 'frm' => $frm, 'bill_mode' => $bill_mode, 'order_id' => $order_id), 'array');
 		if (!empty($frm['commandeid']) || $form_error_object->count()) {
 			// lors d'une modification, ou de la création de facture avec une erreur
@@ -8762,7 +8971,6 @@ function handle_order_insert_or_update($frm, $bill_mode='commander', $form_error
 				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . intval(vn($frm['id'])));
 			}
 		}
-		
 	} else {
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ORDER_MIN'].$GLOBALS['STR_REQUIRED_VALIDATE_ORDER']))->fetch();
 		$output .= affiche_details_commande(null, 'ajout');
@@ -8904,9 +9112,9 @@ function modif_email_template_form($frm, $id, $update_message, $params = array()
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_output.tpl');
 	$tpl->assign('params', $params);
 
-	$tpl->assign('show_tag_list', show_tag_list('clients', vb($hook_result['specific_tag_array']), 'form_text'));
+	$tpl->assign('show_tag_list', show_tag_list('email_clients', 'form_text'));
 	if($email_template_cat_infos['technical_code'] == 'mission_statements') {
-		$tpl->assign('mission_statement_tag', show_tag_list('mission_statements', null, 'form_text'));
+		$tpl->assign('mission_statement_tag', show_tag_list('mission_statements', 'form_text'));
 	} else {
 		$tpl->assign('mission_statement_tag', null);
 	}
@@ -9050,7 +9258,7 @@ function insert_email_template_form($frm, $insert_message, $params = array()) {
 	$tpl->assign('message_html', $insert_message);
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'].'-ajout'));
 	$tpl->assign('action', get_current_url());
-	$tpl->assign('show_tag_list', show_tag_list('clients', vb($hook_result['specific_tag_array']), 'form_text'));
+	$tpl->assign('show_tag_list', show_tag_list('clients', 'form_text'));
 	$tpl->assign('categories_list', $categories_list);
 	$tpl->assign('form_technical_code', vb($frm['form_technical_code']));
 	$tpl->assign('form_name', vb($frm['form_name']));
@@ -9064,7 +9272,7 @@ function insert_email_template_form($frm, $insert_message, $params = array()) {
 	}
 	foreach ($langs_array as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
-			'issel' => vb($frm['form_lang']) == $lng || empty($frm['form_lang'])
+			'issel' => vb($frm['form_lang']) == $lng || (empty($frm['form_lang']) && $lng == $_SESSION['session_langue'])
 			);
 	}
 	$tpl->assign('signature_template_options', get_email_template_options('technical_code', null, null, null, true));
@@ -9295,49 +9503,69 @@ function emailLinksExplanations()
  * Affiche une liste de tag à utiliser dans le corps d'un email
  *
  * @param string $mode contient le nom de la table qui sert à composer la liste des tags. Si ce paramètre vaut mission_statement, alors on ne retourne que les tags concernés. Ce paramètre est utilisé pour afficher ou non les tags via une méthode ajax, cf $mode == 'get_mission_statement_tag' dans actions.php
- * @param array $specific_tag_array permet d'ajouter ponctuellement d'autres tags qui ne sont pas dans la table principale, par exemple pour SOLDE ou DATERELANCE
- * @param string $message_field_name nom du champ textarea qui affiche le contenu de l'email. Le nom de ce champ est différent entre le formulaie de création de template et le formulaire d'envoi d'email
+ * @param string $message_field_name nom du champ textarea qui affiche le contenu de l'email. Le nom de ce champ est différent entre le formulaire de création de template et le formulaire d'envoi d'email
  * @return
  */
-function show_tag_list($mode, $specific_tag_array = array(), $message_field_name = 'form_message')
+function show_tag_list($mode, $message_field_name = 'form_message')
 {
 	$output = '';
-	$hook_result = call_module_hook('show_tag_list', array('mode' => vb($mode)), 'string');
+	// le hook retourne la liste des tags pour la configuration $mode demandé. Si le hook retourne un résultat, alors on le prend, sinon $mode a pour valeur le nom de la table qui sert de source pour générer les tags
+	$hook_result = call_module_hook('show_tag_list', array('mode' => vb($mode)), 'array');
 	if (!empty($hook_result)) {
-		$output = $hook_result;
+		// le hook retourne un résultat, il est prioritaire sur le reste. Le tableau de retour du hook est formaté array('mode'=> array('tag1' => 'explication1', 'tag2' => 'explication2', ...))
+		$all_tags_list_array = $hook_result;
 	} elseif (in_array($mode, listTables())) {
-		$tag_list = get_table_field_names($mode);
+		$tags_list_array = array();
+		// le hook est vide, et le nom de $mode correspond à une table en BDD. On va prendre la liste de champs de cette table pour afficher les tags
+		$table_field_names = get_table_field_names($mode);
+		foreach($table_field_names as $this_field) {
+			// get_table_field_names retourne un tableau de champs indexé numériquement (1=>champ1, 2=>champ2, ...) alors que l'on veut un autre format pour cette fonction. Le tableau doit avoir la forme 'champ'=>'explication'
+			// => On compose un nouveau tableau formaté comme demandé plus bas dans la fonction
+			$tags_list_array[$this_field] = vb($GLOBALS['database_field_titles_array'][$this_field]);
+		}
+		// tableau avec pour index le nom du mode (qui servira plus bas à afficher le titre si variable de langue présente) et en valeur le tableau de tag et explication associée
+		$all_tags_list_array[$mode] = $tags_list_array;
 	} else {
-		$tag_list = get_table_field_names('peel_utilisateurs');
+		$tags_list_array = array();
+		$table_field_names = get_table_field_names('peel_utilisateurs');
+		foreach($table_field_names as $this_field) {
+			// tag générique PEEL
+			$tags_list_array[$this_field] = "";
+		}
+		// tableau avec pour index le nom du mode (qui servira plus bas à afficher le titre si variable de langue présente) et en valeur le tableau de tag et explication associée
+		$all_tags_list_array['peel_utilisateurs'] = $tags_list_array;
 	}
 
+	// code javascript permettant d'ajouter un tag dans le contenu HTML de l'éditeur CKEDITOR
 	$GLOBALS['js_content_array'][] = '
 		function add_tag_to_message(tag) {
 			// $("#message").val($("#message").val() +" "+ tag);
 			var val = CKEDITOR.instances["'.$message_field_name.'"].getData();
 			CKEDITOR.instances["'.$message_field_name.'"].setData(val + " " + tag);
 		}
-	';
-	if (!empty($tag_list)) {
-		$output .= '<div class="alert alert-info">' . $GLOBALS["STR_ADMIN_SHOW_TAG_LIST_EXPLANATION"] . '<br />';
-		foreach($tag_list as $this_tag) {
-			$output .= '<a href="#" onclick="add_tag_to_message(\'['.strtoupper($this_tag).']\');return false;">['.strtoupper($this_tag).']</a> / ';
-		}
-		$output .= '</div>';
-	}
+';
 
-	if (!empty($specific_tag_array)) {
-		foreach($specific_tag_array as $this_taglist_name => $this_tag_list) {
-			$output .= '<div class="alert alert-info">';
-			if (!empty($GLOBALS['STR_SPECIFIC_TAG_'.strtoupper($this_taglist_name).'_EXPLAIN'])) {
-				$output .= $GLOBALS['STR_SPECIFIC_TAG_'.strtoupper($this_taglist_name).'_EXPLAIN'];
+	// Les tags sont affichés dans un encadré bleu, avec les liens pour afficher/masquer la totalité du bloc
+	$output .= '<div class="alert alert-info" id="show_tag_list">' . $GLOBALS["STR_ADMIN_SHOW_TAG_LIST_EXPLANATION"] . '<br />';
+	$output .= '<div class="less-content">';
+	if (!empty($all_tags_list_array)) {
+		foreach($all_tags_list_array as $this_taglist_name => $this_tag_list_array) {
+			if (!empty($GLOBALS['STR_SPECIFIC_TAG_'. strtoupper($this_taglist_name) . '_EXPLAIN'])) {
+				// Dans l'encadré on peut avoir des sous rubriques : pour les clients, pour les collaborateurs, pour le lettres de mission... Le titre de ces rubriques est composé du code technique du bloc de tag
+				$output .= '<h3>'.$GLOBALS['STR_SPECIFIC_TAG_' . strtoupper($this_taglist_name) . '_EXPLAIN'].'</h3>';
+			} 
+			foreach($this_tag_list_array as $this_tag => $this_explain) {
+				if (empty($this_explain)) {
+					// pas de description trouvée, on rempli avec la description générique du titre
+					$this_explain = vb($GLOBALS['database_field_titles_array'][$this_tag]);
+				}
+				$output .= '<a href="#" data-toggle="tooltip" title="'.$this_explain.'"  onclick="add_tag_to_message(\'['.strtoupper($this_tag).']\');return false;">['.strtoupper($this_tag).']</a> / ';
 			}
-			foreach($this_tag_list as $this_tag) {
-				$output .= '<a href="#" onclick="add_tag_to_message(\'['.strtoupper($this_tag).']\');return false;">['.strtoupper($this_tag).']</a> / ';
-			}
-			$output .= '</div>';
 		}
 	}
+	$output .= '</div>
+			<p><a href="#" class="show-more">' . $GLOBALS["STR_ADMIN_MORE_INFOS"] . '...</a><a href="#" class="show-less collapse">' . $GLOBALS["STR_ADMIN_LESS_INFOS"] . '...</a></p>
+			</div>';
 
 	return $output;
 }

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -73,10 +73,12 @@
 				<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}{% if is_societe_mandatory %}<span class="etoile">*</span>{% endif %}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" /></span>{{ societe_error }}
 			</div>
+			{% if siret_txt %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{% if mandatory_fields.siret %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span> {{ siret_error }}
 			</div>
+			{% endif %}
 			{% if STR_INTRACOM_FORM %}	
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM }}<br/>{{ STR_INTRACOM_FORM_ALERT }}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -97,7 +99,7 @@
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{% if mandatory_fields.url %}<span class="etoile">*</span> {% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
-			</div>
+			</div>{{ url_error }}
 		{% if add_b2b_form_inputs %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="type">{{ STR_YOU_ARE }}{% if mandatory_fields.type %}<span class="etoile">*</span> {% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -148,6 +150,9 @@
 			<div class="hidden">
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="form_verif" name="form_verif" value="" /></span>
 			</div>
+		{% if (STR_TELEPHONE_EXPLAIN) %}
+			<div class="alert alert-info">{{ STR_TELEPHONE_EXPLAIN }}</div>
+		{% endif %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="telephone">{{ STR_TELEPHONE }}{% if mandatory_fields.telephone %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="tel" class="form-control" id="telephone" name="telephone" value="{{ telephone|str_form_value }}" /></span>{{ telephone_error }}
@@ -298,7 +303,7 @@
                 <span class="enregistrementgauche"><label for="code">{{ captcha.validation_code_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
                 <span class="enregistrementdroite">
                      <div class="g-recaptcha" data-sitekey="{{ google_recaptcha_sitekey }}" style="display:inline-block;"></div>
-                    <!--{$captcha.inside_form}-->
+                    <!--{{ captcha.inside_form }}-->
                 </span>
             </div>   
 		{% else %}

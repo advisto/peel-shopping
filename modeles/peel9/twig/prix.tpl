@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -21,7 +21,7 @@
 		{% if prix_ht_without_ecotax %}
 	<tr>
 		<td>
-			<span property="price" class="prix">{{ prix_ht_without_ecotax.prix }}</span>
+			<span class="prix">{{ prix_ht_without_ecotax.prix }}</span>
 		</td>
 	</tr> 
 	<tr>
@@ -36,14 +36,14 @@
 		<td class="middle"><del>{{ original_price }}</del></td>
 			{% endif %}
 		<td>
-			<span property="price" class="prix"{% if item_id %} id="{{ item_id }}"{% endif %}>{% if STR_FROM %}{{ STR_FROM }}{% endif %} {{ final_price }} {% if conditionnement %}{{ STR_CONDITIONING_TEXT }}{% endif %}</span>
+			<span class="prix"{% if item_id %} id="{{ item_id }}"{% endif %}>{% if STR_FROM %}{{ STR_FROM }}{% endif %} {{ final_price }} {% if conditionnement %}{{ STR_CONDITIONING_TEXT }}{% endif %}</span>
 		</td>
 	</tr>
 		{% endif %}
 	{% else %}
 	<tr>
 		<td>
-			<span property="price" class="prix"{% if item_id %} id="{{ item_id }}"{% endif %}>{% if STR_FROM %}{{ STR_FROM }}{% endif %} {{ final_price }} {% if conditionnement %}{{ STR_CONDITIONING_TEXT }}{% endif %}</span>
+			<span class="prix"{% if item_id %} id="{{ item_id }}"{% endif %}>{% if STR_FROM %}{{ STR_FROM }}{% endif %} {{ final_price }} {% if conditionnement %}{{ STR_CONDITIONING_TEXT }}{% endif %}</span>
 		</td>
 	</tr>
 		{% if original_price is defined %}
@@ -52,11 +52,6 @@
 	</tr>
 		{% endif %}
 	{% endif %}
-	
-	
-	
-	
-	
 	
 	{% if ecotax %}
 	<tr>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: index.php 66961 2021-05-24 13:26:45Z sdelaporte $
 include("../configuration.inc.php");
 
 if (isset($_GET['catid']) && empty($_GET['catid'])) {
@@ -68,12 +68,15 @@ $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['achat_index_page_c
 $output = affiche_contenu_html('header_product_list', true);
 
 // Une redirection est susceptible d'être faite dans la fonction get_products_list_brief_html, il faut donc l'appeler avant include($GLOBALS['repertoire_modele'] . "/haut.php").
-$output = get_products_list_brief_html($catid, empty($_GET['convert_gift_points']) && empty($GLOBALS['site_parameters']['subcategories_display_disable']), (empty($_GET['convert_gift_points'])?'category':'convert_gift_points'));
-
+if(!empty($_GET['qr_code_display_products']) && !empty($GLOBALS['site_parameters']['display_suspended_products'])){
+	$output = get_products_list_brief_html($catid, empty($_GET['convert_gift_points']) && empty($GLOBALS['site_parameters']['subcategories_display_disable']), 'online_and_suspended_products');
+} else {
+	$output = get_products_list_brief_html($catid, empty($_GET['convert_gift_points']) && empty($GLOBALS['site_parameters']['subcategories_display_disable']), (empty($_GET['convert_gift_points'])?'category':'convert_gift_points'));
+}
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 if ($form_error_object->count() > 0) {
 	foreach ($form_error_object->error as $key => $message) {
-		if ($key == "confirm_ok") {
+		if ($key === "confirm_ok") {
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $message))->fetch();
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $message))->fetch();

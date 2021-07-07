@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 64838 2020-10-28 15:50:17Z sdelaporte $
+// $Id: Product.php 67204 2021-06-14 09:42:44Z jlesergent $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 64838 2020-10-28 15:50:17Z sdelaporte $
+ * @version $Id: Product.php 67204 2021-06-14 09:42:44Z jlesergent $
  * @access public
  */
 class Product {
@@ -152,6 +152,10 @@ class Product {
 	var $on_new = null;
 	var $conditioning_text = null;
 	var $attributs_list = null;
+	var $exclusif_web = null;
+	var $img_new = null;
+	var $img_promotion = null;
+	var $thumbnail_promotion = null;
 
 	/**
 	 * Product::Product()
@@ -216,7 +220,7 @@ class Product {
 					$product_infos_sql[md5($this->id)] = get_product_infos($this->id);
 				}
 				$product_infos = $product_infos_sql[md5($this->id)];
-				
+				// var_dump($product_infos);
 			} elseif(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
 				$product_fields = array('p.id', 'p.technical_code', 'p.reference', 'p.ean_code', 'p.'.vb($GLOBALS['site_parameters']['field_product_name'], 'nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$lang)).' AS name', 'p.descriptif_' . $lang . ' AS descriptif', 'p.description_' . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$lang) . ' AS description', 'p.meta_titre_' . $lang . ' AS meta_titre', 'p.meta_desc_' . $lang . ' AS meta_desc', 'p.meta_key_' . $lang . ' AS meta_key', 'p.on_estimate', 'p.prix', 'p.prix_achat', 'p.prix_revendeur', 'p.tva', 'p.etat', 'p.prix_promo', 'p.promotion', 'p.points', 'p.default_image', 'p.image1', 'p.image2', 'p.image3', 'p.image4', 'p.image5', 'p.image6', 'p.image7', 'p.image8', 'p.image9', 'p.image10', 'p.zip', 'p.id_utilisateur', 'p.youtube_code', 'p.on_stock', 'p.comments', 'p.delai_stock', 'p.etat_stock', 'p.affiche_stock', 'p.on_special', 'p.on_gift', 'p.on_gift_points', 'p.on_rupture', 'p.on_flash', 'p.flash_start', 'p.flash_end', 'p.prix_flash', 'p.extrait', 'p.on_download', 'p.on_check', 'p.on_reseller', 'p.id_marque', 'p.default_color_id', 'p.display_price_by_weight', 'p.id_ecotaxe', 'p.display_tab', 'p.poids', 'p.volume', 'p.position', 'p.extra_link', 'p.paiement', 'p.site_id');
 				if (!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
@@ -331,7 +335,7 @@ class Product {
 		}
 		$this->volume = floatval($this->volume);
 		if (empty($this->prix_ht)) {
-			$this->prix_ht = $this->prix / (1 + $this->tva / 100);
+ 		$this->prix_ht = $this->prix / (1 + $this->tva / 100);
 		}
 		$this->user_id = $user_id;
 		// On exécute des fonctions de modules qui permettent de compléter le prix, de calculer certaines propriétés de l'objet, ...
@@ -411,7 +415,6 @@ class Product {
 			return null;
 		} elseif(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
 			if ($this->categorie_id === null || $this->categorie === null) {
-				
 				$query = query("SELECT p.".vb($GLOBALS['site_parameters']['field_product_name'], 'nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this->lang))." AS name, pc.categorie_id, r.nom_" . $this->lang . " AS categorie
 					FROM peel_produits p
 					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_produits_categories pc ON p.id = pc.produit_id
@@ -782,7 +785,7 @@ class Product {
 						$product_field_names = get_table_field_names('peel_produits');
 						foreach($product_fields as $this_key => $this_field) {
 							$temp = explode(' ', $this_field);
-							if(!in_array(str_replace('p.', '', $temp[0]), $product_field_names)) {
+							if(!in_array(str_replace('p.', '', $temp[0]), $product_field_names) || isset($this->$temp[0])) {
 								unset($product_fields[$this_key]);
 							}
 						}
@@ -869,8 +872,8 @@ class Product {
 	function get_original_price($with_taxes = true, $reseller_mode = false, $format = false, $add_tax_type_text = false, $add_ecotax = true, $get_price_for_this_configuration = true, $quantity = 1, $debug = false)
 	{
 		static $result_array, $price_ht_array;
-		$cache_id = serialize(array($this->id,$this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->prix_ht, $this->tva, $with_taxes, $reseller_mode, $format, $add_tax_type_text, $quantity, $add_ecotax, $get_price_for_this_configuration, $this->configuration_color_price_ht, $this->configuration_size_price_ht, $this->configuration_size_price_ht, $this->configuration_total_original_base_product_price_ht));
-		$price_ht_cache_id = serialize(array($this->id,$this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->prix_ht, $this->tva, $reseller_mode, $quantity, $get_price_for_this_configuration, $this->configuration_color_price_ht, $this->configuration_total_original_base_product_price_ht));
+		$cache_id = serialize(array($this->id,$this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->prix_ht, $this->tva, $with_taxes, $reseller_mode, $format, $add_tax_type_text, $quantity, $add_ecotax, $get_price_for_this_configuration, $this->configuration_color_price_ht, $this->configuration_size_price_ht, $this->configuration_total_original_base_product_price_ht));
+		$price_ht_cache_id = serialize(array($this->id,$this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->prix_ht, $this->tva, $reseller_mode, $quantity, $get_price_for_this_configuration, $this->configuration_color_price_ht, $this->configuration_size_price_ht, $this->configuration_total_original_base_product_price_ht));
 		if(isset($result_array[$cache_id])) {
 			return $result_array[$cache_id];
 		}
@@ -887,9 +890,10 @@ class Product {
 				if (check_if_module_active('attributs')) {
 					if (((!empty($GLOBALS['site_parameters']['product_price_from_attribut_if_price_null']) && empty($price_ht)) || (!empty($this->technical_code) && in_array($this->technical_code, vb($GLOBALS['site_parameters']['product_price_from_attribut'], array())))) && $this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction>0) {
 						// Dans ce mode le prix du produit est calculé uniquement avec les attributs, le montant du produit initial ne doit pas être prit en compte
-						$price_ht = $this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction;
+						var_dump($this->configuration_total_original_price_attributs_ht);
+						$price_ht = $this->configuration_total_original_price_attributs_ht;
 					} else {
-						$price_ht += $this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction;
+						$price_ht += $this->configuration_total_original_price_attributs_ht;
 					}
 					$attribut_overcost_percent = call_module_hook('attribut_overcost_percent', array('product_object' => $this), 'unique');
 				}
@@ -942,7 +946,7 @@ class Product {
 	{
 		// Deux niveaux de cache : résultat formatté avec $result_array, et juste prix HT avec $price_ht_array
 		static $result_array, $price_ht_array;
-		$cache_id = serialize(array($this->id,$this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->tva, $user_promotion_percentage, $with_taxes, $reseller_mode, $format, $add_tax_type_text, $quantity, $add_ecotax, $get_price_for_this_configuration, $add_rdfa_properties, $quantity_all_products_in_category, $this->configuration_color_price_ht, $this->configuration_size_price_ht, $this->configuration_total_original_base_product_price_ht));
+		$cache_id = serialize(array($this->id, $this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->tva, $user_promotion_percentage, $with_taxes, $reseller_mode, $format, $add_tax_type_text, $quantity, $add_ecotax, $get_price_for_this_configuration, $add_rdfa_properties, $quantity_all_products_in_category, $this->configuration_color_price_ht, $this->configuration_size_price_ht, $this->configuration_total_original_base_product_price_ht));
 		$price_ht_cache_id = serialize(array($this->id,$this->configuration_total_original_price_attributs_ht + $this->configuration_total_original_price_attributs_ht_without_reduction, $this->tva, $user_promotion_percentage, $reseller_mode, $quantity, $get_price_for_this_configuration, $quantity_all_products_in_category, $this->configuration_color_price_ht, $this->configuration_size_price_ht, $this->configuration_total_original_base_product_price_ht));
 		if(isset($result_array[$cache_id])) {
 			return $result_array[$cache_id];
@@ -966,7 +970,7 @@ class Product {
 			}
 
 			// Récupération du prix modifié par d'éventuels modules (par exemple module "lot" pour donner le prix réduit pour une quantité donnée)
-			$call_module_hook = call_module_hook('product_get_final_price', array('quantity' => $quantity, 'reseller_mode' => $reseller_mode, 'price_ht' => $price_ht, 'this' => $this), 'min');
+			$call_module_hook = call_module_hook('product_get_final_price', array('quantity' => $quantity, 'reseller_mode' => $reseller_mode, 'price_ht' => $price_ht, 'this' => $this, 'get_price_for_this_configuration' => $get_price_for_this_configuration), 'min');
 			if ($call_module_hook !== null) {
 				if (!empty($GLOBALS['site_parameters'][$this->technical_code.'_product_price_from_hook'])) {
 					// Le prix du produit est déterminé par la valeur calculée par le hook pour ce produit.
@@ -979,11 +983,11 @@ class Product {
 			if (!$this->is_price_flash($reseller_mode)) {
 				if (!$reseller_mode) {
 					// Pour les revendeurs, on n'applique pas d'autre réduction que le pourcentage de réduction explicite pour cet utilisateur
+					// $promotion_devises : Promotion en devise, par opposition aux promotion en pourcentage
 					$promotion_devises = 0;
 					if (check_if_module_active('category_promotion')) {
 						$cat = get_category_promotion_by_product($this->id, $quantity_all_products_in_category);
 						if (!empty($cat) && $cat['promotion_devises'] > 0) {
-							// Réduction par marque en valeur et non pas en pourcentage
 							$promotion_devises = max($promotion_devises, $cat['promotion_devises']);
 						}
 					}
@@ -999,8 +1003,7 @@ class Product {
 					if(!empty($get_promotion_by_user_offer_object) && $get_promotion_by_user_offer_object->prix>0) {
 						if (!empty($GLOBALS['site_parameters']['get_offer_minimum_price_users_array']) && est_identifie() && in_array($_SESSION['session_utilisateur']['id_utilisateur'],$GLOBALS['site_parameters']['get_offer_minimum_price_users_array'])) {
 							// Si l'utilisateur connecté est dans le tableau get_offer_minimum_price_users_array alors on prend le prix le plus faible parmit le prix initial du produit et le prix de l'offre.
-							if($get_promotion_by_user_offer_object->prix < $price_ht)
-							{
+							if($get_promotion_by_user_offer_object->prix < $price_ht) {
 								$price_ht = $get_promotion_by_user_offer_object->prix;
 								// Date de fin d'offre
 								$this->promo_offer_date = $get_promotion_by_user_offer_object->date_limite;
@@ -1015,21 +1018,24 @@ class Product {
 					// Application des réductions automatique en fonction de mots clés dans la description ou la référence du produit 
 					$promotion_by_product_filter_object = $this->get_promotion_by_product_filter();
 					if(!empty($promotion_by_product_filter_object)) {
-						if($promotion_by_product_filter_object->remise_valeur > $promotion_devises)
-						{
+						if($promotion_by_product_filter_object->remise_valeur > $promotion_devises) {
 							$promotion_devises = $promotion_by_product_filter_object->remise_valeur;
 							// Date de fin de promotion
 							$this->promo_offer_date = $promotion_by_product_filter_object->date_fin;
-					}
+						}
 					}
 					$price_ht = max($price_ht - $promotion_devises / (1 + $this->tva / 100), 0);
 				}
-				// Application des réductions en pourcentages
-				$price_ht = $price_ht * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage, false, $quantity, $quantity_all_products_in_category) / 100) ;
+				// Application des réductions en pourcentages. Si get_price_for_this_configuration alors $price_ht contient le montant des attributs avant réduction
+				$price_ht = $price_ht * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage, false, $quantity, $quantity_all_products_in_category) / 100);
+				if ($get_price_for_this_configuration && check_if_module_active('attributs')) {
+					// Ajout du montant des attributs sur lesquels les réductions ne s'appliquent pas
+					$price_ht += $this->configuration_total_original_price_attributs_ht_without_reduction;
+				}
 			} else {
 				// Si c'est un prix flash, on n'applique pas les réductions en pourcentage ni en valeur
 				// (mais sur les options, les pourcentages seront quand même appliqués - pas gérés ici)
-				$price_ht = $price_ht * (1 - $user_promotion_percentage / 100) ;
+				$price_ht = $price_ht * (1 - $user_promotion_percentage / 100);
 			}
 			if(!empty($GLOBALS['site_parameters']['all_prices_rebate_percentage'])) {
 				$price_ht = $price_ht * (1 - $GLOBALS['site_parameters']['all_prices_rebate_percentage']/100);
@@ -1198,6 +1204,10 @@ class Product {
 	function get_all_promotions_percentage($reseller_mode = false, $user_promotion_percentage = 0, $format = false, $quantity = 1, $quantity_all_products_in_category = null)
 	{
 		static $all_promotions_percentage_array;
+		$hook_result = call_module_hook('product_promotions_percentage', array('product_id' => $this->id), 'array');
+		if (empty($hook_result)) {
+			$hook_result = array('nom' => '', 'promotion_devises' => 0, 'promotion_percent' => 0);
+		}
 		if (isset($_SESSION['session_caddie'])) {
 			// On utilise isset ici dans le cas où l'on appel la class Product avant l'initialisation de la classe Caddie, ce qui est possible lors de l'appel au module qui se passe avant l'initialisation du panier
 			$articles = $_SESSION['session_caddie']->articles;
@@ -1245,24 +1255,28 @@ class Product {
 				}
 				// Calcul du pourcentage de réduction à partir du champ prix_promo. Ne s'applique pas si le prix est défini par les réductions par lot
 				if ($this->prix_promo > 0 && $this->prix > 0 && empty($GLOBALS['cache']['lot_price_by_id'][$this->id])) {
-					if (!empty($this->vat_applicable)) {
-						$prix_promo = $this->prix_promo;
-				} else {
-						$prix_promo = $this->prix_promo / (1 + $this->tva / 100);
-					}
-					$prix_promo_percent = ($this->prix - $prix_promo) * 100 / $this->prix;
+					/*
+						On calcul le pourcentage de réduction en se basant toujours sur le prix TTC. On pourrait également faire sur le prix HT, mais il faut que le calcul soit cohérent
+						Donc on désactive ce morceau de code, puisque on test sur le montant TTC ($this->prix)
+						if (!empty($this->vat_applicable)) {
+							$prix_promo = $this->prix_promo;
+						} else {
+							$prix_promo = $this->prix_promo / (1 + $this->tva / 100);
+						}
+					*/
+					$prix_promo_percent = ($this->prix - $this->prix_promo) * 100 / $this->prix;
 				} else {
 					$prix_promo_percent = 0;
 				}
 				$prices_whole_site_promotion_percentage = vn($GLOBALS['site_parameters']['prices_whole_site_promotion_percentage']);
 				if (!empty($GLOBALS['site_parameters']['product_add_all_percent_discount'])) {
 					// Si on veut cumuler les réductions par produit, par marque et par catégorie
-					$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - $this->promotion / 100) * (1 - $cat['promotion_percent'] / 100) * (1 - $marque['promotion_percent'] / 100) * (1 - $global_promotion / 100) * (1 - $promotion_by_product_filter / 100) * (1 - $promotion_by_user_offer / 100) * (1 - $prices_whole_site_promotion_percentage / 100);
+					$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - $this->promotion / 100) * (1 - $cat['promotion_percent'] / 100) * (1 - $marque['promotion_percent'] / 100) * (1 - $global_promotion / 100) * (1 - $promotion_by_product_filter / 100) * (1 - $promotion_by_user_offer / 100) * (1 - $prices_whole_site_promotion_percentage / 100) * (1 - $hook_result['promotion_percent'] / 100);
 					if($promotion_by_user_offer > 0 && $promotion_by_user_offer > $promotion_by_product_filter) {
-					// S'il y a une offre, on sauvegarde sa date de fin
+						// S'il y a une offre, on sauvegarde sa date de fin
 						$this->promo_offer_date = $offer_date;
 					} elseif ($promotion_by_product_filter > 0 && $promotion_by_product_filter > $promotion_by_user_offer) {
-					// S'il y a une promotion, on sauvegarde sa date de fin
+						// S'il y a une promotion, on sauvegarde sa date de fin
 						$this->promo_offer_date = $promo_date;
 					}
 				} else {
@@ -1275,7 +1289,9 @@ class Product {
 						// S'il y a une promotion, on sauvegarde sa date de fin
 						$this->promo_offer_date = $promo_date;
 					}
-					$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - min($promo_max, 100) / 100);
+					$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - min(max($this->promotion, $cat['promotion_percent'], $marque['promotion_percent'], vn($global_promotion), $promotion_by_product_filter, $promotion_by_user_offer, $prix_promo_percent, $prices_whole_site_promotion_percentage, $hook_result['promotion_percent']), 100) / 100);
+			
+			
 				}
 			} else {
 				// Si on est revendeur, seule la promotion utilisateur est utilisée

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: configuration.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -222,7 +222,8 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'bounces' => '/modules/bounces',
 		'vatlayer' => '/modules/vatlayer/functions.php',
 		'counter' => '/modules/counter/functions.php',
-		'faq' => '/modules/faq/fonctions.php'
+		'faq' => '/modules/faq/fonctions.php',
+		'payline' => '/modules/payline/fonctions.php'
 		);
 set_configuration_variable(array('technical_code' => 'modules_front_office_functions_files_array', 'string' => $modules_front_office_functions_files_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $error_msg = ob_get_contents();

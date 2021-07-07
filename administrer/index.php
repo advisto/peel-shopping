@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: index.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -373,9 +373,9 @@ function get_home_block_content($content_code)
 			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('STR_ADMIN_INDEX_PEEL_DESC1', $GLOBALS['STR_ADMIN_INDEX_PEEL_DESC1']);
 			$tpl1->assign('STR_ADMIN_INDEX_PEEL_LAST_OFFERS', $GLOBALS['STR_ADMIN_INDEX_PEEL_LAST_OFFERS']);
-			$tpl1->assign('last_offers_href', 'https://www.peel.fr/solution-e-commerce-1/peel-premium-1.html');
+			$tpl1->assign('last_offers_href', 'https://www.peel.fr/modules-a-la-carte-4/module-peel-premium-1.html');
 			$tpl1->assign('STR_ADMIN_INDEX_CUSTOM_MODULES', $GLOBALS['STR_ADMIN_INDEX_CUSTOM_MODULES']);
-			$tpl1->assign('custom_modules_href', 'https://www.peel.fr/achat/modules-a-la-carte-4.html');
+			$tpl1->assign('custom_modules_href', 'https://www.peel.fr/achat/cat-modules-a-la-carte-4.html');
 			$tpl1->assign('STR_ADMIN_CONTACT_US', $GLOBALS['STR_ADMIN_CONTACT_US']);
 			$tpl1->assign('contact_us_href', 'https://www.peel.fr/utilisateurs/contact.php');
 			$block_content['description1'] = $tpl1->fetch();

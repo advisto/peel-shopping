@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: images.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: images.php 67397 2021-06-25 10:19:34Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -43,11 +43,43 @@ function image_resize($origin_filename_with_path, $new_filename_with_path, $dest
 		$source = @imagecreatefromjpeg($origin_filename_with_path);
 		if (empty($source)) {
 			$source = @imagecreatefrompng($origin_filename_with_path);
+		} elseif (function_exists('exif_read_data')) {
+			// Rotation de l'image selon les metadatas de l'image JPEG. 
+			$exif = @exif_read_data($origin_filename_with_path);
+			if($exif) {
+				if(!empty($exif['Orientation'])) {
+					$orientation = $exif['Orientation'];
+				} elseif(!empty($exif['IFD0']) && !empty($exif['IFD0']['Orientation'])) {
+					// some cameras (most higher models) have position senzor (gyroskope?) and taking-position is wrote in EXIF, here is simple script for automatic rotating images
+					$orientation = $exif['IFD0']['Orientation'];
+				}	elseif(!empty($exif['COMPUTED']) && !empty($exif['COMPUTED']['Orientation'])) {
+					// cf. https://stackoverflow.com/questions/7489742/php-read-exif-data-and-adjust-orientation
+					$orientation = $exif['COMPUTED']['Orientation'];
+				}
+			}
+			if(!empty($orientation) && $orientation != 1) {
+				$deg = 0;
+				switch ($orientation) {
+					case 3:
+					  $deg = 180;
+					  break;
+					case 6:
+					  $deg = 270;
+					  break;
+					case 8:
+					  $deg = 90;
+					  break;
+				}
+				if ($deg) {
+					$source = imagerotate($source, $deg, 0);        
+				}
+			}
 		}
 	}
 	if (empty($source)) {
 		return false;
 	}
+
 	$sourceW = @imagesx($source);
 	$sourceH = @imagesy($source);
 	if (empty($sourceW) || empty($sourceH)) {
@@ -98,4 +130,3 @@ function image_resize($origin_filename_with_path, $new_filename_with_path, $dest
 		return $origin_filename_with_path;
 	}
 }
-

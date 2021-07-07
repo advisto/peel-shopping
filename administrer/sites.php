@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: sites.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -504,7 +504,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			$version = '';
 			// On cherche dans le fichier de référence le numéro de version dans une ligne de commentaire d'entête du type
 			// PEEL Modules X.X.X
-			if($fp = StringMb::fopen_utf8($file_path, "r")) {
+			if(file_exists($file_path) && !is_dir($file_path) && $fp = StringMb::fopen_utf8($file_path, "r")) {
 				while ($line = fgets($fp, 1024)) { 
 					if(StringMb::substr($line, 0, 2) == '//' && preg_match("/PEEL (Shopping|Modules) ([0-9.]*)/i", $line, $matches)) { 
 						$version = $matches[2];
@@ -855,7 +855,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('fonctionsconditionnement', file_exists($GLOBALS['fonctionsconditionnement']));
 	$tpl->assign('module_conditionnement', vn($frm['module_conditionnement']));
 	$tpl->assign('payment_status_decrement_stock', vn($frm['payment_status_decrement_stock']));
-	$tpl->assign('keep_old_orders_intact_date', (empty($frm['keep_old_orders_intact_date']) && intval(vn($frm['keep_old_orders_intact']))>1?get_formatted_date(vb($frm['keep_old_orders_intact'])) : vb($frm['keep_old_orders_intact_date'])));
+	$tpl->assign('keep_old_orders_intact_date', (empty($frm['keep_old_orders_intact_date']) && intval(vn($frm['keep_old_orders_intact']))>1? get_formatted_date(vb($frm['keep_old_orders_intact_date'])) : vb($frm['keep_old_orders_intact_date'])));
 	$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_MODULES', 'Modules');

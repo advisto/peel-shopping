@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -16,8 +16,17 @@
 		<td class="entete" colspan="7">{{ STR_MODULE_DEVISES_ADMIN_LIST_TITLE }}</td>
 	</tr>
 	<tr>
-		<td colspan="7"><p><a href="{{ ajout_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE }}</a></p></td>
+		<td colspan="7">
+			<div style="margin-top:5px;margin-bottom:5px;"><a href="{{ ajout_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span>{{ STR_MODULE_DEVISES_ADMIN_CREATE }}</a></div>
+		</td>
 	</tr>
+	<tr>
+		<td colspan="7">
+			<div class="alert alert-info">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN }}</div>
+			<a href="{{ modif_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY }}</a>
+		</td>
+	</tr>
+
 	{% if (results) %}
 		<tr>
 			<td class="menu">{{ STR_ADMIN_ACTION }}</td>
@@ -42,6 +51,4 @@
 	{% else %}
 	<tr><td colspan="7"><b>{{ STR_MODULE_DEVISES_ADMIN_NOTHING_FOUND }}</b></td></tr>
 	{% endif %}
-</table><br />
-<a href="{{ modif_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY }}</a><br />
-<div class="alert alert-info">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN }}</div>
+</table>

@@ -1,9 +1,9 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -35,7 +35,7 @@
 			<td>
 		{if !empty($res.sub_res) || $res.texte_libre || $res.upload}
 			{if !$res.texte_libre && !$res.upload && !empty($res.sub_res)}
-					<select class="form-control" name="attribut_id_{$res.id}[]" multiple="multiple" style="width:100%" size="{if ($res.sub_res|@count)<5}{$res.sub_res|@count}{else}5{/if}">
+					<select class="form-control" name="attribut_id_{$res.id}[]" multiple="multiple" style="width:100%; height: 200px;" size="{if ($res.sub_res|@count)<5}{$res.sub_res|@count}{else}5{/if}">
 				{foreach $res.sub_res as $sr}
 						<option value="{$sr.value|str_form_value}" {if $sr.issel} selected="selected"{/if}>{$sr.desc|html_entity_decode_if_needed}{if $sr.prix>0} - {$STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST} : {$sr.prix} {$ttc_ht}{/if}</option>
 				{/foreach}

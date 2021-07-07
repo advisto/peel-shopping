@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -35,7 +35,7 @@
 			<td>
 		{% if (res.sub_res) or res.texte_libre or res.upload %}
 			{% if (res.sub_res) %}
-					<select class="form-control" name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:100%" size="{% if (res.sub_res|length)<5 %}{{ res.sub_res|length }}{% else %}5{% endif %}">
+					<select class="form-control" name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:100%; height: 200px;" size="{% if (res.sub_res|length)<5 %}{{ res.sub_res|length }}{% else %}5{% endif %}">
 				{% for sr in res.sub_res %}
 						<option value="{{ sr.value|str_form_value }}" {% if sr.issel %} selected="selected"{% endif %}>{{ sr.desc|html_entity_decode_if_needed }}{% if sr.prix>0 %} - {{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST }} : {{ sr.prix }} {{ ttc_ht }}{% endif %}</option>
 				{% endfor %}

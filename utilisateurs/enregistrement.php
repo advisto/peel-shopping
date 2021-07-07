@@ -1,23 +1,31 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: enregistrement.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_REGISTER', true);
 
 include("../configuration.inc.php");
-if (check_if_module_active('geoip') && !empty($GLOBALS['site_parameters']['filter_no_europ_enable'])) {
-	include("../modules/geoip/filter_no_europ.php");
+if (check_if_module_active('geoip')) {
+	// Filtre geoip
+	if (!empty($GLOBALS['site_parameters']['filter_no_europ_enable'])) {
+		include($GLOBALS['dirroot']."/modules/geoip/filter_no_europ.php");
+	}
+	if (!empty($GLOBALS['site_parameters']['filter_nordic_enable'])) {
+		include($GLOBALS['dirroot']."/modules/geoip/filter_nordic.php");
+	}
 }
 include($GLOBALS['dirroot']."/lib/fonctions/display_user_forms.php");
+
+
 $GLOBALS['allow_fineuploader_on_page'] = true;
 if (est_identifie()) {
 	if (!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
@@ -40,7 +48,7 @@ $GLOBALS['page_name'] = 'enregistrement';
 $GLOBALS['DOC_TITLE'] = $GLOBALS["STR_OPEN_ACCOUNT"];
 
 // initialisation des variables
-$frm = $_POST; unset($frm['priv']);
+$frm = $_POST;
 if(isset($frm['email'])) {
 	$frm['email'] = trim($frm['email']);
 }
@@ -80,9 +88,9 @@ $mandatory_fields = array();
 if(isset($GLOBALS['site_parameters']['user_mandatory_fields'])) {
 	$mandatory_fields = $GLOBALS['site_parameters']['user_mandatory_fields'];
 }
-if (!empty($_POST['user_type'])) {
+if (!empty($frm['user_type'])) {
 	// Chargement des champs obligatoires pour un profil d'utilisateur
-	foreach(vb($GLOBALS['site_parameters']['user_'.$_POST['user_type'].'_mandatory_fields'], array()) as $key => $value) {
+	foreach(vb($GLOBALS['site_parameters']['user_'.$frm['user_type'].'_mandatory_fields'], array()) as $key => $value) {
 		$mandatory_fields[$key] = $value;
 	}
 	if (!empty($mandatory_fields['naissance_company']) && !empty($mandatory_fields['naissance'])) {
@@ -133,7 +141,7 @@ if (!empty($frm)) {
 	// D'abord on génère une erreur pour tous les champs obligatoires qui sont vides
 	$form_error_object->valide_form($frm, $mandatory_fields, array('mot_passe' => vn($GLOBALS['site_parameters']['password_length_required'], 8)), array('mot_passe' => 'check_password_format', 'portable' => 'phoneOk'));
 	if (!empty($frm['url'])) {
-		$is_url = (StringMb::strpos($frm['url'],'://') !=false );
+		$is_url = (StringMb::strpos($frm['url'], '://') !== false);
 		if (empty($is_url)) {
 			$form_error_object->add('url', $GLOBALS['STR_ERR_URL']);
 		}		

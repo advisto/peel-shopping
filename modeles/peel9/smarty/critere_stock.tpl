@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: critere_stock.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: critere_stock.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}{if $is_form}
 <form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}" id="{$form_id}">
 {/if}
@@ -135,7 +135,7 @@
 						{rdelim}
 						//--><!]]></script>
 					{if empty($is_quote)}						
-						<input type="submit" class="btn btn-primary submit-once-only" onclick="{if !empty($popup_stock_alert)}alert('{$popup_stock_alert}');return false;{/if}if (verif_form{$save_suffix_id}({$color_array_result}, {$sizes_infos_array_result}) == true) {ldelim}{$anim_prod_var}{rdelim} else {ldelim} return false; {rdelim}" value="{$STR_ADD_CART|str_form_value}" />
+						<input type="submit" class="btn btn-primary" onclick="{if !empty($popup_stock_alert)}alert('{$popup_stock_alert}');return false;{/if}if (verif_form{$save_suffix_id}({$color_array_result}, {$sizes_infos_array_result}) == true) {ldelim}{$anim_prod_var}{rdelim} else {ldelim} return false; {rdelim}" value="{$STR_ADD_CART|str_form_value}" />
 					{else}
 						<input onclick="get_quote_form('{$product_id}', '{$LANG.STR_CANCEL|filtre_javascript:true:true:false}'); return false;" type="submit" class="btn btn-primary btn-line" value="{$LANG.STR_PDF_QUOTATION}" align="absmiddle" />
 					{/if}

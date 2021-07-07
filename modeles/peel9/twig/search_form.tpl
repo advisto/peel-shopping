@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -44,7 +44,7 @@
 				<span class="glyphicon glyphicon-shopping-cart"></span> {{ LANG.STR_ADD_CART }}
 			</button>
 			<button type="submit" class="btn btn-primary" name="export_pdf" >
-				<img style="height:25px;" src="{{ wwwroot }}/images/logoPDF_small.png" /> {$STR_MODULE_FACTURES_ADVANCED_EXPORT_LIST_PDF}
+				<img style="height:25px;" src="{{ wwwroot }}/images/logoPDF_small.png" /> {{ STR_MODULE_FACTURES_ADVANCED_EXPORT_LIST_PDF }}
 			</button>
 			{% if search_product_list_save_cart %}
 			<input type="text" style="width:220px;" class="form-control" name="products_list_name" required placeholder="{{ LANG.STR_NAME }}" value="{{ products_list_name|str_form_value }}" />
@@ -78,10 +78,10 @@
 	</ul>
 {% if STR_MODULE_ANNONCES_DATE_END_PAST %}
 		<li>
-			<input name="date_end[]" type="checkbox" value="future"{% if date_end_future %} checked="checked"{% endif %}> <span>{$STR_MODULE_ANNONCES_DATE_END_FUTURE}</span><br />
-			<input name="date_end[]" type="checkbox" value="past"{% if date_end_past %} checked="checked"{% endif %}> <span>{$STR_MODULE_ANNONCES_DATE_END_PAST}</span><br />
+			<input name="date_end[]" type="checkbox" value="future"{% if date_end_future %} checked="checked"{% endif %}> <span>{{ STR_MODULE_ANNONCES_DATE_END_FUTURE }}</span><br />
+			<input name="date_end[]" type="checkbox" value="past"{% if date_end_past %} checked="checked"{% endif %}> <span>{{ STR_MODULE_ANNONCES_DATE_END_PAST }}</span><br />
 			{% if all_sites %}
-			<input name="all_sites[]" type="checkbox" value="1"{% if all_sites %} checked="checked"{% endif %}> <span>{$STR_MODULE_DREAMTAKEOFF_SEARCH_ALL_SITES}</span>
+			<input name="all_sites[]" type="checkbox" value="1"{% if all_sites %} checked="checked"{% endif %}> <span>{{ STR_MODULE_DREAMTAKEOFF_SEARCH_ALL_SITES }}</span>
 			{% endif %}
 		</li>
 {% endif %}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_result.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: search_result.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}{if $is_annonce_module_active}
 	{if !empty($res_affiche_annonces)}
 <h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_MODULE_ANNONCES_SEARCH_RESULT_ADS}{/if} - {$ads_found} {if ($ads_found)>1}{$STR_MODULE_ANNONCES_ADS|replace:'s':'s'}{else}{$STR_MODULE_ANNONCES_ADS|replace:'s':''}{/if} {if !empty($STR_AT_LEAST_ONE_CAMPAIGN)}{$STR_AT_LEAST_ONE_CAMPAIGN}{/if}</h1>

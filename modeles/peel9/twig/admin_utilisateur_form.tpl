@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -11,54 +11,60 @@
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
 // $Id: admin_utilisateur_form.tpl 55304 2017-11-28 15:49:01Z sdelaporte $
-#}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
-	{{ form_token }}
-	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
-	<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
-	<input type="hidden" name="remise_valeur" value="{{ remise_valeur|str_form_value }}" />
-	<table class="main_table">
-{% if id_utilisateur %}
-	{% if is_webmail_module_active %}
-		<tr>
-			<td style="font-weight:bold;" colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="{{ wwwroot_in_admin }}/modules/webmail/administrer/webmail_send.php?id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_SEND_EMAIL }} {{ email }}</a></td>
-		</tr>
-	{% endif %}
-		<tr>
-			<td style="font-weight:bold;" colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="{{ administrer_url }}/commander.php?mode=ajout&id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER_TO_THIS_USER }} #{{ id_utilisateur }}</a></span></td>
-		</tr>
-	{% if more_infos_html_top_list_link %}
-		<tr>
-			<td style="font-weight:bold;" colspan="2">
-				<a href="{{ more_infos_html_top_list_link }}">{{ STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER }}</a>
-			</td>
-		</tr>
-	{% endif %}
-{% endif %}
+#}
+<table class="main_table">
 {% if hook_actions %}
 		<tr>
 			<td style="font-weight:bold;" colspan="2">{{ hook_actions }}</td>
 		</tr>
 {% endif %}
-{% if gift_check_link %}
-		<tr>
-			<td style="font-weight:bold;" colspan="2"><img src="{{ wwwroot_in_admin }}/images/mail.gif" />&nbsp;<a data-confirm="{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK_CONFIRM|str_form_value }}" href="{{ gift_checks_href|escape('html') }}">{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK }}</a></td>
-		</tr>
-{% endif %}
-{% if societe %}
-		<tr>
-			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="http://www.societe.com/cgi-bin/liste?nom={{ societe }}">{{ STR_ADMIN_UTILISATEURS_SOCIETE_COM }}{{ STR_BEFORE_TWO_POINTS }}: {{ societe }}</a></td>
-		</tr>
-{% else %}
-		<tr>
-			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="http://www.societe.com/index_entrep.html">{{ STR_ADMIN_UTILISATEURS_SOCIETE_COM }}</a></td>
-		</tr>
-{% endif %}
-		<tr>
-			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="https://www.infogreffe.fr/">{{ STR_ADMIN_UTILISATEURS_INFOGREFFE }}</a></td>
-		</tr>
+
+
+	</table>
+
+<ul class="nav nav-tabs">
+	<li role="presentation" class="active"><a href="#tab1" data-toggle="tab">{{ STR_ADMIN_CLIENT_PAGE }}</a></li>
+	<li role="presentation"><a href="#tab2" data-toggle="tab">{{ STR_ADMIN_MENU_SALES_SALES_TITLE }}</a></li>
+	<li role="presentation"><a href="#tab3" data-toggle="tab">{{ STR_ADDRESSES }}</a></li>
+	<li role="presentation"><a href="#tab4" data-toggle="tab">{{ STR_ADMIN_CONTACT_AND_ACTION }}</a></li>
+	<li role="presentation"><a href="#tab5" data-toggle="tab">{{ STR_ADMIN_CONNECTION_HISTORY }}</a></li>
+	{% if is_annonces_module_active %}
+	<li role="presentation"><a href="#tab6" data-toggle="tab">{{ STR_ADMIN_MENU_MODERATION_ADS_HEADER }}</a></li>
+	{% endif %}
+</ul>
+
+<div class="tab-content">
+	<div class="tab-pane active" id="tab1">
+		<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
+			<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
+			<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
+			<input type="hidden" name="remise_valeur" value="{{ remise_valeur|str_form_value }}" />
+			{{ form_token }}
+			<table>
 		<tr>
 			<td class="entete" colspan="2"><img src="{{ administrer_url }}/images/liste_clients.gif" width="16" height="16" alt="" align="absmiddle" />{{ STR_ADMIN_UTILISATEURS_EDIT_TITLE }} {{ email }}</td>
 		</tr>
+	{% if id_utilisateur %}
+		{% if is_webmail_module_active %}
+			<tr>
+				<td style="font-weight:bold;" colspan="2">
+					<a onclick="return(window.open(this.href)?false:true);" href="{{ wwwroot_in_admin }}/modules/webmail/administrer/webmail_send.php?id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_SEND_EMAIL }} {{ email }}</a>
+				</td>
+			</tr>
+		{% endif %}
+			<tr>
+				<td style="font-weight:bold;" colspan="2">
+					<a onclick="return(window.open(this.href)?false:true);" href="{{ administrer_url }}/commander.php?mode=ajout&id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER_TO_THIS_USER }} #{{ id_utilisateur }}</a>
+				</td>
+			</tr>
+		{% if more_infos_html_top_list_link %}
+			<tr>
+				<td style="font-weight:bold;" colspan="2">
+					<a href="{{ more_infos_html_top_list_link }}">{{ STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER }}</a>
+				</td>
+			</tr>
+		{% endif %}
+	{% endif %}
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_UTILISATEURS_UPDATE_EXPLAIN }}</div></td>
 		</tr>
@@ -134,7 +140,7 @@
 		{% endfor %}
 				</select>
 	{% else %}
-			{$note_administrateur}
+			{{ note_administrateur }}
 	{% endif %}
 			</td>
 		</tr>
@@ -278,7 +284,15 @@
 		{% endif %}
 		<tr>
 			<td>{{ STR_SIREN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="siret" style="width:100%" value="{{ siret|str_form_value }}" /></td>
+			<td>
+				<input type="text" class="form-control" name="siret" style="width:150px"  value="{{ siret|str_form_value }}" />
+				{% if societe %}
+				<a onclick="return(window.open(this.href)?false:true);" href="http://www.societe.com/cgi-bin/liste?nom={{ societe }}">{{ STR_ADMIN_UTILISATEURS_SOCIETE_COM }}{{ STR_BEFORE_TWO_POINTS }}: {{ societe }}</a>
+				{% else %}
+				<a onclick="return(window.open(this.href)?false:true);" href="http://www.societe.com/index_entrep.html">{{ STR_ADMIN_UTILISATEURS_SOCIETE_COM }}</a>
+				{% endif %}
+				- <a onclick="return(window.open(this.href)?false:true);" href="https://www.infogreffe.fr/">{{ STR_ADMIN_UTILISATEURS_INFOGREFFE }}</a>
+			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_VAT_INTRACOM }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -499,23 +513,6 @@
 			<td colspan="2">
 				<table class="full_width">
 					<tr>
-						<td colspan="2">
-							<table class="full_width">
-								<tr>
-									<td class="entete">{{ STR_ADMIN_ADDRESS_CLIENT }}</td>
-								</tr>
-								<tr>
-									<td>
-									{{ get_address_list }}
-									</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CLIENT_INFORMATION }}</td>
-					</tr>
-					<tr>
 						<td colspan="2"><h2>{{ STR_ADMIN_UTILISATEURS_CLIENT_TYPE }}{{ STR_BEFORE_TWO_POINTS }}:</h2></td>
 					</tr>
 					<tr>
@@ -589,9 +586,6 @@
 				</table>
 			</td>
 		</tr>
-		{% if is_vitrine_module_active and is_id_utilisateur %}
-		<tr><td colspan="2"><br />{{ vitrine_admin }}</td></tr>
-		{% endif %}
 	</table>
 		{{ hook_output }}
 	<table class="main_table">
@@ -600,54 +594,214 @@
 		</tr>
 	</table>
 </form>
-{% if is_abonnement_module_active and is_id_utilisateur %}
-<table class="full_width">
-	<tr><td class="entete">{{ STR_MODULE_ABONNEMENT_ADMIN_MANAGE_SUBSCRIPTIONS }}</td></tr>
-	<tr><td>{{ abonnement_admin }}</td></tr>
-</table>
-<br />
-{% endif %}
-{% if (add_credit_gold_user) and is_id_utilisateur %}
-<table class="full_width">
-	<tr><td>{{ add_credit_gold_user }}</td></tr>
-</table>
-<br />
-{% endif %}
+</div>
+<div class="tab-pane" id="tab2">
+	{% if (is_id_utilisateur) %}
+		<table class="main_table">
+			<tr>
+				<td class="entete" colspan="{{ columns }}"><img src="{{ mini_liste_commande_src|escape('html') }}" width="22" height="19" alt="" align="absmiddle">{{ STR_ADMIN_UTILISATEURS_ORDERS_LIST }}</td>
+			</tr>
+			<tr>
+				<td style="font-weight:bold;" colspan="{{ columns }}"><a onclick="return(window.open(this.href)?false:true);" href="{{ administrer_url }}/commander.php?mode=ajout&id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER_TO_THIS_USER }} #{{ id_utilisateur }}</a></span></td>
+			</tr>
+			{% if gift_check_link %}
+			<tr>
+				<td style="font-weight:bold;" colspan="{{ columns }}"><img src="{{ wwwroot_in_admin }}/images/mail.gif" />&nbsp;<a data-confirm="{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK_CONFIRM|str_form_value }}" href="{{ gift_checks_href|escape('html') }}">{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK }}</a></td>
+			</tr>
+			{% endif %}
+			{% if (results) %}
+			<tr>
+				<td class="menu">{{ STR_ADMIN_ACTION }}</td>
+				<td class="menu center">{{ STR_ORDER_NAME }}</td>
+				<td class="menu center">{{ STR_DATE }}</td>
+				<td class="menu center">{{ STR_TOTAL }} {{ STR_TTC }}</td>
+				{% if is_parrainage_module_active %}
+				<td class="menu center">{{ STR_AVOIR }}</td>
+				{% endif %}
+				<td class="menu center">{{ STR_ADMIN_UTILISATEURS_PRODUCTS_ORDERED }}</td>
+				<td class="menu center" colspan="2">{{ STR_PAYMENT }}</td>
+				<td class="menu center">{{ STR_DELIVERY }}</td>
+			</tr>
+			{% for res in results %}
+			{{ res.tr_rollover }}
+				<td class="center">
+					<a title="{{ STR_MODIFY|str_form_value }}" href="{{ res.modif_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="{{ STR_MODIFY|str_form_value }}" /></a>
+					<a title="{{ STR_PRINT|str_form_value }}" href="{{ res.print_href|escape('html') }}"><img src="{{ printer_src|escape('html') }}" alt="{{ STR_PRINT|str_form_value }}" /></a>
+				</td>
+				<td class="center">{{ res.id }}</td>
+				<td class="center">{{ res.date }}</td>
+				<td class="center">{{ res.prix }}</td>
+				{% if is_parrainage_module_active %}
+				<td class="center">{{ res.recuperer_avoir_commande }}</td>
+				{% endif %}
+				<td class="center">{{ res.ordered_products }}</td>
+				<td class="center">{{ res.payment_name }}</td>
+				<td class="center">{{ res.payment_status_name }}</td>
+				<td class="center">{{ res.delivery_status_name }}</td>
+			</tr>
+			{% endfor %}
+			<tr>
+				<td class="center" colspan="{{ columns }}">
+					<br />
+					<form class="entryform form-inline" role="form" method="post" action="{{ action2|escape('html') }}">
+						{{ form_token2 }}
+						<input type="submit" name="print_all_bill" value="{{ STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS|str_form_value }}" class="btn btn-primary" />
+						<input type="hidden" name="user_id" value="{{ user_id|str_form_value }}" />
+					</form>
+				</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="9" class="center">
+					<p><b>{{ STR_ADMIN_UTILISATEURS_NO_ORDER_FOUND }}</b></p>
+				</td>
+			</tr>
+			{% endif %}
+		</table>
+	{% endif %}
+</div>
+	<div class="tab-pane" id="tab3">
+		{% if (is_id_utilisateur) %}
+		<table class="full_width">
+			<tr>
+				<td colspan="2">
+					<table class="full_width">
+						<tr>
+							<td class="entete">{{ STR_ADMIN_ADDRESS_CLIENT }}</td>
+						</tr>
+						<tr>
+							<td>
+							{{ get_address_list }}
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>	
+		</table>
+		{% endif %}
+	</div>
+	<div class="tab-pane" id="tab4">
+		{% if is_commerciale_module_active and is_id_utilisateur %}
+		<table class="full_width">
+			<tr><td class="entete">{{ STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE }}</td></tr>
+			<tr><td><br />{{ form_contact_user }}</td></tr>
+		</table>
+		<br />
+		{% if (phone_event) %}
+		<table id="phone_event" class="full_width">
+			<tr><td class="entete">{{ STR_ADMIN_UTILISATEURS_MANAGE_CALLS }}</td></tr>
+			<tr><td><br />{{ phone_event }}</td></tr>
+		</table>
+		{% endif %}
+		<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
+			<input name="mode" type="hidden" value="event_comment" />
+			<center>
+				<table class="full_width" >
+					<tr>
+						<td class="entete">{{ STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING }} {{ pseudo }}</td>
+					</tr>
+				</table>
+				<table>
+					<tr>
+						<th><br />{{ STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION }}</th>
+					</tr>
+					<tr>
+						<td class="center">
+							<textarea class="form-control" name="form_event_comment" rows="5" cols="50" id="event_comment">{{ event_comment }}</textarea>
+						</td>
+					</tr>	
+					<tr>
+						<td class="center">
+						&nbsp;
+						</td>
+					</tr>
+					<tr>
+						<td class="center">
+							<input name="form_event_submit" type="submit" value="{{ STR_ADMIN_UTILISATEURS_SAVE_EVENT|str_form_value }}" class="btn btn-primary" /><br />
+							<br />
+						</td>
+					</tr>
+				</table>
+			</center>
+		</form>
+		{% endif %}
+		{% if (is_id_utilisateur) %}
+			{% if (download_files) %}
+			<table id="download_files" class="full_width">
+				<tr><td>{{ download_files }}</td></tr>
+			</table>
+			<br />
+			{% endif %}
+			{% if user_alerts is defined %}
+				{{ user_alerts }}
+			<br />
+			{% endif %}
+			{% if affiche_liste_abus %}
+			<table class="full_width" >
+				<tr>
+					<td>{{ affiche_liste_abus }}</td>
+				</tr>
+			</table>
+			{% endif %}
+			
+			{% if actions_moderations_user %}
+			<table class="full_width" >
+				<tr>
+					<td class="entete">{{ STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT }}</td>
+				</tr>
+				<tr>
+					<td>{{ actions_moderations_user }}</td>
+				</tr>
+			</table>
+			{% endif %}
+			{% if is_webmail_module_active %}
+			<table class="full_width">
+				<tr><td>&nbsp;</td></tr>
+				<tr><td>{{ more_infos_html }}</td></tr>
+			</table>
+			<br />
+			{% endif %}
+		{% endif %}
+	</div>
+	<div class="tab-pane" id="tab5">
+			{% if affiche_recherche_connexion_user is defined %}
+			<table class="full_width">
+				<tr>
+					<td>{{ affiche_recherche_connexion_user }}</td>
+				</tr>
+			</table>
+			{% endif %}
+	</div>
+	<div class="tab-pane" id="tab6">
+		{% if is_abonnement_module_active and is_id_utilisateur %}
+		<table class="full_width">
+			<tr><td class="entete">{{ STR_MODULE_ABONNEMENT_ADMIN_MANAGE_SUBSCRIPTIONS }}</td></tr>
+			<tr><td>{{ abonnement_admin }}</td></tr>
+		</table>
+		<br />
+		{% endif %}
+		{% if (add_credit_gold_user) and is_id_utilisateur %}
+		<table class="full_width">
+			<tr><td>{{ add_credit_gold_user }}</td></tr>
+		</table>
+		<br />
+		{% endif %}
 
-{% if (liste_annonces_admin) and (is_id_utilisateur) %}
-<table class="full_width">
-	<tr><td>{{ liste_annonces_admin }}</td></tr>
-</table>
-<br />
-{% endif %}
+		{% if (liste_annonces_admin) and (is_id_utilisateur) %}
+		<table class="full_width">
+			<tr><td>{{ liste_annonces_admin }}</td></tr>
+		</table>
+		<br />
+		{% endif %}
+		{% if is_vitrine_module_active and is_id_utilisateur %}
+		<tr><td colspan="2"><br />{{ vitrine_admin }}</td></tr>
+		{% endif %}
+	</div>
+</div>
 
-{% if is_commerciale_module_active and is_id_utilisateur %}
-<table class="full_width">
-	<tr><td class="entete">{{ STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE }}</td></tr>
-	<tr><td>{{ form_contact_user }}</td></tr>
-</table>
-<br />
-{% endif %}
-{% if (phone_event) and is_id_utilisateur %}
-<table id="phone_event" class="full_width">
-	<tr><td class="entete">{{ STR_ADMIN_UTILISATEURS_MANAGE_CALLS }}</td></tr>
-	<tr><td>{{ phone_event }}</td></tr>
-</table>
-{% endif %}
-{% if is_webmail_module_active and is_id_utilisateur %}
-<table class="full_width">
-	<tr><td>&nbsp;</td></tr>
-	<tr><td>{{ more_infos_html }}</td></tr>
-</table>
-<br />
-{% endif %}
-{% if (download_files) and is_id_utilisateur %}
-<table id="download_files" class="full_width">
-	<tr><td>{{ download_files }}</td></tr>
-</table>
-<br />
-{% endif %}
-{% if user_alerts is defined and is_id_utilisateur %}
-	{$user_alerts}
-<br />
-{% endif %}
+
+
+
+
+
+

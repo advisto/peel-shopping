@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,7 +12,9 @@
 // +----------------------------------------------------------------------+
 // $Id: admin_liste_home.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_HTML_TITLE }}</div>
-<p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_HTML_CREATE }}</a></p>
+<div style="margin-top:5px;">
+	<p><a href="{{ add_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_ADMIN_HTML_CREATE }}</a></p>
+</div>
 <div class="alert alert-info"><b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_HTML_EXPLAIN }}</div>
 <div class="table-responsive">
 	<table class="table">
@@ -31,7 +33,7 @@
 		<td class="center"><img class="change_status" src="{{ res.etat_src|escape('html') }}" alt="" onclick="{{ res.etat_onclick|escape('html') }}" /></td>
 		<td class="center" width="150">{{ res.site_name }}</td>
 	{% if res.site_country is defined %}
-		<td class="center" width="150">{$res.site_country}</td>
+		<td class="center" width="150">{{ res.site_country }}</td>
 	{% endif %}
 		</tr>
 		{% endfor %}

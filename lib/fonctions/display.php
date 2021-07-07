@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 64929 2020-11-05 11:28:13Z sdelaporte $
+// $Id: display.php 67436 2021-06-28 16:21:18Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -176,8 +176,10 @@ if (!function_exists('affiche_meta')) {
 			$this_title = $GLOBALS['DOC_TITLE'];
 		} elseif (!empty($GLOBALS['strSpecificMeta']['Title'][$page_name])) {
 			$this_title = $GLOBALS['strSpecificMeta']['Title'][$page_name];
-		} else {
+		} elseif(!empty($m_default['meta_titre_' . $_SESSION['session_langue']])) {
 			$this_title = $m_default['meta_titre_' . $_SESSION['session_langue']];
+		} else {
+			$this_title = '';
 		}
 		$this_title = StringMb::html_entity_decode($this_title);
 		if (!empty($GLOBALS['meta_description'])) {
@@ -196,7 +198,7 @@ if (!function_exists('affiche_meta')) {
 				if (!empty($m['description'])) {
 					// Description disponible, on la prend
 					$this_description .= $m['description'];
-				} else {
+				} elseif(!empty($m_default['meta_desc_' . $_SESSION['session_langue']])) {
 					// Sinon on prendra une metadescription d'ordre général
 					$this_description .= $m_default['meta_desc_' . $_SESSION['session_langue']];
 				}
@@ -235,7 +237,7 @@ if (!function_exists('affiche_meta')) {
 			if (StringMb::strlen($this_keywords) < 70) {
 				$this_keywords .= ' ' . $this_description;
 			}
-			if (StringMb::strlen($this_keywords) < 100) {
+			if (StringMb::strlen($this_keywords) < 100 && !empty($m_default['meta_key_' . $_SESSION['session_langue']])) {
 				$this_keywords .= ' ' . $m_default['meta_key_' . $_SESSION['session_langue']];
 			}
 			if (!empty($this_keywords)) {
@@ -277,10 +279,14 @@ if (!function_exists('affiche_meta')) {
 			$display_facebook_tag_array = array('meta_titre' => $this_title, 'meta_desc' => $this_description, 'image' => $GLOBALS['facebook_image'], 'type' => (!empty($display_facebook_tag) && is_string($display_facebook_tag)?$display_facebook_tag:'website'), 'image_size' => vb($GLOBALS['facebook_image_size']));
 			$tpl->assign('facebook_tag', display_facebook_tag($display_facebook_tag_array));
 		}
+		$specific_meta = null;
 		if (!empty($GLOBALS['site_parameters']['ups_viewPortResponsive']) && defined('IN_STEP1')) {
-			$tpl->assign('specific_meta', '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,user-scalable=no" />');
+			$specific_meta .= '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,user-scalable=no" />';
 		} elseif(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
-			$tpl->assign('specific_meta', '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
+			$specific_meta .= '<meta name="viewport" content="width=device-width, initial-scale=1.0" />';
+		}
+		if(!empty($specific_meta)) {
+			$tpl->assign('specific_meta', $specific_meta);
 		}
 		if((!empty($_GET['update']) && $_GET['update'] == 1) || (!empty($_GET['update_thumbs']) && $_GET['update_thumbs'] == 1) || !empty($GLOBALS['robots_noindex']) || !empty($_GET['follow']) || !empty($_GET['nofollow'])) {
 			$robots = 'noindex, nofollow';
@@ -352,9 +358,12 @@ if (!function_exists('affiche_ariane')) {
 					$other['hidden'] = affiche_arbre_categorie(vn($_GET['catid']), null, null, array(), true, $use_short_name);
 				}
 			} elseif (defined('IN_CATALOGUE_PRODUIT')) {
-				$other['txt'] .= affiche_arbre_categorie(vn($_GET['catid']), null, null, array());
+				$affiche_arbre_categorie_output = trim(affiche_arbre_categorie(vn($_GET['catid']), null, null, array()));
+				if (!empty($affiche_arbre_categorie_output)) {
+					$other['txt'] .= $affiche_arbre_categorie_output . ' > ';
+				}
 				$product_object = new Product($_GET['id']);
-				$other['txt'] .= ' > '.$product_object->name;
+				$other['txt'] .= $product_object->name;
 				if($hidden) {
 					$other['hidden'] = affiche_arbre_categorie(vn($_GET['catid']), null, null, array(), true);
 					$other['hidden'] .= ' > '.$product_object->name;
@@ -544,13 +553,16 @@ if (!function_exists('affiche_filtre')) {
 					FROM peel_categories c
 					WHERE c.nom_' . $_SESSION['session_langue'] . '!="" AND c.etat="1" AND id="' . intval($id) . '" AND ' . get_filter_site_cond('categories', 'c') . '
 					ORDER BY c.position');
-				$cat = fetch_assoc($qid);
-				//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
-				if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
-					$cat = get_default_content($cat, intval($id), 'categories');
+				if($cat = fetch_assoc($qid)){
+					//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+					if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+						$cat = get_default_content($cat, intval($id), 'categories');
+					}
+					$urlcat_with_suffixe = get_product_category_url($id, $cat['categorie'], true, true);
+					// En cas d'ajout d'une option ici, il faut aussi ajouter le champ dans le tableau de vérification dans la fonction params_affiche_produits => if(!in_array($_GET['tri'], array('nom_fr', 'prix'))) {
+				} else {
+					$urlcat_with_suffixe = get_current_url(true, false, array('tri','sort')) . '?';
 				}
-				$urlcat_with_suffixe = get_product_category_url($id, $cat['categorie'], true, true);
-				// En cas d'ajout d'une option ici, il faut aussi ajouter le champ dans le tableau de vérification dans la fonction params_affiche_produits => if(!in_array($_GET['tri'], array('nom_fr', 'prix'))) {
 			} else {
 				$urlcat_with_suffixe = get_current_url(true, false, array('tri','sort')) . '?';
 			}
@@ -603,6 +615,7 @@ if (!function_exists('get_brand_link_html')) {
 			SELECT m.id, m.nom_' . $_SESSION['session_langue'] . ' AS marque, m.image
 			FROM peel_marques m';
 		if (empty($id_marque)) {
+			// On veut des marques qui ont au moins un produit actif
 			$sql .= '
 			LEFT JOIN peel_produits p ON p.id_marque=m.id AND p.etat=1 AND ' . get_filter_site_cond('produits', 'p') . '';
 		}
@@ -709,9 +722,14 @@ if (!function_exists('get_brand_description_html')) {
 			} else {
 				$brand_products['nb_produits'] = 'N/A';
 			}
-			$tmpData = array('nom' => $brand_object->nom,
-				'display_brand' => true
-				);
+			$tmpData = array();
+			$tmpData['description'] = $brand_object->description;
+			// get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				$tmpData = get_default_content($tmpData, intval($brand_object->id), 'marques');
+			}
+			$tmpData['nom'] = $brand_object->nom;
+			$tmpData['display_brand'] = true;
 			$tmpData['admin_content'] = a_priv('admin_content');
 			if ($tmpData['admin_content']) {
 				$tmpData['admin_link'] = array('href' => $GLOBALS['administrer_url'] . '/marques.php?mode=modif&id=' . $brand_object->id, 'name' => $GLOBALS['STR_MODIFY_BRAND']);
@@ -732,20 +750,15 @@ if (!function_exists('get_brand_description_html')) {
 			if(is_int($brand_products['nb_produits']) && $brand_products['nb_produits']<=1 && StringMb::strtolower(StringMb::substr($tmpData['nb_produits_txt'], -1)) == 's') {
 				$tmpData['nb_produits_txt'] = StringMb::substr($tmpData['nb_produits_txt'], 0, StringMb::strlen($tmpData['nb_produits_txt'])-1);
 			}
-			$tmpData['description'] = $brand_object->description;
-			// get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
-			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
-				$tmpData = get_default_content($tmpData, intval($brand_object->id), 'marques');
-			}
 			correct_output($tmpData['description'], true, 'html', $_SESSION['session_langue']);
 			if (!empty($GLOBALS['site_parameters']['brand_description_details'])) {
 				$tmpData['description_details'] = $brand_object->description_details;
 			}
-			$tmpData['suggestion_description_details'] = get_suggestion_description_details(0, $brand_object->id, $_SESSION['session_utilisateur']);
-			$tmpData['suggestion_description_details_waiting'] = get_suggestion_description_details(0, $brand_object->id, $_SESSION['session_utilisateur'], 'waiting');
+			$tmpData['suggestion_description_details'] = get_suggestion_description_details(0, $brand_object->id, vb($_SESSION['session_utilisateur']));
+			$tmpData['suggestion_description_details_waiting'] = get_suggestion_description_details(0, $brand_object->id, vb($_SESSION['session_utilisateur']), 'waiting');
 
-            $tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details(0, $brand_object->id, $_SESSION['session_utilisateur']);
-            $tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details(0, $brand_object->id, $_SESSION['session_utilisateur'], 'waiting');
+            $tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details(0, $brand_object->id, vb($_SESSION['session_utilisateur']));
+            $tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details(0, $brand_object->id, vb($_SESSION['session_utilisateur']), 'waiting');
             
 			if (!empty($tmpData['suggestion_description_details_waiting'])){
 				$suggest_description_details = $tmpData['suggestion_description_details_waiting']['description'];
@@ -906,7 +919,7 @@ if (!function_exists('get_categories_output')) {
 		$output = '';
 		$item_name_array = array();
 		//on ne souhaite pas générer un cache si technical_code est renseigné, car une liste restreinte spécifique sera aussi appliquée pour les autres visiteurs
-		if(empty($selected_item)) {
+		if(empty($technical_code_cache) && empty($selected_item)) {
 			// use_admin_rights => Converti en chaine de caractère. strval retourne 1 si true, et vide '' si false ou null.
 			$cache_id = $location . '_' . $mode . '_' .  $display_mode . '_' . $add_indent .  '_' .  $_SESSION['session_langue'] . '_' . $GLOBALS['site_id'] . '_' . vb($input_name). '_'  . vb($input_name). '_' . vb($technical_code_cache)  . '_' . strval($use_admin_rights) . '_' . vb($text_max_length).'_' . vb($max_depth_allowed).'_' . vn($columns_if_related_display_mode).'_' . vb($parent_id). '_' . vb($exclude_id). '_' . vn($_SESSION['session_admin_multisite']);
 			$this_cache_object = new Cache($cache_id, array('group' => 'categories'));
@@ -1838,7 +1851,7 @@ if (!function_exists('affiche_menu_recherche')) {
 			} else {
 				// on construit les options du select des catégories
 				if(empty($GLOBALS['site_parameters']['advanced_fields_in_search_bar_disabled'])) {
-					$tpl->assign('select_categorie', get_categories_output(null, 'categories', vn($_GET["categorie"], vn($_GET['catid'])), 'option', '&nbsp;&nbsp;', null, null, false, 40));
+					$tpl->assign('select_categorie', get_categories_output(null, 'categories', (empty($GLOBALS['site_parameters']['not_selected_menu_recherche'])?vn($_GET["categorie"], vn($_GET['catid'])):null), 'option', '&nbsp;&nbsp;', null, null, false, 40));
 				}
 				$tpl->assign('category_input_name', 'categorie');
 				$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
@@ -1882,11 +1895,19 @@ if (!function_exists('affiche_guide')) {
 					if(StringMb::substr($this_value, 0, 4) === 'art_') {
 						$art_ids_array[] = StringMb::substr($this_value, 4);
 					}
+					if(StringMb::substr($this_value, 0, 4) === 'rub_') {
+						$rub_ids_array[] = StringMb::substr($this_value, 4);
+					}
 				}
 				if(!empty($art_ids_array)) {
 					$art_where = 'a.id IN (' . implode(', ', real_escape_string($art_ids_array)) . ')';
 				} else {
 					$skip_arts = true;
+				}
+				if(!empty($rub_ids_array)) {
+					$rub_where = 'r.id IN (' . implode(', ', real_escape_string($rub_ids_array)) . ')';
+				} else {
+					$skip_rubs = true;
 				}
 			} else {
 				$art_where = '1';
@@ -1906,6 +1927,21 @@ if (!function_exists('affiche_guide')) {
 						$result = get_default_content($result, $result['id'], 'articles');
 					}
 					$tplLinks["art_".$result['id']] = array('href' => get_content_url($result['id'], $result['nom'], $result['rubrique_id'], $result['rubrique_nom']), 'label' => $result['nom'], 'selected' => false);
+				}
+			}
+			if(empty($skip_rubs)) {
+				$sql = 'SELECT r.nom_' . $_SESSION['session_langue'] . ' AS rubrique_nom, r.id
+					FROM peel_rubriques r
+					WHERE ' . $rub_where . ' AND r.etat = "1" AND r.nom_' . $_SESSION['session_langue'] . '!="" AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', false) . '
+					GROUP BY r.id
+					ORDER BY r.position ASC, rubrique_nom ASC';
+				$qid = query($sql);
+				while ($result = fetch_assoc($qid)) {
+					//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+					if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+						$result = get_default_content($result, $result['id'], 'rubriques');
+					}
+					$tplLinks["rub_".$result['id']] = array('href' => get_content_url($result['id'], $result['nom'], $result['rubrique_id'], $result['rubrique_nom']), 'label' => StringMb::str_shorten($result['rubrique_nom'], 30), 'selected' => false);
 				}
 			}
 		}
@@ -2332,6 +2368,14 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['js_files'][] = get_url('/lib/js/fly-to-basket.js');
 		}
 		if (vb($GLOBALS['site_parameters']['anim_loading_page']) == 1) {
+			/* Options éventuelles, ne marche pas si minification activée
+			$GLOBALS['js_content_array'][] = '
+	paceOptions = {
+		ajax: false,
+		document: false,
+		elements: false,
+		eventLag: false
+	};'; */
 			$GLOBALS['js_files'][] = get_url('/lib/js/pace.min.js');
 		}
 		// effet de changement de couleur pour les boutons btn-primary
@@ -2373,6 +2417,10 @@ if (!function_exists('getHTMLHead')) {
 			$css_output = '<style>' . implode('', $GLOBALS['header_css_output_array']) .  '</style>';
 		} else {
 			$css_output = '';
+		}
+		if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+			$css_output .= '
+<link rel="preload" href="' . $GLOBALS['wwwroot'] . '/lib/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin />';
 		}
 		$tpl->assign('css_output', $css_output);
 		$tpl->assign('msg_err_keyb', $GLOBALS['STR_ERR_KEYB']);
@@ -3012,21 +3060,24 @@ if (!function_exists('output_light_html_page')) {
 		$tpl->assign('body', $body);
 		$tpl->assign('full_head_section_text', $full_head_section_text);
 		$tpl->assign('notification_output', implode('', $GLOBALS['notification_output_array']));
-		if (empty($full_head_section_text) && $add_general_css_js_files) {
-			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
-				$GLOBALS['js_files'][-100] = get_url('/lib/js/jquery.js');
-				$GLOBALS['js_files'][-90] = get_url('/lib/js/jquery-ui.js');
-				$GLOBALS['css_files'][] = get_url('/lib/css/jquery-ui.css');
-				$GLOBALS['css_files'][] = get_url('/lib/css/bootstrap.css');
-				$GLOBALS['js_files'][] = get_url('/lib/js/bootstrap.js');
-				$GLOBALS['js_files'][-20] = get_url('/lib/js/advisto.js');
-			}
-			foreach (get_array_from_string($GLOBALS['site_parameters']['css']) as $this_css_filename) {
-				$this_css_file = trim($this_css_filename);
-				if (StringMb::strpos($this_css_file, '//') !== false) {
-					$GLOBALS['css_files'][] = $this_css_file;
-				} elseif(file_exists($GLOBALS['repertoire_modele'] . '/css/' . $this_css_file)) {
-					$GLOBALS['css_files'][] = $GLOBALS['repertoire_css'] . '/' . $this_css_file;  // .'?'.time()
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		if (empty($full_head_section_text)) {
+			if($add_general_css_js_files) {
+				if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+					$GLOBALS['js_files'][-100] = get_url('/lib/js/jquery.js');
+					$GLOBALS['js_files'][-90] = get_url('/lib/js/jquery-ui.js');
+					$GLOBALS['css_files'][] = get_url('/lib/css/jquery-ui.css');
+					$GLOBALS['css_files'][] = get_url('/lib/css/bootstrap.css');
+					$GLOBALS['js_files'][] = get_url('/lib/js/bootstrap.js');
+					$GLOBALS['js_files'][-20] = get_url('/lib/js/advisto.js');
+				}
+				foreach (get_array_from_string($GLOBALS['site_parameters']['css']) as $this_css_filename) {
+					$this_css_file = trim($this_css_filename);
+					if (StringMb::strpos($this_css_file, '//') !== false) {
+						$GLOBALS['css_files'][] = $this_css_file;
+					} elseif(file_exists($GLOBALS['repertoire_modele'] . '/css/' . $this_css_file)) {
+						$GLOBALS['css_files'][] = $GLOBALS['repertoire_css'] . '/' . $this_css_file;  // .'?'.time()
+					}
 				}
 			}
 			if(!empty($GLOBALS['css_files'])) {
@@ -3034,6 +3085,9 @@ if (!function_exists('output_light_html_page')) {
 				$tpl->assign('css_files', array_unique($GLOBALS['css_files']));
 			}
 			$tpl->assign('js_output', get_javascript_output(!empty($GLOBALS['site_parameters']['load_javascript_async']) && empty($_GET['page_offline']), !empty($GLOBALS['site_parameters']['minify_js']) && empty($_GET['page_offline'])));
+		}
+		if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
+			$tpl->assign('peel_debug', $GLOBALS['peel_debug']);
 		}
 		$output = $tpl->fetch();
 		if (!empty($convert_to_encoding)) {
@@ -3713,7 +3767,8 @@ if (!function_exists('get_address_list')) {
 				$output .= '
 			<p><a class="btn btn-primary btn_p1" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=create_new_address" title="'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'">'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'</a></p>';
 			}
-			$output .= '
+			if (!empty($result)) {
+				$output .= '
 				<div class="row">
 					<div class="col-sm-6 col-md-4">
 						<div class="well">
@@ -3728,6 +3783,7 @@ if (!function_exists('get_address_list')) {
 						</div>
 					</div>
 ';
+			}
 		} else {
 			// L'administrateur peut créer autant d'adresses sans être limité.
 			$output .= '
@@ -3771,9 +3827,11 @@ if (!function_exists('get_address_list')) {
 			}
 			$i++;
 		}
-		$output .= '
+		if (!$in_admin) {
+			$output .= '
 			</div>
 ';
+		}
 		return $output;
 	}
 }

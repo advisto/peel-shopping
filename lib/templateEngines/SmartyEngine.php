@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: SmartyEngine.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: SmartyEngine.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,7 +24,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SmartyTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: SmartyEngine.php 64741 2020-10-21 13:48:51Z sdelaporte $
+ * @version $Id: SmartyEngine.php 66961 2021-05-24 13:26:45Z sdelaporte $
  * @access public
  */
 class SmartyEngine extends EngineTpl {
@@ -54,6 +54,7 @@ class SmartyEngine extends EngineTpl {
 		$this->smarty->registerPlugin("modifier", "highlight_found_text", "highlight_found_text");
 		$this->smarty->registerPlugin("modifier", "rewriting_urlencode", "rewriting_urlencode");
 		$this->smarty->registerPlugin("modifier", "fprix", "fprix");
+		$this->smarty->registerPlugin("modifier", "in_array", "in_array");
 		$this->smarty->registerDefaultTemplateHandler('SmartyDefaultTemplateHandler');
 	}
 

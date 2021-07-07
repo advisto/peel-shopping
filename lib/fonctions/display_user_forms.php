@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: display_user_forms.php 66965 2021-05-24 14:59:47Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -293,6 +293,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('type', vb($frm['type']));
 		$tpl->assign('activity', vb($frm['activity']));
 		$tpl->assign('url', vb($frm['url']));
+		$tpl->assign('url_error', $form_error_object->text('url'));
 		// On mentionne le champ si obligatoire - en fait on le vérifiera uniquement pour la France
 		$tpl->assign('siret', vb($frm['siret']));
 		$tpl->assign('siret_error', $form_error_object->text('siret'));
@@ -336,16 +337,16 @@ if (!function_exists('get_user_register_form')) {
 			if (!empty($GLOBALS['site_parameters']['google_recaptcha_sitekey'])) {
 				$tpl->assign('captcha', array('validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE']));
 				$tpl->assign('google_recaptcha_sitekey', $GLOBALS['site_parameters']['google_recaptcha_sitekey']);
-			} else {
-			// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
-			$tpl->assign('captcha', array(
-				'validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE'],
-				'inside_form' => get_captcha_inside_form($frm),
-				'validation_code_copy_txt' => $GLOBALS['STR_VALIDATION_CODE_COPY'],
-				'error' => $form_error_object->text('code'),
-				'value' => vb($frm['code'])
-			));
-		}
+			} elseif(function_exists('get_captcha_inside_form')) {
+				// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
+				$tpl->assign('captcha', array(
+					'validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE'],
+					'inside_form' => get_captcha_inside_form($frm),
+					'validation_code_copy_txt' => $GLOBALS['STR_VALIDATION_CODE_COPY'],
+					'error' => $form_error_object->text('code'),
+					'value' => vb($frm['code'])
+				));
+			}
 		}
 		
 		// Select permettant de paramétrer la langue par défaut du compte lors de l'envoi d'email
@@ -650,6 +651,7 @@ if (!function_exists('get_contact_form')) {
 	function get_contact_form(&$frm, &$form_error_object, $skip_introduction_text = false)
 	{
 		$output = '';
+		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('contact_form.tpl');
 		$tpl->assign('skip_introduction_text', $skip_introduction_text);
 		$tpl->assign('type', vb($_GET['type']));
@@ -969,7 +971,11 @@ if (!function_exists('get_address_form')) {
 							' . get_country_select_options(null, vb($frm['pays']), 'id') . '
 						</select>
 					</span>
-				</div>
+				</div>';
+				if (!empty($GLOBALS['STR_TELEPHONE_EXPLAIN'])) {
+					$output .= '<div class="alert alert-info">'.$GLOBALS['STR_TELEPHONE_EXPLAIN'].'</div>';
+				}
+				$output .= '
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_PORTABLE'] . ' '.  (!$in_admin && empty($GLOBALS['site_parameters']['display_user_forms_required_portable_disabled'])?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['portable']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" '.(!$in_admin && empty($GLOBALS['site_parameters']['display_user_forms_required_portable_disabled'])?'required="required"':'').' /></span>

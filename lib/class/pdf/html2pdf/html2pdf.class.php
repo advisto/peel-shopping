@@ -1581,24 +1581,24 @@ class HTML2PDF
         if (is_array($inTL)) {
             $inTL[0]-= $border['l']['width'];
             $inTL[1]-= $border['t']['width'];
+			if ($inTL[0]<=0 || $inTL[1]<=0) $inTL = null;
         }
         if (is_array($inTR)) {
             $inTR[0]-= $border['r']['width'];
             $inTR[1]-= $border['t']['width'];
+			if ($inTR[0]<=0 || $inTR[1]<=0) $inTR = null;
         }
         if (is_array($inBR)) {
             $inBR[0]-= $border['r']['width'];
             $inBR[1]-= $border['b']['width'];
+			if ($inBR[0]<=0 || $inBR[1]<=0) $inBR = null;
         }
         if (is_array($inBL)) {
             $inBL[0]-= $border['l']['width'];
             $inBL[1]-= $border['b']['width'];
+			if ($inBL[0]<=0 || $inBL[1]<=0) $inBL = null;
         }
 
-        if ($inTL[0]<=0 || $inTL[1]<=0) $inTL = null;
-        if ($inTR[0]<=0 || $inTR[1]<=0) $inTR = null;
-        if ($inBR[0]<=0 || $inBR[1]<=0) $inBR = null;
-        if ($inBL[0]<=0 || $inBL[1]<=0) $inBL = null;
 
         // prepare the background color
         $pdfStyle = '';

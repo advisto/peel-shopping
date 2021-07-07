@@ -1,21 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: produit_details.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_CATALOGUE_PRODUIT', true);
 
 include("../configuration.inc.php");
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['product_details_page_columns_count'];
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_PRODUCT'];
+$GLOBALS['page_name'] = 'product';
 
 $output = '';
 $product_infos = array();
@@ -50,14 +51,8 @@ if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'
 		$product_infos['categorie'] = get_category_name($product_infos['categorie_id']);
 	}
 }
-// On récupère l'information on_check du produit ici, pour le passer ensuite à la classe Product qui en a besoin pour savoir si il faut faire une jointure INNER JOIN ou LEFT JOIN sur la table de catégories, en fonction si on_check ou pas
-$sql = "SELECT on_check
-	FROM peel_produits
-	WHERE id = ". intval($_GET['id']);
-$query = query($sql);
-if ($result = fetch_assoc($query)) {
-	$product_infos['on_check'] = $result['on_check'];
-}
+
+$product_infos = get_product_infos($_GET['id']);
 $product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 if (!empty($_GET['step']) && check_if_module_active('attributs')) {
 	call_module_hook('attribut_step', array('product_object' => $product_object, 'frm'=> $_POST, 'step'=> $_GET['step']));
@@ -101,7 +96,7 @@ $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['product_details_pa
 
 if ($form_error_object->count() > 0) {
 	foreach ($form_error_object->error as $key => $error) {
-		if ($key == "confirm_ok") {
+		if ($key === "confirm_ok") {
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $error))->fetch();
 		} else {
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();

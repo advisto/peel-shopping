@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -464,9 +464,9 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 							// Si pas déjà image téléchargée en cours et qu'on a passé une image dans attributs_list, on vérifie qu'elle semble avec nom cohérent, et on la prend
 							$_SESSION["session_display_popup"][$input_name] = $preselected_value;
 						}
-						if (!empty($_SESSION["session_display_popup"][$input_name])) {
+						if (!empty($_SESSION["session_display_popup"][$input_name]) && !defined('IN_CATALOGUE_PRODUIT')) {
 							// si l'image existe déjà, alors on l'affiche tout simplement (avec la possibilité de la supprimer)
-							$attribut_text .= display_option_image($_SESSION["session_display_popup"][$input_name]);
+							$attribut_text .= display_option_image($_SESSION["session_display_popup"][$input_name], true);
 						} else {
 							// On ne passe pas de nom d'image dans le formulaire par sécurité
 							$input_type = 'file';
@@ -586,6 +586,9 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						'input_class' => $input_class,
 						'options' => $options,
 						'max_label_length' => $max_label_length,
+						'nom_attribut_id' => $this_nom_attribut_id,
+						'attributes_information_picto' => (!empty($GLOBALS['site_parameters']['attributes_class_picto_'.$this_nom_attribut_id])?$GLOBALS['site_parameters']['attributes_class_picto_'.$this_nom_attribut_id]:''),
+						'attributes_information_html' => (!empty(affiche_contenu_html('attributes_information_html_'.$this_nom_attribut_id, true))?affiche_contenu_html('attributes_information_html_'.$this_nom_attribut_id, true):''),
 						'update_product_price' => $input_on_change . ' update_product_price' . $save_suffix_id.'();',
 						'onchange' => 'display_image_attribut(\''.$input_id.'\');'.(empty($GLOBALS['site_parameters']['ads_disable_product_attributes_price_total'])?$input_on_change . ' update_product_price' . $save_suffix_id . '();':'')
 					);
@@ -615,6 +618,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS_HTML', $GLOBALS['STR_BEFORE_TWO_POINTS_HTML']);
+		$tpl->assign('STR_MODULE_ACCOUNTING_OK', $GLOBALS['STR_MODULE_ACCOUNTING_OK']);
 		$tpl->assign('attributes_text_array', $attributes_text_array);
 		$tpl->assign('display_mode', $display_mode);
 		$tpl->assign('input_name', $input_name);

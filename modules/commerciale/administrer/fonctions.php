@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -156,7 +156,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (!empty($contact['actif']) && $contact['actif'] == 'FALSE' ? 'puce-blanche.gif' : 'puce-verte.gif'),
 				'comments' => $contact['comments'],
 				'email_send_href' => (check_if_module_active('webmail')?$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_utilisateur=' . intval(vn($contact['contact_id'])):''),
-				'appeler_href' => $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($contact['contact_id'])) . '&start=0#phone_event',
+				'appeler_href' => $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($contact['contact_id'])) . '&start=0#tab4',
 				);
 			$i++;
 		}

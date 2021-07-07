@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: en.php 67177 2021-06-09 13:38:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -282,7 +282,7 @@ $GLOBALS["STR_ERR_TIME"] = "The period of 24 hours after the renewal application
 $GLOBALS["STR_ERR_TOWN"] = "Please fill in your town.\n";
 $GLOBALS["STR_ERR_TWOPASS"] = "The two words don't match, please try again.\n";
 $GLOBALS["STR_ERR_TYPE"] = "Please fill in your shipping mean.\n";
-$GLOBALS["STR_ERR_URL"] = "You did not specify your website url.\n";
+$GLOBALS["STR_ERR_URL"] = "You must fill this field with the URL of your website (ex: https://www.example.com).\n";
 $GLOBALS["STR_ERR_YOU_ARE"] = "You do not specify your status.\n";
 $GLOBALS["STR_ERR_ZIP"] = "Please fill in your zip code.\n";
 $GLOBALS["STR_ERR_ZONE"] = "Please fill in your shipping zone.\n";
@@ -824,7 +824,7 @@ $GLOBALS["STR_SUBMIT"] = "Submit";
 $GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "Subject / Message";
 $GLOBALS["STR_SUGGEST"] = "Your credit certificate allows you to get extra products. Please consult the following list to complete your order. <a href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\">Click here to consult our suggest list</a>.";
 $GLOBALS["STR_SUPPORT"] = "For any queries please feel free to <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">contact us using this form</a>.";
-$GLOBALS["STR_SWIFT"] = "SWIFT / BIC";
+$GLOBALS["STR_SWIFT"] = "BIC";
 $GLOBALS["STR_SYNC_OK"] = "File synchronisation ended with success";
 $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "This table lists the products present in your cart";
 $GLOBALS["STR_TABLE_SUMMARY_ORDERS"] = "This table lists your order history";
@@ -938,9 +938,9 @@ $GLOBALS["STR_ZIP"] = "Zip code";
 $GLOBALS["STR_ZOOM"] = "Zoom";
 $GLOBALS["STR_PIECE"] = "Piece";
 $GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "Certificate of exemption";
-$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "Error file. File valid : jpg, jpeg, gif, png, doc, pdf";
+$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "Error on file. Valid extensions: jpg, jpeg, gif, png, doc, pdf. ";
 $GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "Not subject to VAT";
-$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "Select file";
 $GLOBALS["STR_VAT_EXEMPTION"] = "VAT exemption";
 $GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "Quantity";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
@@ -961,6 +961,16 @@ $GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "Article livrable dans un délai 
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "days";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "week";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "month";
+$GLOBALS["STR_ORDER_SUSPECT"] = "Order suspect";
 $GLOBALS["STR_CODE_CHORUS"] = "Chorus Code";
 $GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "Click here to register for WHATSAPP";
 $GLOBALS["STR_NAME_ADDRESS"] = "Address name";
+
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_1'] = "One-time payment";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_2'] = "Payment in 2 installments";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_3'] = "Payment in 3 installments";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_FREE_OF_CHARGE'] = "free of charge";
+$GLOBALS["STR_EMAIL_INCORRECT"] = "Empty or invalid email for the recipient %s";
+$GLOBALS["STR_AMOUNT_TVA"] = "VAT amount";
+$GLOBALS["STR_VAT_PERCENTAGE"] = "VAT rate";
+$GLOBALS["STR_VAT_DETAIL"] = "VAT detail";

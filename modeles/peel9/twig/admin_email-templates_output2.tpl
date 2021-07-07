@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -57,6 +57,10 @@
 					<td>{{ STR_ADMIN_TECHNICAL_CODE }}</td>
 					<td><input name="form_technical_code" style="width:90%" type="text" class="form-control" id="technical_code" value="{{ form_technical_code|str_form_value }}" /></td>
 				</tr>
+				{% else %}
+				<tr>
+					<td colspan="2"><input name="form_technical_code" type="hidden" class="form-control" id="technical_code" value="{{ form_technical_code|str_form_value }}" /></td>
+				</tr>
 				{% endif %}
 				<tr>
 					<td>{{ STR_ADMIN_EMAIL_TEMPLATES_TEMPLATE_NAME }}</td>
@@ -66,7 +70,7 @@
 					<td>{{ STR_ADMIN_SUBJECT }}</td>
 					<td><input name="form_subject" style="width:90%" type="text" class="form-control" id="template_subject" value="{{ form_subject|str_form_value }}" /></td>
 				</tr>
-				<tr id="show_tag_list">
+				<tr>
 					<td colspan="2">{{ show_tag_list }}</td>
 				</tr>		
 				<tr>

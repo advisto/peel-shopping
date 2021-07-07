@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 64928 2020-11-05 10:50:06Z sdelaporte $
+// $Id: format.php 67533 2021-07-07 10:10:59Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -521,7 +521,7 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 	if (empty($datetime_or_timestamp) || $datetime_or_timestamp==='0') {
 		$date = '';
 	} elseif (!is_numeric($datetime_or_timestamp)) {
-		if (substr($datetime_or_timestamp, 0, 10) == '0000-00-00') {
+		if (substr($datetime_or_timestamp, 0, 4) == '0000') {
 			$date = '';
 		} elseif (is_numeric(substr($datetime_or_timestamp, 0, 4))) {
 			// Format MySQL => on convertit en timestamp
@@ -535,6 +535,9 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 			// Mais avant PHP 5.1.0, cette fonction retournait -1 en cas d'échec. => on passe donc ici à false 
 			$date = false;
 		}
+	} elseif(is_numeric($datetime_or_timestamp) && $datetime_or_timestamp>1000000 && strlen($datetime_or_timestamp) == 8) {
+		// Gestion de date sans séparateur, par exemple : 01012020
+		$date = strtotime(get_mysql_date_from_user_input($datetime_or_timestamp));
 	} else {
 		$date = $datetime_or_timestamp;
 	}
@@ -562,6 +565,10 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
  */
 function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_missing = false, $forced_string_format = null)
 {
+	if (strlen($string) == 7 && !is_numeric(substr($string, 2, 1))) {
+		// Format mois => on transforme en premier jour du mois
+		$string = '01' . substr($string, 2, 1) . $string;
+	}
 	if(is_numeric($string) && $string>100000000) {
 		// $string est un timestamp
 		$string = date('Y-m-d H:i:s', intval($string));
@@ -576,6 +583,10 @@ function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_mi
 		// On supprime les % pour avoir les bonnes valeurs utilisables ensuite avec date() pour la génération finale
 		// Pour l'heure, on utilise le format standard compatible dans date(), car le format utilisateur va rester de toutes façons dans le même ordre
 		$supposed_string_format = $GLOBALS['date_format_short'].' '.$GLOBALS['time_basic_format_long'];
+		if(is_numeric($string) && $string>1000000 && strlen($string) == 8) {
+			// Gestion de date sans séparateur, par exemple : 01012020
+			$string = substr($string, 0, 2) . '/' . substr($string, 2, 2) . '/' . substr($string, 4, 4);
+		}
 	}
 	if (!empty($forced_string_format)) {
 		$supposed_string_format = $forced_string_format;
@@ -841,7 +852,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				
 				$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
 			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES_CARROUSEL]') !== false) {
-				$template_tags['CLIENT_REFERENCES_CARROUSEL'] = affiche_reference_carrousel(true,null, 1, 1, 12, 0);
+				$template_tags['CLIENT_REFERENCES_CARROUSEL'] = affiche_reference_carrousel(true,null, 1, vn($GLOBALS['site_parameters']['format_reference_carrousel_nb_colonnes'],1), 12, 0);
 			} elseif(StringMb::strpos($text, '[SPECIFIC_FIELD_FORM]') !== false && !empty($GLOBALS['site_parameters']['enable_admin_specific_form'])) {
 				$frm = $_POST;
 				if (!isset($form_error_object)) {
@@ -930,7 +941,9 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			// On rajoute des tags de date qui sont en minuscules ou majuscules
 			foreach(array('d', 'D', 'j', 'l', 'N', 's', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y', 'a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'U') as $this_date_item) {
 				// Explications de chaque valeur sur : http://fr.php.net/manual/fr/function.date.php
-				$template_tags[$this_date_item] = date($this_date_item);
+				if(empty($template_tags[$this_date_item])) {
+					$template_tags[$this_date_item] = date($this_date_item);
+				}
 			}
 			for($i=0 ; $i<=10 ; $i++) {
 				// Gestion de tags YEAR-N
@@ -1148,8 +1161,8 @@ function get_string_from_array($array, $disable_add_quote=false)
 					$array[$this_key] = '"' . str_replace('"', '""', $this_value) . '"';
 				}	
 			}
-				$string = '' . implode(', ', $array) . '';
-			} else {
+			$string = '' . implode(', ', $array) . '';
+		} else {
 			foreach($array as $this_key => $this_value) {
 				if($this_value === true){
 					$array[$this_key] = 'true';
@@ -1218,7 +1231,7 @@ function get_array_from_string($string)
 						$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value)-1);						
 						$i=1;
 						// Si $next_separator === false on passe N fois dans la boucle ci-dessous, sinon on n'y passe pas
-					while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && isset($parts[$this_part_key+$i])) {
+						while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && isset($parts[$this_part_key+$i])) {
 							// On rajoute la suite tant qu'on n'a pas de séparateur de fin : il y avait une ou des virgules dans le texte
 							$this_value .= ','.$parts[$this_part_key+$i];
 							$skip_part_key_array[] = $this_part_key+$i;
@@ -1229,10 +1242,10 @@ function get_array_from_string($string)
 						if($quote_char != '[') {
 							// On retire les doublons du caractères englobant, puisqu'il a été doublé à l'intérieur de la chaine
 							$this_value = str_replace($quote_char.$quote_char, $quote_char, $this_value);
-					}
+						}
 					} else {
 						// On a une anomalie : séparateur à l'intérieur de la chaine
-				}
+					}
 				}
 				if($this_value == 'true' || $this_value == 'TRUE'){
 					$this_value = true;
@@ -1568,7 +1581,7 @@ function array_merge_recursive_distinct() {
 					$merged[] = $value;
 				} elseif (is_array($value) && (isset($merged[$key]) && is_array($merged[$key]))) {
 					// Merge récursif, comme array_merge_recursive et non pas comme array_merge
-						$merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
+					$merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
 				} else {
 					// Clé alphanumérique : efface toute autre version déjà présente dans le tableau (=> d'où le nom array_merge_recursive_distinct, contrairement à array_merge_recursive qui créerait un tableau)
 					$merged[$key] = $value;
@@ -1651,21 +1664,21 @@ function add_or_remove_primary_container_in_html($html, $mode = 'add', $css_styl
 	// return $html;
 	if (!empty($html)) {
 		// Il y a du contenu à modifier. On va créer la balise ouvrante
-		$open_div_tag = '<span style="margin:0px;padding:0px';
+		$open_div_tag = '<div style="';
 		if (!empty($css_style) && is_array($css_style)) {
 			// On veut passer un ou plusieurs style à la balise
 			$i=1;
 			foreach($css_style as $this_rules=>$this_value) {
 				// on ne met pas de ; à la fin car CKeditor les supprimes
-				$open_div_tag .= ';'.$this_rules.':'.$this_value;
+				$open_div_tag .= $this_rules.':'.$this_value.'; ';
 				$i++;
 			}
 		}
 		// Fermeture de la balise ouvrante.
-		$open_div_tag .= '">';
+		$open_div_tag .= 'margin-bottom:0px; margin-top:0px; padding:0px">';
 
 		// balise fermante
-		$close_div_tag = '</span>';
+		$close_div_tag = '</div>';
 		if ($mode == 'add') {
 			// On souhaite ajouter la span globale
 			$html_with_globale_div = $open_div_tag;
@@ -1709,11 +1722,12 @@ function add_or_remove_primary_container_in_html($html, $mode = 'add', $css_styl
  * @return
  */
 function get_clean_html_for_pdf($html) {
-	$output = trim(str_replace(array("\r\n",'<div>&nbsp;</div>', '<div><br></div>', '</body>', '<html>', '</html>', '<head>', '</head>', '<title>', '</title>', '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', '<meta http-equiv="Content-Style-Type" content="text/css">'), '', $html));
+	$output = trim(str_replace(array("\r\n", '<div><br></div>', '</body>', '<html>', '</html>', '<head>', '</head>', '<title>', '</title>', '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', '<meta http-equiv="Content-Style-Type" content="text/css">'), '', $html));
 	if (!empty($GLOBALS['site_parameters']['empty_container_to_delete_in_html_for_pdf'])) {
 		// Ajout du paramètre empty_container_to_delete_in_html_for_pdf pour supprimer des div vide générées lors de la conversion du RTF en HTML.
 		$output = str_replace($GLOBALS['site_parameters']['empty_container_to_delete_in_html_for_pdf'], '', $output);
 	}
+	$output = str_replace('<div>&nbsp;</div>', '<br>', $output);
 	$output = str_replace('<b><br></b>', '<br>', $output);
 	$output = preg_replace('/<body([^\>]*)>/siU', '', $output);
 	$output = preg_replace('/<font([^\>]*)><br><\/font>/siU', '<br>', $output);
@@ -1728,10 +1742,11 @@ function get_clean_html_for_pdf($html) {
 	$output = str_replace('  style="', ' style="', $output);
 	$output = preg_replace('/<([^\>]*)style="([^\>]*)" style="([^\>]*)">/siU', '<$1 style="$2$3">', $output);
 	$output = str_replace('margin:0px;padding:0px;margin:0px;padding:0px;', 'margin:0px;padding:0px;', $output);
+	$output = str_replace('width:100%', 'width:99%', $output);
 	
 	if (!empty($GLOBALS['site_parameters']['convert_div_into_span_in_pdf'])) {
-		// le problème des div ajoutée automatiquement est qu'elle provoque des sauts de lignes lorsqu'elle sont affiché dans le PDF. On ne souhaite pas avoir de décalage de ce type avec les div. Si on veut des sauts de ligne, on utilise <br />.
-		$output = str_replace('div', 'span', $output);
+		// Le problème des div ajoutée automatiquement est qu'elles provoquent des sauts de ligne lorsqu'elles sont affichées dans le PDF. On ne souhaite pas avoir de décalage de ce type avec les div. Si on veut des sauts de ligne, on utilise <br />.
+		$output = str_replace(array('<div', '</div'), array('<span', '</span'), $output);
 	}
 	return $output;
 }

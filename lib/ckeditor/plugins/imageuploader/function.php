@@ -34,7 +34,7 @@ function loadImages() {
             $file_size_kilobyte = ($file_size_byte/1024);
             $file_size_kilobyte_rounded = round($file_size_kilobyte,1);
             $filesizetemp = $file_size_kilobyte_rounded;
-            $filesizefinal = round($filesizefinal + $filesizetemp) . " KB";
+            $filesizefinal = round($filesizefinal + $filesizetemp);
             $calcsize = round($filesizefinal + $filesizetemp);
             $count = ++$count;
 
@@ -76,7 +76,9 @@ function loadImages() {
         }
         if($calcsize >= 1024){
             $filesizefinal = round($filesizefinal/1024,1) . " MB";
-        }
+        } else {
+            $filesizefinal = $filesizefinal . " KB";
+		}
 
         echo "
         <script>

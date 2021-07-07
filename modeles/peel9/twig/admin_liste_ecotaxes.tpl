@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -16,18 +16,16 @@
 		<td class="entete" colspan="6">{{ STR_ADMIN_ECOTAXES_TITLE }}</td>
 	</tr>
 	<tr>
-		<td colspan="6"><div class="alert alert-info">{{ STR_ADMIN_ECOTAXES_EXPLAIN }}</div></td>
-	</tr>
-	<tr>
 		<td colspan="6">
-			<table>
-				<tr>
-					<td><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" /></td>
-					<td><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_ECOTAXES_ADD_ECOTAX }}</a></td>
-				</tr>
-			</table><br />
+			<div style="margin-top:5px;">
+				<p><a href="{{ add_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_ADMIN_ECOTAXES_ADD_ECOTAX }}</a></p>
+			</div>
 		</td>
 	</tr>
+	<tr>
+		<td colspan="6"><div class="alert alert-info">{{ STR_ADMIN_ECOTAXES_EXPLAIN }}</div></td>
+	</tr>
+
 	{% if (results) %}
 	<tr>
 		<td class="menu">{{ STR_ADMIN_ACTION }}</td>

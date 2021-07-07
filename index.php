@@ -1,17 +1,17 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 64741 2020-10-21 13:48:51Z sdelaporte $
-/*! \mainpage PEEL Shopping 9.3.0 - Open eCommerce
+// $Id: index.php 67314 2021-06-21 13:37:40Z sdelaporte $
+/*! \mainpage PEEL Shopping 9.4.0 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
  * \section install_sec Installation
@@ -61,7 +61,9 @@ if(!empty($GLOBALS['site_parameters']['skip_home_new_products'])) {
 }
 $tpl->assign('focus_article', get_articles_html(0, false, 0, $GLOBALS['site_id']));
 $tpl->assign('nouveaute_article', get_articles_html(0, false, $GLOBALS['site_id'], 0, 'articles_html'));
-
+if (check_if_module_active('best_seller')) {
+	$tpl->assign('best_seller', affiche_best_seller_produit_colonne(true));
+}
 if (!est_identifie()) {
 	// Si pas identifie, on regarde si on affiche les blocs de connexion et d'inscription
 	if(!empty($GLOBALS['site_parameters']['skip_home_affiche_compte'])) {
@@ -102,10 +104,14 @@ $tpl->assign('center_middle_home', get_modules('center_middle_home', true));
 $tpl->assign('home_middle_top', affiche_contenu_html('home_middle_top', true)); 
 $tpl->assign('home_middle', affiche_contenu_html('home_middle', true));
 $tpl->assign('website_type', vb($GLOBALS['site_parameters']['website_type']));
-
+if (check_if_module_active('references')) {
+	$tpl->assign('affiche_reference_carrousel', affiche_reference_carrousel(true,null, 1, 1, 12, 0));
+}
 $modules_left = get_modules('home_left', true, null, null);
 $tpl->assign('contenu_html_bottom', affiche_contenu_html("home_bottom", true));
 $tpl->assign('MODULES_LEFT', $modules_left);
+$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['site_index_page_columns_count'];
+$tpl->assign('page_columns_third', (vn($GLOBALS['page_columns_count']) == 3));
 
 $hook_result = call_module_hook('index_form_template_data', array(), 'array');
 foreach($hook_result as $this_key => $this_value) {
@@ -114,7 +120,6 @@ foreach($hook_result as $this_key => $this_value) {
 
 $output .= $tpl->fetch();
 
-$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['site_index_page_columns_count'];
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -15,8 +15,18 @@
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" id="import_export_form" enctype="multipart/form-data">
  	{{ form_token }}
 	<h2>{% if test_mode %}{{ STR_ADMIN_CHECK_DATA }}{% else %}{{ STR_ADMIN_IMPORT_STATUS }}{% endif %}</h2>
-	{% if error %}<div class="alert alert-danger"><p><b>{{ STR_ADMIN_CHECK_DATA_BEFORE_IMPORT }}{{ STR_BEFORE_TWO_POINTS }}:</b></p><br />{{ error }}</div>
-	{% else %}<p>{{ STR_FILE }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ import_file.url|escape('html') }}">{{ import_file.form_value }}</a></p>{% endif %}
+	
+	{% if error %}
+		{% if force_import_despite_of_error %}
+			<div class="alert alert-danger"><p><b>{{ STR_ADMIN_LINE_WITH_ERROR_NOT_IMPORT }}{{ STR_BEFORE_TWO_POINTS }}:</b></p><br />{{ error }}</div>
+			<p>{{ STR_FILE }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ import_file.url|escape('html') }}">{{ import_file.form_value }}</a></p>
+		{% else %}
+			<div class="alert alert-danger"><p><b>{{ STR_ADMIN_CHECK_DATA_BEFORE_IMPORT }}{{ STR_BEFORE_TWO_POINTS }}:</b></p><br />{{ error }}</div>
+		{% endif %}
+	{% else %}
+		<p>{{ STR_FILE }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ import_file.url|escape('html') }}">{{ import_file.form_value }}</a></p>
+	{% endif %}
+
 	{% if import_output %}<div class="well">{{ import_output }}</div>{% endif %}
 	{% if test_mode %}
 	<input type="hidden" name="type" value="{{ type }}" />
@@ -33,8 +43,9 @@
 		{% if error is empty %}
 	<input type="hidden" name="mode" value="import" />
 	<input type="hidden" name="test_mode" value="0" />
-	<p class="center"><input type="submit" name="submit" value="{{ STR_VALIDATE|str_form_value }}" class="btn btn-primary" /></p>
+	<p class="center"><input type="submit" value="{{ STR_VALIDATE|str_form_value }}" class="btn btn-primary" /></p>
 		{% else %}
+	<a onclick="if(bootbox.confirm('{{ STR_CONTINUE_WITH_ERROR_CONFIRM|filtre_javascript(true,true,false) }}', function(result) {if(result) {force_import_with_error_line();}}));" href="#" class="btn btn-primary">{{ STR_CONTINUE_WITH_ERROR }}</a>
 	<input type="hidden" name="mode" value="" />
 	<p class="center"><input type="submit" name="submit" value="{{ STR_BACK|str_form_value }}" class="btn btn-danger" /></p>
 		{% endif %}
@@ -64,6 +75,7 @@
 	<h2>{{ STR_ADMIN_IMPORT_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</h2>
 	<div class="center">
 		<p>{{ STR_ADMIN_IMPORT_FILE_ENCODING }}{{ STR_BEFORE_TWO_POINTS }}: <select class="form-control" name="data_encoding" style="width: 150px">
+				<option value=""{% if data_encoding == '' %} selected="selected"{% endif %}>Auto{{ STR_BEFORE_TWO_POINTS }}: UTF-8 / ISO 8859-1</option>
 				<option value="utf-8"{% if data_encoding == 'utf-8' %} selected="selected"{% endif %}>UTF-8</option>
 				<option value="iso-8859-1"{% if data_encoding == 'iso-8859-1' %} selected="selected"{% endif %}>ISO 8859-1</option>
 			</select></p>

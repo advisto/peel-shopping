@@ -1,9 +1,9 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -195,6 +195,12 @@
 			<td>{$STR_MODULE_BANNER_ADMIN_ON_BACKGROUND_SITE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="checkbox" name="on_background_site" value="1" {if $on_background_site} checked="checked"{/if} />
+			</td>
+		</tr>
+		<tr>
+			<td>{$STR_MODULE_BANNER_ADMIN_ON_PRODUCT_DETAILS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="checkbox" name="on_product_details" value="1" {if $on_product_details} checked="checked"{/if} />
 			</td>
 		</tr>
 		<tr>

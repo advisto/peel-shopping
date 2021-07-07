@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 65040 2020-11-16 10:51:57Z sdelaporte $
+// $Id: order.php 67177 2021-06-09 13:38:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -303,7 +303,9 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				$statut_livraison_new = intval($delivery_status_id_by_technical_code_array['cancelled']);
 			}
 		}
-		if (empty($GLOBALS['site_parameters']['payment_status_create_bill']) || in_array($statut_paiement_new, explode(',', $GLOBALS['site_parameters']['payment_status_create_bill']))) {
+		//Pour éviter d'une mauvais saisie, on supprime les éventuels espace pour l'utilisation de explode
+		$payment_status_create_bill = str_replace(' ', '', $GLOBALS['site_parameters']['payment_status_create_bill']);
+		if (empty($GLOBALS['site_parameters']['payment_status_create_bill']) || in_array($statut_paiement_new, explode(',', $payment_status_create_bill))) {
 			// Quel que soit l'ancien statut, si la facture est souhaitée dans un statut qui doit avoir la génération de facture, alors on s'assure que le numéro et la date sont bien remplis 
 			// get_bill_number crée un numéro de facture si il n'existe pas déjà à partir de $GLOBALS['site_parameters']['format_numero_facture']
 			// Si il existe déjà, get_bill_number le transforme en remplaçant les tags si pas déjà remplacés auparavant, et si il n'y en a pas alors le numéro sera inchangé au final
@@ -599,7 +601,11 @@ function create_or_update_order($order_infos, &$articles_array)
 	if (!empty($hook_result['order_infos'])) {
 		$order_infos = $hook_result['order_infos'];
 	}
-		// le hook n'a pas retourné de valeur indiquant une éventuelle action en BDD, donc on gère la commande avec PEEL.
+	// Hook qui gère l'intertion de commande n'utilisant pas l'architecture PEEL.
+	// Le hook retourne le numéro de commande généré
+	// si aucun hook n'existe, la fonction call_module_hook retourne le boolean true.
+	$hook_result = call_module_hook('create_or_update_order', array('order_infos'=> $order_infos, 'articles_array'=> $articles_array), 'string');
+	if(empty($hook_result) || !is_numeric($hook_result)) {
 	$set_sql = array();
 	$commandes_fields = get_table_field_names('peel_commandes', null, true);
 	$commandes_fields_types = get_table_field_types('peel_commandes', null, true);
@@ -615,11 +621,6 @@ function create_or_update_order($order_infos, &$articles_array)
 			$set_sql[] = $peel_field." = '" . nohtml_real_escape_string($value) . "'";
 		}
 	}
-	// Hook qui gère l'intertion de commande n'utilisant pas l'architecture PEEL.
-	// Le hook retourne le numéro de commande généré
-	// si aucun hook n'existe, la fonction call_module_hook retourne le boolean true.
-	$hook_result = call_module_hook('create_or_update_order', array('order_infos'=> $order_infos, 'articles_array'=> $articles_array), 'string');
-	if(empty($hook_result) || !is_numeric($hook_result)) {
 		// le hook n'a pas retourné de valeur indiquant une éventuelle action en BDD, donc on gère la commande avec PEEL.
 		if (!empty($order_infos['commandeid'])) {
 			// On met à jour la commande
@@ -708,7 +709,7 @@ function create_or_update_order($order_infos, &$articles_array)
 				update_points($order_infos['total_points'], vn($order_infos['points_etat']), $order_id, null);
 			}
 		}
-		// Appel du hook qui viendra potentiellement remplacer le tableau de correspondance des champs de la table qui stock les produits commandés.
+		// Appel du hook qui viendra potentiellement remplacer le tableau de correspondance des champs de la table qui stocke les produits commandés.
 		$hook_result = call_module_hook('product_order_table_and_fields',array('order_infos' => $order_infos), 'array');
 		if (!empty($hook_result['articles_array'])) {
 			$articles_array = $hook_result['articles_array'];
@@ -1435,8 +1436,6 @@ function get_order_infos_array($order_object, $product_infos_array=array(), $bil
 		$total_tva = $order_object->total_tva;
 		$montant_ht = $order_object->montant_ht;
 	}
-	
-	
 	$order_infos['net_infos_array'] = array("avoir" => fprix($order_object->avoir, true, $order_object->devise, true, $order_object->currency_rate, true),
 		"total_remise" => fprix($order_object->total_remise, true, $order_object->devise, true, $order_object->currency_rate, true),
 		"cout_transport" => fprix($order_object->cout_transport, true, $order_object->devise, true, $order_object->currency_rate, true),
@@ -1459,7 +1458,7 @@ function get_order_infos_array($order_object, $product_infos_array=array(), $bil
 	foreach($distinct_total_vat as $vat_percent_name => $value) {
 		if (StringMb::substr($vat_percent_name, 0, strlen('transport')) == 'transport') {
 			// La variable $vat_percent_name contient la valeur qui sera affichée en face du montant de la TVA sur la facture
-			// Dans le cas de la TVA sur le transport, le mot "tranport" est présent dans le nom. Pour connaitre le taux de TVA dans ce cas, il faut supprimer le mot "transport" du nom, et supprimer les espaces.
+			// Dans le cas de la TVA sur le transport, le mot "tranport" est présent dans le nom. Pour connaître le taux de TVA dans ce cas, il faut supprimer le mot "transport" du nom, et supprimer les espaces.
 			$vat_percent = trim(StringMb::substr($vat_percent_name, strlen('transport')));
 		} else {
 			// Dans tous les autres cas, le nom de la TVA est le taux de la TVA, il n'y a pas d'information supplémentaire dans le nom.
@@ -1505,6 +1504,8 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 	}
 
 	$product_infos_array = array();
+	
+	call_module_hook('product_infos_array_in_order', array('order_id' => vb($order_id)));
 	
 	$sql = "SELECT oi.*
 		FROM peel_commandes_articles oi
@@ -1586,19 +1587,60 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
  * @param mixed $amount_to_pay Ce paramètre est utilisé pour les paiements partiels.
  * @param boolean $allow_autosend
  * @param array $params Possibilité de définir des paramètres particuliers pour les moyens de paiement appelés via get_payment_form_XXXX qui les prendraient en compte, par exemple "title"
+ * @param boolean $empty_type
+ *
  * @return string
  */
-function get_payment_form($order_id, $forced_type = null, $send_admin_email = false, $forced_amount_to_pay = 0, $allow_autosend = true, $params = array())
+function get_payment_form($order_id, $forced_type = null, $send_admin_email = false, $forced_amount_to_pay = 0, $allow_autosend = true, $params = array(), $empty_type = false)
 {
 	static $admin_email_sent;
 	$output = '';
-	$result = query('SELECT *
-		FROM peel_commandes
-		WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes') . '');
-	$com = fetch_object($result);
+
+	$warn_payment_admin_email = $GLOBALS['support_commande'];
+	
+	$hook_result = call_module_hook('get_payment_form_bill_infos', array('order_id' => $order_id, 'params' => $params), 'array');
+	if(!empty($hook_result)) {
+		// Par exemple le module micro_-_entreprise définit le format des factures ici
+		$order_id = $hook_result['order_id'];
+		if (!empty($hook_result['sql'])) {
+			$result = query($hook_result['sql']);
+			$com = fetch_object($result);
+		} elseif(!empty($hook_result['order_object'])) {
+			$com = $hook_result['order_object'];
+		}
+		if (!empty($hook_result['warn_payment_admin_email'])) {
+			$warn_payment_admin_email = $hook_result['warn_payment_admin_email'];
+		}
+	} else {
+		$sql = 'SELECT *
+			FROM peel_commandes
+			WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes');
+		$result = query($sql);
+		$com = fetch_object($result);
+	}
 	if(empty($com)) {
 		return null;
 	}
+	if (empty($com->email)) {
+		// si l'email est absent, ou que le format de l'email n'est pas le bon, on ne va pas plus loin sinon le module de paiement peut refuser la transaction
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_PREMIUM_MANDATORY_EMAIL']))->fetch();
+	} elseif(!empty($com->email) && !EmailOK($com->email)) {
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_ERR_EMAIL_BAD"]))->fetch();
+	}
+	$email_array = explode(',', str_replace(';', ',', $com->email));
+	$com->email = trim($email_array[0]);
+	
+	call_module_hook('general_custom_params', array(), 'array');
+
+	if(!empty($GLOBALS['t2_add_bill_systempay_link'])) {
+		$forced_type = 'systempay';
+	} elseif(!empty($GLOBALS['t2_add_bill_paybox_link'])) {
+		$forced_type = 'paybox';
+	} elseif(!empty($GLOBALS['t2_add_bill_paypal_link'])) {
+		$forced_type = 'paypal';
+	}
+
+	
 	if (!empty($forced_amount_to_pay)) {
 		$amount_to_pay = $forced_amount_to_pay;
 	} else {
@@ -1626,6 +1668,9 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		// In $com->payment_technical_code is stored the "technical_code" found in peel_paiement
 		$type = $com->paiement;
 	}
+
+	$hook_result = call_module_hook('get_payment_form_pre', array('order_id' => $order_id, 'type' => $type, 'amount_to_pay' => $amount_to_pay), 'string');
+
 	if (!empty($GLOBALS['site_parameters']['payment_multiple']) && StringMb::strpos($type, '#')!==false) {
 		// Si le paiement multiple est actif, et qu'il y a le caractère # dans le code technique du moyen de paiement, on récupère les informations pour faire un paiement partiel.
 		// Le paramètre payment_multiple est composé de cette façon : '2'=>'50', '3'=>'30' par exemple, donc la clé contient le nombre de paiement, et la valeur correspond au pourcentage du montant total à payer pour le premier règlement.
@@ -1656,7 +1701,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		$query = query($sql_paiement);
 		while ($tab_paiement = fetch_assoc($query)) {
 			if (!empty($tab_paiement['technical_code'])) {
-				$this_output = get_payment_form($order_id, $tab_paiement['technical_code'], $send_admin_email, $amount_to_pay, $allow_autosend, $params);
+				$this_output = get_payment_form($order_id, $tab_paiement['technical_code'], $send_admin_email, $amount_to_pay, $allow_autosend, $params, true);
 				if(!empty($this_output)) {
 					$output_array[] = $this_output;
 				}
@@ -1674,8 +1719,11 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		$tpl->assign($this_key, $this_value);
 	}
 	$tpl->assign('type', $type);
-
-	$tpl->assign('commande_pdf_href', get_site_wwwroot($com->site_id, $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
+	if(!empty($com->code_facture)) {
+		$tpl->assign('commande_pdf_href', get_site_wwwroot($com->site_id, $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
+	} else {
+		$tpl->assign('commande_pdf_href', null);
+	}
 	$tpl->assign('amount_to_pay_formatted', fprix($amount_to_pay, true, $com->devise, true, get_float_from_user_input(vn($com->currency_rate))));
 	$tpl->assign('disable_address_payment_by_check', !empty($GLOBALS['site_parameters']['disable_address_payment_by_check']));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -1778,30 +1826,98 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			break;
 
 		case 'paybox' :
-			if (check_if_module_active('paybox')) {
+			$forms_paybox = '';
+			if(!defined('IN_STEP3')){
+				$forms_paybox .= '<table><tr>';
+			}
+			if(!defined('IN_ORDER_HISTORY') && !defined('IN_STEP3')){
+				if($empty_type){
+					$tpl->assign('column_paybox', 'col-md-4');
+				} else {
+					$tpl->assign('column_paybox', 'col-md-4 col-md-offset-4');
+				}
+			} else {
+				$tpl->assign('column_paybox', '');
+			}
+			if (check_if_module_active('paybox') && (!defined('IN_STEP3')) && !$empty_type) {
 				require_once($GLOBALS['fonctionspaybox']);
 				$js_action = 'document.TheForm.submit()';
-				$tpl->assign('form', givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])));
+				$forms_paybox .= (defined('IN_ORDER_HISTORY')?'<div>':'<td>') . givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])) . (defined('IN_ORDER_HISTORY')?'</div>':'</td>');
+				$send_admin_template_email = 'admin_info_payment_credit_card';
+			} elseif($type == 'paybox') {
+				require_once($GLOBALS['fonctionspaybox']);
+				$js_action = 'document.TheForm.submit()';
+				$forms_paybox .= '<td>' . givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])). '</td>';
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
+			if(!defined('IN_STEP3')){
+				$forms_paybox .= '</tr></table>';
+			}
+			$tpl->assign('form',$forms_paybox);
 			break;
 
-        case 'paybox_2x' :
-            if (check_if_module_active('paybox')) {
-                require_once($GLOBALS['fonctionspaybox']);
-                $js_action = 'document.TheForm.submit()';
-                $tpl->assign('form', givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 2, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])));
-                $send_admin_template_email = 'admin_info_payment_credit_card';
-            }
-            break;
-        case 'paybox_3x' :
-            if (check_if_module_active('paybox')) {
-                require_once($GLOBALS['fonctionspaybox']);
-                $js_action = 'document.TheForm.submit()';
-                $tpl->assign('form', givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])));
-                $send_admin_template_email = 'admin_info_payment_credit_card';
-            }
-            break;
+		case 'paybox_2x' :
+			$forms_paybox = '';
+			if(!defined('IN_STEP3')){
+				$forms_paybox .= '<table><tr>';
+			}
+			if(!defined('IN_ORDER_HISTORY') && !defined('IN_STEP3')){
+				if($empty_type){
+					$tpl->assign('column_paybox', 'col-md-4');
+				} else {
+					$tpl->assign('column_paybox', 'col-md-4 col-md-offset-4');
+				}
+			} else {
+				$tpl->assign('column_paybox', '');
+			}
+			if (check_if_module_active('paybox') && !defined('IN_STEP3') && !$empty_type) {
+				require_once($GLOBALS['fonctionspaybox']);
+				$js_action = 'document.TheForm.submit()';
+				$forms_paybox .= (defined('IN_ORDER_HISTORY')?'<div>':'<td>') . givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 2, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])) . (defined('IN_ORDER_HISTORY')?'</div>':'</td>');
+				$send_admin_template_email = 'admin_info_payment_credit_card';
+			} elseif($type == 'paybox_2x') {
+				require_once($GLOBALS['fonctionspaybox']);
+				$js_action = 'document.TheForm.submit()';
+				$forms_paybox .= '<td>' . givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 2, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])) . '</td>';
+				$send_admin_template_email = 'admin_info_payment_credit_card';
+			}
+			if(!defined('IN_STEP3')){
+				$forms_paybox .= '</tr></table>';
+			}
+			$tpl->assign('form',$forms_paybox);
+			break;
+
+		case 'paybox_3x' :
+			$forms_paybox = '';
+			if(!defined('IN_STEP3')){
+				$forms_paybox .= '<table><tr>';
+			}
+			if(!defined('IN_ORDER_HISTORY') && !defined('IN_STEP3')){
+				if($empty_type){
+					$tpl->assign('column_paybox', 'col-md-4');
+				} else {
+					$tpl->assign('column_paybox', 'col-md-4 col-md-offset-4');
+				}
+			} else {
+				$tpl->assign('column_paybox', '');
+			}
+			if (check_if_module_active('paybox') && !defined('IN_STEP3') && !$empty_type) {
+				require_once($GLOBALS['fonctionspaybox']);
+				$js_action = 'document.TheForm.submit()';
+				$forms_paybox .= (defined('IN_ORDER_HISTORY')?'<div>':'<td>') . givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])) . (defined('IN_ORDER_HISTORY')?'</div>':'</td>');
+				$send_admin_template_email = 'admin_info_payment_credit_card';
+			} elseif($type == 'paybox_3x') {
+				require_once($GLOBALS['fonctionspaybox']);
+				$js_action = 'document.TheForm.submit()';
+				$forms_paybox .= '<td>' . givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])) . '</td>';
+				$send_admin_template_email = 'admin_info_payment_credit_card';
+			}
+			if(!defined('IN_STEP3')){
+				$forms_paybox .= '</tr></table>';
+			}
+			$tpl->assign('form',$forms_paybox);
+			break;
+
 		case 'bluepaid' :
 			if (check_if_module_active('bluepaid')) {
 				require_once($GLOBALS['fonctionsbluepaid']);
@@ -1909,6 +2025,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 
 		default :
 			if (function_exists('get_payment_form_'.$type)) {
+				require_once($GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$type]);
 				$function_name = 'get_payment_form_'.$type;
 				$standard_params = array('order_id' => $order_id, 'lang' => $_SESSION['session_langue'], 'amount' => fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), 'currency_code' => $com->devise, 'user_email' => $com->email, 'payment_times' => 1, 'sTexteLibre' => '', 'societe_ship' => $com->societe_ship, 'prenom_ship' => $com->prenom_ship, 'nom_ship' => $com->nom_ship, 'adresse_ship' => $com->adresse_ship, 'zip_ship' => $com->zip_ship, 'ville_ship' => $com->ville_ship, 'pays_ship' => $com->pays_ship,'fullname_ship' => $com->prenom_ship . ' ' . $com->nom_ship, 'telephone_ship' => $com->telephone_ship, 'societe_bill' => $com->societe_bill,'prenom_bill' => $com->prenom_bill, 'nom_bill' => $com->nom_bill, 'adresse_bill' => $com->adresse_bill, 'zip_bill' => $com->zip_bill, 'ville_bill' => $com->ville_bill, 'pays_bill' => $com->pays_bill, 'fullname_bill' => $com->prenom_bill . ' ' . $com->nom_bill, 'telephone_bill' => $com->telephone_bill, 'type' => $type, 'id_utilisateur' => $com->id_utilisateur, 'site_id' => $com->site_id);
 				$params = array_merge_recursive_distinct($standard_params, $params);
@@ -1921,7 +2038,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		// On n'envoie qu'un seul email de ce type à l'admin même si $forced_type="" et boucle sur tous les moyens de paiement 
 		unset($custom_template_tags);
 		$custom_template_tags['ORDER_ID'] = $com->order_id;
-		send_email($GLOBALS['support_commande'], '', '', $send_admin_template_email, $custom_template_tags, null, $GLOBALS['support_commande']);
+		send_email($warn_payment_admin_email, '', '', $send_admin_template_email, $custom_template_tags, null, $GLOBALS['support_commande']);
 		$admin_email_sent = true;
 	}
 	if($allow_autosend && !empty($js_action) && (vn($GLOBALS['site_parameters']['module_autosend']) == 1)) {
@@ -1954,11 +2071,13 @@ function is_order_modification_allowed($order_datetime)
 			// Année <= N-2 bloquées
 			$reference_date = date('Y-12-31', time() - 24 * 3600 * 365 * 2);
 		}
+	} elseif ($GLOBALS['site_parameters']['keep_old_orders_intact'] == '2') {
+		$reference_date = get_mysql_date_from_user_input($GLOBALS['site_parameters']['keep_old_orders_intact_date']);
 	} else {
 		// keep_old_orders_intact est alors un timestamp
 		$reference_date = date('Y-m-d H:i:s', $GLOBALS['site_parameters']['keep_old_orders_intact']);
 	}
-	if (!empty($reference_date) && $order_datetime > $reference_date) {
+	if (!empty($reference_date) && strtotime($order_datetime) > strtotime($reference_date)) {
 		$allowed = true;
 	}
 	return $allowed;

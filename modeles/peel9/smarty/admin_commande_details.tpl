@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: admin_commande_details.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -135,7 +135,7 @@
 			<tr>
 				<td colspan="2">
 					<div class="well">
-						{$STR_ADMIN_TOTAL_TTC_ALL_INCLUDE} : {$montant_displayed_prix} {$ttc_ht}
+						{$STR_ADMIN_TOTAL_TTC_ALL_INCLUDE} : {$montant} {$ttc}
 							<br />
 						{$STR_ADMIN_INCLUDING_VAT} : {$amount_tva}
 							<br />

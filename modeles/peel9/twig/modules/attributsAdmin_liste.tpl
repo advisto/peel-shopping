@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -13,12 +13,16 @@
 // $Id: attributsAdmin_liste.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<form action="{{ action }}" method="POST">
 	<table class="full_width">
-	<tr><td colspan="6" class="entete">{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST }} <strong>{{ nom|html_entity_decode_if_needed }}</strong></td></tr>
+	<tr><td colspan="5" class="entete">{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST }} <strong>{{ nom|html_entity_decode_if_needed }}</strong></td></tr>
 	<tr>
-		<td colspan="6"><div class="alert alert-info">{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN }}</div></td>
+		<td colspan="5">
+			<div style="margin-top:5px;">
+				<p><a href="{{ add_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION }}</a></p>
+			</div>
+		</td>
 	</tr>
 	<tr>
-		<td colspan="6"><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION }}</a></td>
+		<td colspan="5"><div class="alert alert-info">{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN }}</div></td>
 	</tr>
 	<tr>
 		<td class="menu">{{ STR_ADMIN_ACTION }}</td>
@@ -29,7 +33,7 @@
 	</tr>
 {% if num_results == 0 %}
 	<tr><td colspan="5"><b>{{ STR_MODULE_ATTRIBUTS_ADMIN_NO_OPTION_DEFINED }}</b></td></tr>
-{% else %}C
+{% else %}
 	{% for res in results %}
 		{{ res.tr_rollover }}
 		<td class="center">

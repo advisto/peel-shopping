@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -17,7 +17,11 @@
 		<td class="entete" colspan="4">{{ STR_MODULE_TAGCLOUD_ADMIN_LIST_TITLE }}</td>
 	</tr>
 	<tr>
-		<td colspan="4"><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_MODULE_TAGCLOUD_ADMIN_ADD_SEARCH }}</a></td>
+		<td colspan="4">
+			<div style="margin-top:5px;">
+				<p><a href="{{ add_href|escape('html') }}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span> {{ STR_MODULE_TAGCLOUD_ADMIN_ADD_SEARCH }}</a></p>
+			</div>
+		</td>
 	</tr>
 	{% if (results) %}
 	<tr>
@@ -42,11 +46,11 @@
 	<tr><td colspan="4"><div class="alert alert-warning">{{ STR_MODULE_TAGCLOUD_ADMIN_NOTHING_FOUND }}</div></td></tr>
 	{% endif %}
 </table>
-<div class="center">
+<p>{{ links_multipage }}</p>
+<div class="center" style="margin-top:5px;">
 		<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="Tout cocher">
 		<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="Tout décocher">
 		<input type="hidden" name="mode" value="suppr_select" />
 		&nbsp; &nbsp; &nbsp; &nbsp; <input class="btn btn-info alert-danger" type="submit" value="supprimer">
 </div>
 </form>
-<p>{{ links_multipage }}</p>	

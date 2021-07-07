@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -30,7 +30,7 @@
 			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<input type="radio" name="etat" value="1" {% if etat == '1' %} checked="checked"{% endif %} /> {{ STR_ADMIN_ACTIVATED }}
-				<input type="radio" name="etat" value="0" {% if etat == '0' OR etat is empty %} checked="checked"{% endif %} /> {{ STR_ADMIN_DEACTIVATED }}
+				<input type="radio" name="etat" value="0" {% if etat == '0' or etat is empty %} checked="checked"{% endif %} /> {{ STR_ADMIN_DEACTIVATED }}
 			</td>
 		</tr>
 		{% for lng in langs %}

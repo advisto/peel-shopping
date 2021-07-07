@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: de.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: de.php 67177 2021-06-09 13:38:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -288,7 +288,7 @@ $GLOBALS["STR_ERR_TIME"] = "Das 24-Stunden-Limit für die Erneuerung Ihres Kennw
 $GLOBALS["STR_ERR_TOWN"] = "Sie haben keine Stadt angegeben.\n";
 $GLOBALS["STR_ERR_TWOPASS"] = "Die Kennwörter stimmen nicht überein.\n";
 $GLOBALS["STR_ERR_TYPE"] = "Sie haben keine Lieferart angegeben.\n";
-$GLOBALS["STR_ERR_URL"] = "Sie haben keine URL Ihrer Website angegeben.\n";
+$GLOBALS["STR_ERR_URL"] = "";
 $GLOBALS["STR_ERR_YOU_ARE"] = "Sie haben Ihren Status nicht angegeben.\n";
 $GLOBALS["STR_ERR_ZIP"] = "Sie haben keine PLZ angegeben.\n";
 $GLOBALS["STR_ERR_ZONE"] = "Sie haben kein Lieferland oder -gebiet angegeben.\n";
@@ -643,7 +643,7 @@ $GLOBALS["STR_OUT_OF"] = "auf";
 $GLOBALS["STR_PAGE"] = "Seite:";
 $GLOBALS["STR_PAIEMENT_SECURISE"] = "Gesicherte Bezahlung";
 $GLOBALS["STR_PARAMETERS_SAVED"] = "";
-$GLOBALS["STR_PARAMETERS_COMPLEMENT"] = "";
+$GLOBALS["STR_PARAMETERS_COMPLEMENT"] = "Vous pouvez changer ce paramètre depuis la page de modification des paramètres : <a href='". get_url('/utilisateurs/change_params.php')."'>". get_url('/utilisateurs/change_params.php')."</a>";
 $GLOBALS["STR_PARRAIN_ENTETE"] = "Lassen Sie Ihre Freunde davon profitieren";
 $GLOBALS["STR_PARRAIN_TEXTE"] = "Wenn Sie Ihre Freunde davon profitieren lassen, erhalten sie einen Gutschein in Höhe von %s für ihre erste Bestellung.<br /> Und für Sie? Ein Gutschein in Höhe von %s für deren erste Bestellungen!";
 $GLOBALS["STR_PASS_PERDU"] = "Falls Sie ihr Kennwort vergessen haben, klicken Sie hier";
@@ -832,7 +832,7 @@ $GLOBALS["STR_SUBMIT"] = "Validieren";
 $GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "";
 $GLOBALS["STR_SUGGEST"] = "Ihr Guthaben erlaubt es, weitere Produkte zu erhalten. <a href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\">Schauen Sie sich doch einmal unsere Empfehlungen an, um Ihren Einkauf zu komplettieren</a>.";
 $GLOBALS["STR_SUPPORT"] = "Für all Ihre Informationsersuchen<a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">können Sie uns über dieses Formular kontaktieren</a>.";
-$GLOBALS["STR_SWIFT"] = "SWIFT / BIC";
+$GLOBALS["STR_SWIFT"] = "BIC";
 $GLOBALS["STR_SYNC_OK"] = "Die Synchronisierung der Dateien war erfolgreich";
 $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "Diese Tabelle listet die dem Warenkorb hinzugefügten Artikel auf";
 $GLOBALS["STR_TABLE_SUMMARY_ORDERS"] = "Diese Tabelle zeigt den Bestellverlauf";
@@ -948,7 +948,7 @@ $GLOBALS["STR_PIECE"] = "";
 $GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "";
 $GLOBALS["STR_ERR_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "";
-$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "Menge";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
@@ -962,6 +962,7 @@ $GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
 $GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
 $GLOBALS["STR_ON_REQUEST"] = "";
 $GLOBALS["STR_ESTIMATE"] = "";
+$GLOBALS["STR_ORDER_SUSPECT"] = "";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK"] = "";
 $GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "";
 
@@ -972,3 +973,12 @@ $GLOBALS["STR_ORDER_SUSPECT"] = "";
 $GLOBALS["STR_CODE_CHORUS"] = "";
 $GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "";
 $GLOBALS["STR_NAME_ADDRESS"] = "";
+
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_1'] = "";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_2'] = "";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_3'] = "";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_FREE_OF_CHARGE'] = "";
+$GLOBALS["STR_EMAIL_INCORRECT"] = "";
+$GLOBALS["STR_AMOUNT_TVA"] = "";
+$GLOBALS["STR_VAT_PERCENTAGE"] = "";
+$GLOBALS["STR_VAT_DETAIL"] = "";

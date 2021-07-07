@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: commander.php 66961 2021-05-24 13:26:45Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -47,7 +47,7 @@ if (vb($frm['export_pdf'])) {
 			}
 			include($GLOBALS['dirroot']."/lib/class/Invoice.php");
 			$invoice_pdf = new Invoice('P', 'mm', 'A4');
-			$is_pdf_generated = $invoice_pdf->FillDocument(null, null, null, null, null, null, null, 'facture', false, null, null, null, null, $ids_array);
+			$is_pdf_generated = $invoice_pdf->FillDocument(null, null, null, null, null, null, null, 'facture', false, null, null, null, null, $ids_array, true, (count($ids_array) == 1 && !empty($GLOBALS['site_parameters']['facturx_enabled'])));
 			unset($invoice_pdf);
 			if($is_pdf_generated) {
 				die();
@@ -70,6 +70,8 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 		
 	case "modif" :
+		call_module_hook('admin_order_detail', array('order_id'=>vb($_GET['commandeid']),'frm' => vb($_POST)));
+
 		// Affiche le formulaire de la commande à modifier
 		$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"];
 		if (!empty($_POST['bdc_code_facture']) && !empty($_POST['bdc_sendclient'])) {

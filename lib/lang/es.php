@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: es.php 67177 2021-06-09 13:38:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -256,8 +256,8 @@ $GLOBALS["STR_ERR_KEYB"] = "Pulse el botón X para cerrar el teclado";
 $GLOBALS["STR_ERR_LOGIN"] = "Por favor, rellene su nombre de usuario.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Usted no puso su mensaje.\n";
 $GLOBALS["STR_ERR_MISMATCH_PASSWORD"] = "Las contraseñas no coinciden. ¡Por favor, escribe su contraseña de nuevo";
-$GLOBALS['STR_ERR_MONDIAL_RELAY']= "Please select a relay point";
-$GLOBALS["STR_ERR_NAME"] = "Usted na ha completado su apellido.\n";
+$GLOBALS["STR_ERR_MONDIAL_RELAY"] = "Seleccione un punto de relevo";
+$GLOBALS["STR_ERR_NAME"] = "Usted na ha completado su apelido.\n";
 $GLOBALS["STR_ERR_NEWPASS_CONFIRM"] = "Usted no ha confirmado la nueva contraseña.\n";
 $GLOBALS["STR_ERR_NEWPASS"] = "Usted no ha ingresado una nueva contraseña de mas de %s caracteres.\n";
 $GLOBALS["STR_ERR_NICKNAME_STILL"] = "Este nombre de usuario ya existe.";
@@ -282,7 +282,7 @@ $GLOBALS["STR_ERR_TIME"] = "El período de 24 horas después de la petición de 
 $GLOBALS["STR_ERR_TOWN"] = "Usted no ha completado su ciudad.\n";
 $GLOBALS["STR_ERR_TWOPASS"] = "Las dos contraseñas no coinciden.\n";
 $GLOBALS["STR_ERR_TYPE"] = "Usted no ha completado su tipo de expedición.\n";
-$GLOBALS["STR_ERR_URL"] = "Usted no ha completado el URL de su sitio web.\n";
+$GLOBALS["STR_ERR_URL"] = "Debe completar este campo con la URL de su sitio web (por ejemplo: https://www.example.com).\n";
 $GLOBALS["STR_ERR_YOU_ARE"] = "No ha especificado su estado.\n";
 $GLOBALS["STR_ERR_ZIP"] = "Usted no ha completado su ZIP.\n";
 $GLOBALS["STR_ERR_ZONE"] = "Usted no ha completado su zona / país de expedición.\n";
@@ -825,7 +825,7 @@ $GLOBALS["STR_SUBMIT"] = "Validar";
 $GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "Tema/ Mensaje";
 $GLOBALS["STR_SUGGEST"] = "Su abono le permite de obtener productos complementarios. <a href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\">Le invitamos a visitar nuestra lista de sugerencias para completar su compra</a>.";
 $GLOBALS["STR_SUPPORT"] = "Para todas demanda de informaciones, <a href=\"{$GLOBALS['wwwroot']}/comprar/anuncio-mayorista.php\">puede contactarnos vía este formulario</a>.";
-$GLOBALS["STR_SWIFT"] = "SWIFT / BIC";
+$GLOBALS["STR_SWIFT"] = "BIC";
 $GLOBALS["STR_SYNC_OK"] = "Sincronización de archivos se ha completado con éxito";
 $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "Esta tabla muestra los productos almacenados en el carrito";
 $GLOBALS["STR_TABLE_SUMMARY_ORDERS"] = "Esta tabla muestra el histórico de pedidos";
@@ -939,9 +939,9 @@ $GLOBALS["STR_ZIP"] = "Código postal";
 $GLOBALS["STR_ZOOM"] = "Zoom";
 $GLOBALS["STR_PIECE"] = "pieza";
 $GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "Certificado de exención";
-$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "Error de archivo. Archivo válido: jpg, jpeg, gif, png, doc, pdf";
+$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "Error de archivo. Archivo válido: jpg, jpeg, gif, png, doc, pdf. ";
 $GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "No sujeto a IVA";
-$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "Select file";
 $GLOBALS["STR_VAT_EXEMPTION"] = "exención de IVA";
 $GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "Cantidad";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
@@ -962,6 +962,16 @@ $GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "Artículo entregable dentro";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "dias";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "semanas";
 $GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "meses";
+$GLOBALS["STR_ORDER_SUSPECT"] = "Comando sospechoso";
 $GLOBALS["STR_CODE_CHORUS"] = "Code Chorus";
 $GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "Haga clic aquí para registrarse en WHATSAPP";
-$GLOBALS["STR_NAME_ADDRESS"] = "";
+$GLOBALS["STR_NAME_ADDRESS"] = "Nombre dirección";
+
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_1'] = "Pago único";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_2'] = "Pago en 2 cuotas";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_PAYMENT_TIMES_3'] = "Pago en 3 cuotas";
+$GLOBALS['STR_REGLEMENT_CARTE_BANCAIRE_FREE_OF_CHARGE'] = "sin costo";
+$GLOBALS["STR_EMAIL_INCORRECT"] = "Correo electrónico vacío o no válido para el destinatario %s";
+$GLOBALS["STR_AMOUNT_TVA"] = "Importe del IVA";
+$GLOBALS["STR_VAT_PERCENTAGE"] = "Tipo de IVA";
+$GLOBALS["STR_VAT_DETAIL"] = "Detalle de IVA";

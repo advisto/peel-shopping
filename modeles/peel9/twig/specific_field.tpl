@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
@@ -69,7 +69,7 @@
 {% elseif f.field_type == "hidden" %}
 <input name="{{ f.field_name|str_form_value }}" type="hidden" value="{{ f.field_value|str_form_value }}" id="{{ f.field_id }}" />
 {% elseif f.field_type == "textarea" %}
-<textarea {% if f.mandatory %} required="required"{% endif %} rows="4" {% if f.readonly %} readonly="readonly"{% endif %} name="{{ f.field_name|str_form_value }}" id="{{ f.field_id }}" class="form-control"{% if f.field_placeholder %} placeholder="{{ f.field_placeholder|str_form_value }}" {% endif %}>{{ f.field_value }}</textarea>
+<textarea {% if f.mandatory %} required="required"{% endif %} rows="6" {% if f.readonly %} readonly="readonly"{% endif %} name="{{ f.field_name|str_form_value }}" id="{{ f.field_id }}" class="form-control"{% if f.field_placeholder %} placeholder="{{ f.field_placeholder|str_form_value }}" {% endif %}>{{ f.field_value }}</textarea>
 {% elseif f.field_type == "html" %}
 {{ f.text_editor_html }}
 {% elseif f.field_type == "separator" or f.field_type == "tag" %}

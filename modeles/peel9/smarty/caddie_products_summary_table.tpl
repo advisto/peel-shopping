@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_products_summary_table.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: caddie_products_summary_table.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}
 <div class="col-sm-12">
 	<div class="table-responsive">
@@ -31,7 +31,7 @@
 		{foreach $products as $p}
 			<tr>
 				<td class="lignecaddie_suppression">
-					{if empty($cart_disable_delete_product_link)}
+					{if empty($cart_disable_delete_product_link) && empty($p.cart_disable_delete_product_link)}
 					<a data-confirm="{$STR_DELETE_PROD_CART|str_form_value}" href="{$p.delete_href|escape:'html'}">
 						<span class="glyphicon glyphicon-remove-sign" title="{$STR_DELETE_PROD_CART|str_form_value}" style="color: #FF0000; font-size:22px;"></span>
 					</a>

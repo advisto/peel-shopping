@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: user_register_form.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}<h1 property="name" class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form {if !empty($short_register_form)}short_register_form{/if}">
 {if empty($short_register_form)}
@@ -73,10 +73,13 @@
 					<span class="enregistrementgauche"><label for="societe">{$STR_SOCIETE}{if !empty($mandatory_fields['societe'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{$societe|html_entity_decode_if_needed|str_form_value}" /></span>{$societe_error}
 				</div>
+				
+		{if !empty($siret_txt)}
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="siret">{$siret_txt}{if !empty($mandatory_fields['siret'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span> {$siret_error}
 				</div>
+		{/if}
 		{if !empty($STR_INTRACOM_FORM)}
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="intracom_for_billing">{$STR_INTRACOM_FORM}<br/>{$STR_INTRACOM_FORM_ALERT}{if !empty($mandatory_fields['intracom_for_billing'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -96,7 +99,7 @@
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="url">{$STR_WEBSITE}{if !empty($mandatory_fields['url'])}<span class="etoile">*</span> {/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="url" name="url" placeholder="http://" value="{$url|html_entity_decode_if_needed|str_form_value}" /></span>
-				</div>
+				</div>{$url_error}
 			{if $add_b2b_form_inputs}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="type">{$STR_YOU_ARE}{if !empty($mandatory_fields['type'])}<span class="etoile">*</span> {/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -143,6 +146,9 @@
 				<span class="enregistrementgauche"><label for="naissance">{$STR_NAISSANCE}{if !empty($mandatory_fields['naissance'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 				<span class="enregistrementdroite"><input name="naissance" class="form-control datepicker" type="text" id="naissance" size="10" maxlength="10" value="{$naissance|str_form_value}" style="width:110px" /></span>
 			</div>
+		{/if}
+		{if !empty($STR_TELEPHONE_EXPLAIN)}
+			<div class="alert alert-info">{$STR_TELEPHONE_EXPLAIN}</div>
 		{/if}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="telephone">{$STR_TELEPHONE}{if !empty($mandatory_fields['telephone'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>

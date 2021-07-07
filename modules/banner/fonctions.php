@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
+// $Id: fonctions.php 66961 2021-05-24 13:26:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
 // Définition du tableau de critère SQL (champ => Valeur)
-$GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page', 'ad_creation_page', 'background_site');
+$GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page', 'ad_creation_page', 'background_site', 'product_details');
 
 /**
  * Traitement de la fin de la génération d'une page
@@ -75,7 +75,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
 	}
-
+	
 	// Taille par défaut des bannières à modifier en fonction du template du site.
 	if (!empty($GLOBALS['page_columns_count']) && $GLOBALS['page_columns_count'] == 2) {
 		$max_banner_width = 750;
@@ -134,9 +134,9 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 		// Alternance de bannière pair/impair sur le dernier chiffre de l'id de l'annonce ou de la page d'annonce pour une catégorie. Le choix du type de page est fait précédemment dans la requête.
 		if ((defined('IN_CATALOGUE_ANNONCE') || defined('IN_IPHONE_ADS_MODULE')) && !empty($page)) {
 			// pour une catégorie
-			$tested_number = StringMb::substr($page, -1);
+			$tested_number = intval(StringMb::substr($page, -1));
 		} elseif ((defined('IN_CATALOGUE_ANNONCE_DETAILS') || defined('IN_IPHONE_ADS_MODULE')) && !empty($ad_id)) {
-			$tested_number = StringMb::substr($ad_id, -1);
+			$tested_number = intval(StringMb::substr($ad_id, -1));
 			// pour une annonce
 		}
 		if(isset($tested_number)){
@@ -167,6 +167,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 				$output.=$temp[1];
 			}
 		} else {
+		
 			$sql_banner = "SELECT *
 				FROM peel_banniere
 				" . $sql_where . " AND date_fin>='" . date('Y-m-d') . "' AND " . get_filter_site_cond('banniere') . "

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2021 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.4.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_produits.tpl 64750 2020-10-21 16:20:30Z sdelaporte $
+// $Id: admin_liste_produits.tpl 66961 2021-05-24 13:26:45Z sdelaporte $
 *}{if $is_empty}
 	<p><a href="{$href|escape:'html'}">{$STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST}</a></p>
 {else}
@@ -80,7 +80,7 @@
 		{/if}
 			<div class="clearfix visible-md visible-lg"></div>
 		{if $is_gifts_module_active}
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{$STR_ADMIN_PRODUITS_IS_PRODUCT} <strong>{$STR_MODULE_GIFTS_ADMIN_GIFT}</strong> ?<br />
 				<span>
 					<input type="radio" name="on_gift" value="null" checked="checked" /> {$STR_ADMIN_ANY} &nbsp;
@@ -89,7 +89,7 @@
 				</span>
 			</div>
 		{/if}
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{$STR_ADMIN_PRODUITS_IS_PRODUCT} <strong>{$STR_ADMIN_ACTIVATED}</strong> ?<br />
 				<span>
 					<input type="radio" name="etat" value="null" checked="checked" /> {$STR_ADMIN_ANY} &nbsp;
@@ -97,13 +97,13 @@
 					<input type="radio" name="etat"{if $etat_zero_issel} checked="checked"{/if} value="0" /> {$STR_NO}
 				</span>
 			</div>
-			<div class="col-md-4 col-sm-6 center pull-right" style="padding-top:10px; padding-bottom:10px">
+			<div class="col-md-3 col-sm-6 center pull-right" style="padding-top:10px; padding-bottom:10px">
 				<input class="btn btn-primary" type="submit" value="{$STR_SEARCH|str_form_value}" name="action" />
 			</div>
 		</div>
 	</div>
 	<div class="entete">{$STR_ADMIN_PRODUITS_PRODUCTS_LIST} <span style="float:right;">{$STR_ADMIN_PRODUITS_PRODUCTS_COUNT}{$STR_BEFORE_TWO_POINTS}: {$nombre_produits}</span></div>
-	<div><img src="images/add.png" width="16" height="16" alt="" class="middle" /><a href="{$ajout_produits_href|escape:'html'}">{$STR_ADMIN_CATEGORIES_ADD_PRODUCT}</a></div>
+	<div style="margin-top:5px;margin-bottom:5px;"><a href="{$ajout_produits_href|escape:'html'}" class="btn btn-primary"><span class="glyphicon glyphicon-plus" title=""></span>{$STR_ADMIN_CATEGORIES_ADD_PRODUCT}</a></div>
 		{if $is_duplicate_module_active}
 	<div class="alert alert-info"><b>{$STR_NOTA_BENE}{$STR_BEFORE_TWO_POINTS}:</b> {$STR_ADMIN_PRODUITS_DUPLICATE_WARNING}</div>
 		{/if}
@@ -126,7 +126,7 @@
 					{/if}
 				</td>
 				<td class="center">
-				<input type="text" data-confirm="{$STR_ADMIN_UPDATE_WARNING|str_form_value}" onchange="update_reference(this, '{$li.id|str_form_value}', '{$administrer_url|str_form_value}')" style="width:210px;font-size:12px;" value="{$li.reference}" id="reference{$li.id}" name="reference_product" class="form-control">
+				<input type="text" data-confirm="{$STR_ADMIN_UPDATE_WARNING|str_form_value}" onchange="update_reference(this, '{$li.id|str_form_value}', '{$administrer_url|str_form_value}')" style="font-size:12px;" value="{$li.reference}" id="reference{$li.id}" name="reference_product" class="form-control">
 				</td>
 				<td class="center">
 					{if empty($li.cats)}
@@ -179,30 +179,36 @@
 			{/foreach}
 		</table>
 	</div>
-	<div class="center" style="line-height: 42px">
-		<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="{$STR_ADMIN_CHECK_ALL|str_form_value}" />
-		<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="{$STR_ADMIN_UNCHECK_ALL|str_form_value}" />
-		<br>
-		<select class="form-control" name="modification_multiple" style="max-width: 450px">
-			<option value="">------</option>
-			<option value="on_our_selection">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION}</option>
-			<option value="off_our_selection">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION}</option>
-			<option value="on_news">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW}</option>
-			<option value="off_news">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_NEW}</option>
-			<option value="on_promotions">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_PROMO}</option>
-			<option value="off_promotions">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_PROMO}</option>
-			<option value="on_best_sellers">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_BEST_SELLERS}</option>
-			<option value="off_best_sellers">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_BEST_SELLERS}</option>
-			<option value="on_recommended_products">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_RECOMMENDED_PRODUCTS}</option>
-			<option value="on_top_block">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_TOP}</option>
-			<option value="on_etat">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_ETAT}</option>
-			<option value="off_etat">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_ETAT}</option>
-			<option value="suppr_multiple">{$STR_ADMIN_MODIFICATION_MULTIPLE_SUPPR_PRODUCT}</option>
-		</select>
-		<br>
-		<input class="btn btn-primary" type="submit" value="Appliquer les changement" data-confirm="{$STR_ADMIN_APPLY_CHANGES|str_form_value}"/>
-	</div>
+	<div class="center">{$Multipage}</div>
+		<div class="entete">{$STR_ADMIN_MODIFICATION_MULTIPLE}</div>
+		<div class="well">
+			<div class="center">
+				<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="{$STR_ADMIN_CHECK_ALL|str_form_value}" />
+				<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="{$STR_ADMIN_UNCHECK_ALL|str_form_value}" />
+				<br />
+				<br />
+				<select class="form-control" name="modification_multiple" style="max-width: 450px">
+					<option value="">------</option>
+					<option value="on_our_selection">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION}</option>
+					<option value="off_our_selection">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION}</option>
+					<option value="on_news">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW}</option>
+					<option value="off_news">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_NEW}</option>
+					<option value="on_promotions">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_PROMO}</option>
+					<option value="off_promotions">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_PROMO}</option>
+					<option value="on_best_sellers">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_BEST_SELLERS}</option>
+					<option value="off_best_sellers">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_BEST_SELLERS}</option>
+					<option value="on_recommended_products">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_RECOMMENDED_PRODUCTS}</option>
+					<option value="on_top_block">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_TOP}</option>
+					<option value="on_etat">{$STR_ADMIN_MODIFICATION_MULTIPLE_ON_ETAT}</option>
+					<option value="off_etat">{$STR_ADMIN_MODIFICATION_MULTIPLE_OFF_ETAT}</option>
+					<option value="suppr_multiple">{$STR_ADMIN_MODIFICATION_MULTIPLE_SUPPR_PRODUCT}</option>
+				</select>
+				<br />
+				<br />
+				<input class="btn btn-primary" type="submit" value="Appliquer les changement" data-confirm="{$STR_ADMIN_APPLY_CHANGES|str_form_value}"/>
+			</div>
+		</div>
 	</form>
-	<div class="center">{$Multipage} <a href="{$delete_all_href|str_form_value}" data-confirm="{$STR_ADMIN_DELETE_WARNING|str_form_value}" class="btn btn-danger">{$STR_ADMIN_DELETE_ALL_RESULTS}</a></div>
+	<div class="center"><a href="{$delete_all_href|str_form_value}" data-confirm="{$STR_ADMIN_DELETE_WARNING|str_form_value}" class="btn btn-danger">{$STR_ADMIN_DELETE_ALL_RESULTS}</a></div>
 	{/if}
 {/if}
