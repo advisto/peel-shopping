@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 67425 2021-06-28 12:27:13Z sdelaporte $
+// $Id: fonctions.php 67588 2021-07-12 15:30:02Z jlesergent $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -8017,7 +8017,7 @@ function get_product_infos($where, $filter_site_cond = true, $fields_list_or_arr
 	if($one_row_mode) {
 		$limit = 1;
 	}
-	if (!is_array($where) && intval($where) != 0) {
+	if (!is_array($where) && is_numeric($where)) {
 		// Si on passe directement un ID de produit. $where peut être un string ou un int, il faut le caster en int sinon ça pose problème lors du calcul du hash. En effet serialize ne retourne pas le même résultat si la variable est un int ou un string. Test avec != pour vérifier que c'est bien un id qu'on cherche
 		$where = intval($where);
 	}

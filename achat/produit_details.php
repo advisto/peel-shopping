@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 66961 2021-05-24 13:26:45Z sdelaporte $
+// $Id: produit_details.php 67579 2021-07-12 14:55:44Z jlesergent $
 define('IN_CATALOGUE_PRODUIT', true);
 
 include("../configuration.inc.php");
@@ -31,7 +31,10 @@ if (function_exists('set_product_id')) {
 if (empty($_GET['id'])) {
 	// Si aucun produit n'est spécifié, retour à la page d'accueil
 	redirect_and_die(get_url('/'), true);
+} else {
+	$_GET['id'] = intval($_GET['id']);
 }
+
 // On récupère l'url précédement visitée dans $_SESSION['product_details_previous_page_url'] pour que lors de l'appel à get_cart_popup_div(), on puisse rediriger vers cette url avec le bouton "Continuer mes achats". 
 if(!empty($GLOBALS['site_parameters']['cart_popup_previous_page_success_href']) && !empty($_SERVER['HTTP_REFERER']) && ($_SERVER['HTTP_REFERER'] != get_current_url(true)) ) {
 	$_SESSION['product_details_previous_page_url'] = $_SERVER['HTTP_REFERER'];
